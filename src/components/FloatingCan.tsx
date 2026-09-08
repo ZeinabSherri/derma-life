@@ -8,6 +8,7 @@ import { Group } from "three";
 
 type FloatingCanProps = {
   flavor?: SodaCanProps["flavor"];
+  scale?: SodaCanProps["scale"];
   floatSpeed?: number;
   rotationIntensity?: number;
   floatIntensity?: number;
@@ -19,6 +20,7 @@ const FloatingCan = forwardRef<Group, FloatingCanProps>(
   (
     {
       flavor = "blackCherry",
+      scale,
       floatSpeed = 1.5,
       rotationIntensity = 1,
       floatIntensity = 1,
@@ -37,7 +39,7 @@ const FloatingCan = forwardRef<Group, FloatingCanProps>(
           floatingRange={floatingRange}
         >
           {children}
-          <SodaCan flavor={flavor} />
+          <SodaCan flavor={flavor} scale={scale} />
         </Float>
       </group>
     );
