@@ -14,6 +14,10 @@ import { ArrowIcon } from "./ArrowIcon";
 import { WavyCircles } from "./WavyCircles";
 
 const SPINS_ON_CHANGE = 8;
+// A bit slower than a flat 1s - keeps the other tweens below (background
+// color, text swap) proportionally timed to it instead of drifting out of
+// sync with the now-longer spin.
+const SPIN_DURATION = 1.35;
 const FLAVORS: {
   flavor: SodaCanProps["flavor"];
   color: string;
@@ -57,7 +61,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
             ? `-=${Math.PI * 2 * SPINS_ON_CHANGE}`
             : `+=${Math.PI * 2 * SPINS_ON_CHANGE}`,
         ease: "power2.inOut",
-        duration: 1,
+        duration: SPIN_DURATION,
       },
       0,
     )
@@ -67,13 +71,21 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
           backgroundColor: FLAVORS[nextIndex].color,
           fill: FLAVORS[nextIndex].color,
           ease: "power2.inOut",
-          duration: 1,
+          duration: SPIN_DURATION,
         },
         0,
       )
       .to(".text-wrapper", { duration: 0.2, y: -10, opacity: 0 }, 0)
-      .to({}, { onStart: () => setCurrentFlavorIndex(nextIndex) }, 0.5)
-      .to(".text-wrapper", { duration: 0.2, y: 0, opacity: 1 }, 0.7);
+      .to(
+        {},
+        { onStart: () => setCurrentFlavorIndex(nextIndex) },
+        0.5 * SPIN_DURATION,
+      )
+      .to(
+        ".text-wrapper",
+        { duration: 0.2, y: 0, opacity: 1 },
+        0.7 * SPIN_DURATION,
+      );
   }
 
   return (
