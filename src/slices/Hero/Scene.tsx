@@ -22,6 +22,8 @@ export default function Scene({}: Props) {
   const can3Ref = useRef<Group>(null);
   const can4Ref = useRef<Group>(null);
   const can5Ref = useRef<Group>(null);
+  const can6Ref = useRef<Group>(null);
+  const can7Ref = useRef<Group>(null);
 
   const can1GroupRef = useRef<Group>(null);
   const can2GroupRef = useRef<Group>(null);
@@ -37,6 +39,8 @@ export default function Scene({}: Props) {
       !can3Ref.current ||
       !can4Ref.current ||
       !can5Ref.current ||
+      !can6Ref.current ||
+      !can7Ref.current ||
       !can1GroupRef.current ||
       !can2GroupRef.current ||
       !groupRef.current
@@ -55,6 +59,8 @@ export default function Scene({}: Props) {
     gsap.set(can3Ref.current.position, { y: 5, z: 2 });
     gsap.set(can4Ref.current.position, { x: 2, y: 4, z: 2 });
     gsap.set(can5Ref.current.position, { y: -5 });
+    gsap.set(can6Ref.current.position, { x: -2, y: -4, z: 2 });
+    gsap.set(can7Ref.current.position, { x: 2, y: -5, z: 1 });
 
     const introTl = gsap.timeline({
       defaults: {
@@ -106,6 +112,14 @@ export default function Scene({}: Props) {
       // Can 5 -Watermelon
       .to(can5Ref.current.position, { x: 0.75, y: 0.3, z: -0.5 }, 0)
       .to(can5Ref.current.rotation, { z: -0.25 }, 0)
+
+      // Can 6 - Black Cherry (fills the lower-middle gap)
+      .to(can6Ref.current.position, { x: 1, y: -0.65, z: -0.9 }, 0)
+      .to(can6Ref.current.rotation, { z: 0.2 }, 0)
+
+      // Can 7 - Grape (fills the lower-right gap)
+      .to(can7Ref.current.position, { x: 1.7, y: -0.45, z: -1.7 }, 0)
+      .to(can7Ref.current.rotation, { z: -0.15 }, 0)
       .to(
         groupRef.current.position,
         { x: 1, y: 0.15, duration: 3, ease: "sine.inOut" },
@@ -154,6 +168,20 @@ export default function Scene({}: Props) {
       <FloatingCan
         ref={can5Ref}
         flavor="watermelon"
+        scale={BOTTLE_SCALE}
+        floatSpeed={FLOAT_SPEED}
+      />
+
+      <FloatingCan
+        ref={can6Ref}
+        flavor="blackCherry"
+        scale={BOTTLE_SCALE}
+        floatSpeed={FLOAT_SPEED}
+      />
+
+      <FloatingCan
+        ref={can7Ref}
+        flavor="grape"
         scale={BOTTLE_SCALE}
         floatSpeed={FLOAT_SPEED}
       />
