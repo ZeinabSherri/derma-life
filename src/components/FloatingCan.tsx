@@ -2,11 +2,12 @@
 
 import { forwardRef, ReactNode } from "react";
 import { Float } from "@react-three/drei";
+import { GroupProps } from "@react-three/fiber";
 
 import { SodaCan, SodaCanProps } from "@/components/SodaCan";
 import { Group } from "three";
 
-type FloatingCanProps = {
+type FloatingCanProps = Omit<GroupProps, "children"> & {
   flavor?: SodaCanProps["flavor"];
   scale?: SodaCanProps["scale"];
   floatSpeed?: number;

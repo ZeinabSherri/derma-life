@@ -1,6 +1,9 @@
 import { Metadata } from "next";
+import fs from "fs";
+import path from "path";
 
 import { Bounded } from "@/components/Bounded";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
   title: "Blog | DermaLife",
@@ -8,72 +11,8 @@ export const metadata: Metadata = {
     "Insights on skincare science, formulation trends, and industry updates from DermaLife.",
 };
 
-type Post = {
-  category: string;
-  title: string;
-  excerpt: string;
-  date: string;
-};
-
-const POSTS: Post[] = [
-  {
-    category: "Skincare Science",
-    title: "The Science Behind Hyaluronic Acid: Why It's a Skincare Staple",
-    excerpt:
-      "How this naturally occurring humectant holds up to 1,000 times its weight in water - and what that means for formulating effective hydrating serums.",
-    date: "2026-08-12",
-  },
-  {
-    category: "Formulation Trends",
-    title: "2026 Formulation Trends: Waterless Beauty and Solid Skincare",
-    excerpt:
-      "Anhydrous formulations are reshaping private label skincare - lower shipping weight, longer shelf life, and less packaging waste.",
-    date: "2026-08-05",
-  },
-  {
-    category: "Industry Updates",
-    title: "Understanding GMP Compliance in Cosmetic Manufacturing",
-    excerpt:
-      "A practical look at what Good Manufacturing Practice certification actually covers, and why it matters when you're choosing a contract manufacturer.",
-    date: "2026-07-29",
-  },
-  {
-    category: "Skincare Science",
-    title:
-      "Niacinamide vs. Vitamin C: Choosing the Right Active for Your Brand",
-    excerpt:
-      "Two of the most requested actives in private label skincare, compared - stability, pH sensitivity, and how they perform together.",
-    date: "2026-07-18",
-  },
-  {
-    category: "Industry Updates",
-    title: "The Rise of Clean Beauty: What Private Label Brands Need to Know",
-    excerpt:
-      "Consumer demand for transparent, ethically sourced ingredients is accelerating - here's how it's shaping ingredient sourcing across the industry.",
-    date: "2026-07-09",
-  },
-  {
-    category: "Formulation Trends",
-    title:
-      "From Concept to Shelf: A Guide to New Product Development Timelines",
-    excerpt:
-      "What actually happens between an initial formulation brief and a market-ready product, and how to plan your launch timeline around it.",
-    date: "2026-06-27",
-  },
-];
-
-const CATEGORY_COLORS: Record<string, string> = {
-  "Skincare Science": "#A9746E",
-  "Formulation Trends": "#C4915B",
-  "Industry Updates": "#7C6A8E",
-};
-
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+function imageExists(filename: string) {
+  return fs.existsSync(path.join(process.cwd(), "public", "blog", filename));
 }
 
 export default function BlogIndexPage() {
@@ -98,31 +37,48 @@ export default function BlogIndexPage() {
       </div>
 
       <div className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-2">
-        {POSTS.map((post) => (
-          <article
-            key={post.title}
-            className="flex flex-col gap-4 rounded-lg border border-[#2B302B]/10 bg-white p-6 shadow-sm"
-          >
-            <span
-              className="w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-              style={{
-                backgroundColor: CATEGORY_COLORS[post.category] ?? "#6B8F71",
-              }}
+        {BLOG_POSTS.map((post) => {
+          const hasImage = imageExists(post.image);
+          return (
+            <a
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              className="group flex flex-col overflow-hidden rounded-lg border border-[#2B302B]/10 bg-white shadow-sm transition-shadow duration-150 hover:shadow-md"
             >
-              {post.category}
-            </span>
-            <h2 className="text-balance text-2xl font-bold leading-tight">
-              {post.title}
-            </h2>
-            <p className="text-base font-normal opacity-80">{post.excerpt}</p>
-            <time
-              dateTime={post.date}
-              className="mt-auto text-sm font-medium opacity-60"
-            >
-              {formatDate(post.date)}
-            </time>
-          </article>
-        ))}
+              <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#EDE3DD]">
+                {hasImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/blog/${post.image}`}
+                    alt=""
+                    className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div
+                    className="flex size-full items-center justify-center text-sm font-medium text-white/70"
+                    style={{ backgroundColor: post.categoryColor }}
+                  >
+                    Image coming soon
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-4 p-6">
+                <span
+                  className="w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
+                  style={{ backgroundColor: post.categoryColor }}
+                >
+                  {post.category}
+                </span>
+                <h2 className="text-balance text-2xl font-bold leading-tight group-hover:underline">
+                  {post.title}
+                </h2>
+                <p className="text-base font-normal opacity-80">
+                  {post.excerpt}
+                </p>
+              </div>
+            </a>
+          );
+        })}
       </div>
 
       <div className="mx-auto mt-16 max-w-3xl text-center">

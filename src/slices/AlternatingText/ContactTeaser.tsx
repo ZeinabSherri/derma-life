@@ -9,27 +9,62 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { Bounded } from "@/components/Bounded";
 import FloatingCan from "@/components/FloatingCan";
+import { SodaCanProps } from "@/components/SodaCan";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+type ClusterBottle = {
+  flavor: SodaCanProps["flavor"];
+  position: [number, number, number];
+  floatSpeed: number;
+};
+
+// Small loose clusters instead of one bottle per side - each entry gets its
+// own float speed so the group bobs asynchronously rather than in lockstep,
+// which reads as much more clearly "alive" than a single bottle did.
+const LEFT_CLUSTER: ClusterBottle[] = [
+  { flavor: "blackCherry", position: [-0.4, 0.15, 0], floatSpeed: 1.4 },
+  { flavor: "grape", position: [0.3, -0.2, -0.35], floatSpeed: 1.9 },
+  { flavor: "lemonLime", position: [0, 0.42, 0.3], floatSpeed: 1.1 },
+];
+
+const RIGHT_CLUSTER: ClusterBottle[] = [
+  { flavor: "watermelon", position: [0.4, 0.1, 0], floatSpeed: 1.3 },
+  {
+    flavor: "strawberryLemonade",
+    position: [-0.3, -0.25, -0.35],
+    floatSpeed: 1.7,
+  },
+  { flavor: "blackCherry", position: [0, 0.4, 0.3], floatSpeed: 1.0 },
+];
+
 /**
  * "Get In Touch" callout. Same lightweight, non-pinned concept as
- * BlogTeaser (different color, own copy), but brings the 3D bottle back in
- * for this one - two bottles now, one on each side of the centered text,
- * both popping in with a spin-and-scale reveal the first time the section
- * scrolls into view, then settling into their usual gentle float. No pin,
- * no scroll-scrubbed side-swap (that's AlternatingText's thing above), and
- * each bottle uses its own small contained <View> (same approach as the
- * Carousel bottle) rather than a full-width canvas with world-unit offsets,
- * so it doesn't repeat the tablet-crowding bug that pattern caused
- * elsewhere. The three grid children are DOM-ordered bottle/text/bottle, so
- * "text in the middle, bottle on both sides" holds true whether the grid is
- * a single stacked column (mobile) or three side-by-side columns (lg+) -
- * no responsive order overrides needed.
+ * BlogTeaser (different color, own copy), but brings the 3D bottles back in
+ * for this one - a small floating cluster on each side of the centered
+ * text. All of them pop in with a spin-and-scale reveal (staggered) the
+ * first time the section scrolls into view, then settle into their own
+ * asynchronous gentle float. No pin, no scroll-scrubbed side-swap (that's
+ * AlternatingText's thing above), and each side uses its own small
+ * contained <View> (same approach as the Carousel bottle) rather than a
+ * full-width canvas with world-unit offsets, so it doesn't repeat the
+ * tablet-crowding bug that pattern caused elsewhere. The three grid
+ * children are DOM-ordered cluster/text/cluster, so "text in the middle,
+ * bottles on both sides" holds true whether the grid is a single stacked
+ * column (mobile) or three side-by-side columns (lg+) - no responsive
+ * order overrides needed.
  */
 export function ContactTeaser() {
-  const leftCanRef = useRef<Group>(null);
-  const rightCanRef = useRef<Group>(null);
+  const leftRefs = [
+    useRef<Group>(null),
+    useRef<Group>(null),
+    useRef<Group>(null),
+  ];
+  const rightRefs = [
+    useRef<Group>(null),
+    useRef<Group>(null),
+    useRef<Group>(null),
+  ];
 
   useGSAP(() => {
     gsap
@@ -56,17 +91,17 @@ export function ContactTeaser() {
         "-=0.3",
       );
 
-    // Both bottles pop in with a spin-and-scale reveal the first time this
-    // section scrolls into view (staggered slightly), then settle into
-    // FloatingCan's usual gentle idle float.
-    [leftCanRef, rightCanRef].forEach((canRef, i) => {
+    // Every bottle pops in with a spin-and-scale reveal the first time this
+    // section scrolls into view (staggered across the whole set), then
+    // settles into FloatingCan's own idle float.
+    [...leftRefs, ...rightRefs].forEach((canRef, i) => {
       if (!canRef.current) return;
-      const delay = i * 0.15;
+      const delay = i * 0.1;
       gsap.from(canRef.current.scale, {
         x: 0,
         y: 0,
         z: 0,
-        duration: 1.2,
+        duration: 1.1,
         delay,
         ease: "back.out(1.7)",
         scrollTrigger: {
@@ -75,8 +110,8 @@ export function ContactTeaser() {
         },
       });
       gsap.from(canRef.current.rotation, {
-        y: Math.PI * 4,
-        duration: 1.4,
+        y: Math.PI * 3,
+        duration: 1.3,
         delay,
         ease: "power3.out",
         scrollTrigger: {
@@ -90,15 +125,21 @@ export function ContactTeaser() {
   return (
     <Bounded className="contact-teaser relative overflow-hidden bg-[#C4915B] text-[#FAFAF8]">
       <div className="relative grid w-full items-center gap-8 py-16 lg:grid-cols-[1fr,auto,1fr] lg:gap-6 lg:py-24">
-        <View className="aspect-square h-[40vmin] min-h-48 justify-self-center">
+        <View className="aspect-square h-[42vmin] min-h-56 justify-self-center">
           <Center>
-            <FloatingCan
-              ref={leftCanRef}
-              flavor="blackCherry"
-              floatIntensity={0.6}
-              rotationIntensity={0.8}
-              floatSpeed={1.5}
-            />
+            {LEFT_CLUSTER.map((bottle, i) => (
+              <FloatingCan
+                key={i}
+                ref={leftRefs[i]}
+                flavor={bottle.flavor}
+                position={bottle.position}
+                scale={1.3}
+                floatIntensity={1.3}
+                rotationIntensity={1.1}
+                floatingRange={[-0.15, 0.15]}
+                floatSpeed={bottle.floatSpeed}
+              />
+            ))}
           </Center>
           <Environment
             files="/hdr/lobby.hdr"
@@ -127,15 +168,21 @@ export function ContactTeaser() {
           </a>
         </div>
 
-        <View className="aspect-square h-[40vmin] min-h-48 justify-self-center">
+        <View className="aspect-square h-[42vmin] min-h-56 justify-self-center">
           <Center>
-            <FloatingCan
-              ref={rightCanRef}
-              flavor="watermelon"
-              floatIntensity={0.6}
-              rotationIntensity={0.8}
-              floatSpeed={1.3}
-            />
+            {RIGHT_CLUSTER.map((bottle, i) => (
+              <FloatingCan
+                key={i}
+                ref={rightRefs[i]}
+                flavor={bottle.flavor}
+                position={bottle.position}
+                scale={1.3}
+                floatIntensity={1.3}
+                rotationIntensity={1.1}
+                floatingRange={[-0.15, 0.15]}
+                floatSpeed={bottle.floatSpeed}
+              />
+            ))}
           </Center>
           <Environment
             files="/hdr/lobby.hdr"
