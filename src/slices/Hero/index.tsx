@@ -5,11 +5,12 @@ import { SliceComponentProps } from "@prismicio/react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { View } from "@react-three/drei";
+import { Center, Environment, View } from "@react-three/drei";
 
 import { Bounded } from "@/components/Bounded";
 import Button from "@/components/Button";
 import { TextSplitter } from "@/components/TextSplitter";
+import FloatingCan from "@/components/FloatingCan";
 import Scene from "./Scene";
 import { Bubbles } from "./Bubbles";
 import { useStore } from "@/hooks/useStore";
@@ -122,6 +123,45 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       <div className="grid">
         <div className="grid h-screen place-items-center">
           <div className="grid auto-rows-min place-items-center text-center">
+            {/*
+              Mobile/tablet only: the desktop hero-scene above is a sticky
+              full-bleed canvas whose 7 bottles are driven entirely by a
+              scroll-scrubbed GSAP timeline tuned for wide screens - the
+              positions crowd/overlap on narrow viewports (see the isDesktop
+              comment below) and the scroll-hijack style pin is heavy on
+              touch scrolling anyway. Rather than showing nothing here, this
+              is a small, self-contained, non-scroll-tied pair of bottles
+              (same pattern as Carousel/ContactTeaser) that just floats in
+              place - no position/rotation tween keyed to scroll progress.
+              Desktop is untouched: this block doesn't render there at all.
+            */}
+            {!isDesktop && (
+              <View className="mb-4 aspect-[2/1] h-[26vh] max-h-56 w-full max-w-sm">
+                <Center>
+                  <FloatingCan
+                    flavor="blackCherry"
+                    position={[-0.55, 0, 0]}
+                    scale={1.1}
+                    floatIntensity={1.1}
+                    rotationIntensity={0.8}
+                    floatSpeed={1.4}
+                  />
+                  <FloatingCan
+                    flavor="lemonLime"
+                    position={[0.55, 0, 0]}
+                    scale={1.1}
+                    floatIntensity={1.1}
+                    rotationIntensity={0.8}
+                    floatSpeed={1.7}
+                  />
+                </Center>
+                <Environment
+                  files="/hdr/lobby.hdr"
+                  environmentIntensity={1.2}
+                />
+                <directionalLight intensity={5} position={[0, 1, 1]} />
+              </View>
+            )}
             <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#6B8F71] md:text-[9rem] lg:text-[13rem]">
               <TextSplitter
                 text="Beauty"
