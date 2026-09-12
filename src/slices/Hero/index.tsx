@@ -141,7 +141,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   <FloatingCan
                     flavor="blackCherry"
                     position={[-0.55, 0, 0]}
-                    scale={1.1}
+                    scale={1.3}
                     floatIntensity={1.1}
                     rotationIntensity={0.8}
                     floatSpeed={1.4}
@@ -149,7 +149,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   <FloatingCan
                     flavor="lemonLime"
                     position={[0.55, 0, 0]}
-                    scale={1.1}
+                    scale={1.3}
                     floatIntensity={1.1}
                     rotationIntensity={0.8}
                     floatSpeed={1.7}

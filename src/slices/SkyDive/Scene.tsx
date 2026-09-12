@@ -75,15 +75,19 @@ export default function Scene({ sentence, flavor }: SkyDiveProps) {
         return;
       }
 
-      // Set initial positions
-      gsap.set(cloudsRef.current.position, { z: 10 });
+      // Set initial positions. Distances pulled in from the original
+      // (-4/7/z:10) - those kept everything outside the camera frustum for
+      // a long stretch of scroll before anything became visible, which
+      // read as a blank section. Starting closer means the fly-in begins
+      // already partly in frame.
+      gsap.set(cloudsRef.current.position, { z: 6 });
       gsap.set(canRef.current.position, {
-        ...getXYPositions(-4),
+        ...getXYPositions(-2.5),
       });
 
       gsap.set(
         wordsRef.current.children.map((word) => word.position),
-        { ...getXYPositions(7), z: 2 },
+        { ...getXYPositions(4.5), z: 2 },
       );
 
       // Spinning can
@@ -119,12 +123,17 @@ export default function Scene({ sentence, flavor }: SkyDiveProps) {
         duration: DURATION,
       });
 
+      // Was +=2000: the fly-in/hold/fly-out sequence only has ~1.6 GSAP
+      // timeline-units of actual motion in it, so spreading that over 2000px
+      // of pinned scroll left long stretches where nothing was visibly
+      // changing - a large "dead" scroll gap. Tightening this compresses
+      // the same animation into much less scroll distance.
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: ".skydive",
           pin: true,
           start: "top top",
-          end: "+=2000",
+          end: "+=550",
           scrub: 1.5,
         },
       });
@@ -147,18 +156,18 @@ export default function Scene({ sentence, flavor }: SkyDiveProps) {
           {
             keyframes: [
               { x: 0, y: 0, z: -1 },
-              { ...getXYPositions(-7), z: -7 },
+              { ...getXYPositions(-5), z: -5 },
             ],
             stagger: 0.3,
           },
           0,
         )
         .to(canRef.current.position, {
-          ...getXYPositions(4),
+          ...getXYPositions(2.5),
           duration: 0.5,
           ease: "back.in(1.7)",
         })
-        .to(cloudsRef.current.position, { z: 7, duration: 0.5 });
+        .to(cloudsRef.current.position, { z: 5, duration: 0.5 });
     },
     { dependencies: [isDesktop] },
   );

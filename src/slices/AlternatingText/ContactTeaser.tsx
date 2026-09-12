@@ -133,7 +133,7 @@ export function ContactTeaser() {
                 ref={leftRefs[i]}
                 flavor={bottle.flavor}
                 position={bottle.position}
-                scale={1.3}
+                scale={1.5}
                 floatIntensity={1.3}
                 rotationIntensity={1.1}
                 floatingRange={[-0.15, 0.15]}
@@ -176,7 +176,7 @@ export function ContactTeaser() {
                 ref={rightRefs[i]}
                 flavor={bottle.flavor}
                 position={bottle.position}
-                scale={1.3}
+                scale={1.5}
                 floatIntensity={1.3}
                 rotationIntensity={1.1}
                 floatingRange={[-0.15, 0.15]}

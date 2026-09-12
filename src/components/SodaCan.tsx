@@ -7,13 +7,15 @@ import * as THREE from "three";
 useGLTF.preload("/Bottle-baked.glb");
 
 // Serum "flavor" tints - each key stays wired to the Prismic `flavor` Select
-// field options, only the displayed color/name changed.
+// field options, only the displayed color/name changed. Restricted to the
+// neutral cream/white/tan family from the reference bottle photos, instead
+// of the previous saturated brand-color palette.
 export const flavorColors = {
-  lemonLime: "#6E8B5A", // Green Tea Glow
-  grape: "#7C6A8E", // Niacinamide Balance
-  blackCherry: "#A9746E", // Collagen Boost
-  strawberryLemonade: "#C4915B", // Vitamin C Brighten
-  watermelon: "#7FA8A0", // Hyaluronic Hydrate
+  lemonLime: "#F0EBE2", // Green Tea Glow - pale warm white
+  grape: "#DCCFBC", // Niacinamide Balance - soft beige
+  blackCherry: "#EAE6DE", // Collagen Boost - cream/ivory
+  strawberryLemonade: "#D9A876", // Vitamin C Brighten - peach/tan
+  watermelon: "#C98F5E", // Hyaluronic Hydrate - warm tan
 };
 
 // Model has 5 separate parts (label, glass body, inner tube, cap, rubber
@@ -40,7 +42,7 @@ export type SodaCanProps = {
 
 export function SodaCan({
   flavor = "blackCherry",
-  scale = 2,
+  scale = 2.3,
   ...props
 }: SodaCanProps) {
   const { nodes, materials } = useGLTF("/Bottle-baked.glb");
