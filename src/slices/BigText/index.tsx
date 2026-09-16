@@ -14,7 +14,7 @@ const BigText = ({ slice }: BigTextProps): JSX.Element => {
     <section
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      className="min-h-screen w-screen overflow-hidden bg-[#2B302B] text-[#FAFAF8]"
+      className="min-h-screen w-screen overflow-hidden bg-white text-[#2B302B]"
     >
       <h2 className="grid w-full gap-[3vw] py-10 text-center font-black uppercase leading-[.7]">
         <div className="text-[34vw]">Science</div>

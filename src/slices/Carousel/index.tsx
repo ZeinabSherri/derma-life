@@ -90,16 +90,17 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
 
   return (
     <section
+      id="products"
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      className="carousel relative grid min-h-screen grid-rows-[auto,4fr,auto] justify-center overflow-hidden bg-white py-12 text-white"
+      className="carousel relative grid min-h-screen scroll-mt-20 grid-rows-[auto,4fr,auto] justify-center overflow-hidden bg-white py-12 text-white"
     >
       <div className="background pointer-events-none absolute inset-0 bg-[#2B302B] opacity-50" />
 
       <WavyCircles className="absolute left-1/2 top-1/2 h-[120vmin] -translate-x-1/2 -translate-y-1/2 text-[#2B302B]" />
 
       <div className="relative">
-        <h2 className="text-center text-5xl font-bold">
+        <h2 className="text-center font-serif text-5xl font-bold">
           Our Product Categories
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-xl font-normal opacity-90">

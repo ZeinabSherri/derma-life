@@ -34,10 +34,8 @@ export default function BlogPostPage({ params }: Props) {
   const hasImage = imageExists(post.image);
 
   return (
-    <Bounded className="min-h-screen bg-[#FAFAF8] pb-24 text-[#2B302B]">
-      {/* See blog/page.tsx for why this is a nested-wrapper margin-top and
-          not a pt-* utility on Bounded itself. */}
-      <div className="mx-auto mt-32 max-w-3xl">
+    <Bounded className="min-h-screen bg-white pb-24 text-[#2B302B]">
+      <div className="mx-auto mt-12 max-w-3xl">
         {/* Plain anchor - see BlogTeaser.tsx for why. */}
         <a
           href="/blog"
@@ -53,11 +51,11 @@ export default function BlogPostPage({ params }: Props) {
           {post.category}
         </span>
 
-        <h1 className="mt-4 text-balance text-4xl font-black leading-tight lg:text-5xl">
+        <h1 className="mt-4 text-balance font-serif text-4xl font-bold leading-tight lg:text-5xl">
           {post.title}
         </h1>
 
-        <div className="mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#EDE3DD]">
+        <div className="mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#F3F1EC]">
           {hasImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img

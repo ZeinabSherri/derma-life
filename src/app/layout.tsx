@@ -1,4 +1,5 @@
 import localFont from "next/font/local";
+import { Playfair_Display } from "next/font/google";
 
 import { PrismicPreview } from "@prismicio/next";
 import { repositoryName } from "@/prismicio";
@@ -15,14 +16,24 @@ const alpino = localFont({
   variable: "--font-alpino",
 });
 
+// Editorial serif for headings, matching the reference design - self-hosted
+// by Next at build time, not a runtime Google Fonts request.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-playfair",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={alpino.variable}>
-      <body className="overflow-x-hidden bg-[#FAFAF8]">
+    <html lang="en" className={`${alpino.variable} ${playfair.variable}`}>
+      <body className="overflow-x-hidden bg-white">
         <Header />
         <main>
           {children}

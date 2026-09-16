@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["var(--font-alpino)", "sans-serif"],
+        serif: ["var(--font-playfair)", "serif"],
       },
       keyframes: {
         "slide-left": {

@@ -123,7 +123,7 @@ export function ContactTeaser() {
   });
 
   return (
-    <Bounded className="contact-teaser relative overflow-hidden bg-[#C4915B] text-[#FAFAF8]">
+    <Bounded className="contact-teaser relative overflow-hidden bg-white text-[#2B302B]">
       <div className="relative grid w-full items-center gap-8 py-16 lg:grid-cols-[1fr,auto,1fr] lg:gap-6 lg:py-24">
         <View className="aspect-square h-[42vmin] min-h-56 justify-self-center">
           <Center>
@@ -150,7 +150,7 @@ export function ContactTeaser() {
         </View>
 
         <div className="text-center">
-          <h2 className="contact-teaser-heading text-balance text-5xl font-bold lg:text-6xl">
+          <h2 className="contact-teaser-heading text-balance font-serif text-5xl font-bold lg:text-6xl">
             Get In Touch
           </h2>
           <p className="contact-teaser-body mx-auto mt-4 max-w-md text-balance text-xl font-normal opacity-90">

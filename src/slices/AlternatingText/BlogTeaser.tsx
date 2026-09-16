@@ -44,14 +44,14 @@ export function BlogTeaser() {
   });
 
   return (
-    <Bounded className="blog-teaser relative overflow-hidden bg-[#6B8F71] text-[#FAFAF8]">
-      <WavyCircles className="pointer-events-none absolute left-1/2 top-1/2 h-[90vmin] -translate-x-1/2 -translate-y-1/2 text-white/10" />
+    <Bounded className="blog-teaser relative overflow-hidden bg-white text-[#2B302B]">
+      <WavyCircles className="pointer-events-none absolute left-1/2 top-1/2 h-[90vmin] -translate-x-1/2 -translate-y-1/2 text-[#6B8F71]/10" />
 
       <div className="relative mx-auto grid max-w-2xl place-items-center gap-4 py-24 text-center">
-        <h2 className="blog-teaser-heading text-balance text-5xl font-bold lg:text-6xl">
+        <h2 className="blog-teaser-heading text-balance font-serif text-5xl font-bold lg:text-6xl">
           From Our Blog
         </h2>
-        <p className="blog-teaser-body max-w-xl text-balance text-xl font-normal opacity-90">
+        <p className="blog-teaser-body max-w-xl text-balance text-xl font-normal opacity-80">
           Insights on skincare science, formulation trends, and industry updates
           — stay ahead with DermaLife&apos;s latest articles.
         </p>
@@ -66,7 +66,7 @@ export function BlogTeaser() {
         */}
         <a
           href="/blog"
-          className="blog-teaser-button mt-4 rounded-xl bg-[#FAFAF8] px-6 py-4 text-center text-xl font-bold uppercase tracking-wide text-[#2B302B] transition-colors duration-150 hover:bg-white"
+          className="blog-teaser-button mt-4 rounded-xl bg-[#6B8F71] px-6 py-4 text-center text-xl font-bold uppercase tracking-wide text-white transition-colors duration-150 hover:bg-[#597861]"
         >
           Visit Our Blog
         </a>

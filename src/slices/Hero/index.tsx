@@ -44,6 +44,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
       introTl
         .set(".hero", { opacity: 1 })
+        .from(".hero-eyebrow", {
+          opacity: 0,
+          y: 10,
+        })
         .from(".hero-header-word", {
           scale: 3,
           opacity: 0,
@@ -82,23 +86,32 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         .fromTo(
           "body",
           {
-            backgroundColor: "#FAFAF8",
+            backgroundColor: "#FFFFFF",
           },
           {
-            backgroundColor: "#E4EBE0",
+            backgroundColor: "#F7F8F5",
             overwrite: "auto",
           },
           1,
         )
-        .from(".text-side-heading .split-char", {
-          scale: 1.3,
-          y: 40,
-          rotate: -25,
-          opacity: 0,
-          stagger: 0.1,
-          ease: "back.out(3)",
-          duration: 0.5,
-        })
+        // Starts alongside the body-color tween (position "1", not
+        // sequentially after it) and uses a tighter stagger/duration - the
+        // #about nav link jumps straight to the top of this section, and
+        // this scrub-linked reveal needs to already be finished by then or
+        // the last few characters land visibly faded/half-revealed.
+        .from(
+          ".text-side-heading .split-char",
+          {
+            scale: 1.3,
+            y: 40,
+            rotate: -25,
+            opacity: 0,
+            stagger: 0.03,
+            ease: "back.out(3)",
+            duration: 0.3,
+          },
+          1,
+        )
         .from(".text-side-body", {
           y: 20,
           opacity: 0,
@@ -162,15 +175,21 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 <directionalLight intensity={5} position={[0, 1, 1]} />
               </View>
             )}
-            <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#6B8F71] md:text-[9rem] lg:text-[13rem]">
+            <p className="hero-eyebrow font-sans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
+              Innovation Skin Technology
+            </p>
+            <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#2B302B] md:text-[9rem] lg:text-[13rem]">
               <TextSplitter
                 text="Beauty"
                 wordDisplayStyle="block"
                 className="hero-header-word"
               />
             </h1>
-            <div className="hero-subheading mt-12 text-5xl font-semibold text-[#2B302B] lg:text-6xl">
-              <p>Formulating for success.</p>
+            <div className="hero-subheading mt-12 font-serif text-5xl text-[#2B302B] lg:text-6xl">
+              <p>
+                <span className="font-bold">Formulating</span>{" "}
+                <span className="italic">for success.</span>
+              </p>
             </div>
             <div className="hero-body text-2xl font-normal text-[#2B302B]">
               <p>
@@ -185,9 +204,12 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
         </div>
 
-        <div className="text-side relative z-[80] grid h-screen items-center gap-4 md:grid-cols-2">
+        <div
+          id="about"
+          className="text-side relative z-[80] grid h-screen scroll-mt-24 items-center gap-4 md:grid-cols-2"
+        >
           <div>
-            <h2 className="text-side-heading text-balance text-6xl font-black uppercase text-[#2B302B] lg:text-8xl">
+            <h2 className="text-side-heading text-balance font-serif text-6xl font-bold text-[#2B302B] lg:text-8xl">
               <TextSplitter text="Where Science Meets Beauty" />
             </h2>
             <div className="text-side-body mt-4 max-w-xl text-balance text-xl font-normal text-[#2B302B]">

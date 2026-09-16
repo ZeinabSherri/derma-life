@@ -70,7 +70,7 @@ export default function Scene({ sentence, flavor }: SkyDiveProps) {
               scrub: 1,
             },
           })
-          .to("body", { backgroundColor: "#E4EBE0", overwrite: "auto" });
+          .to("body", { backgroundColor: "#F7F8F5", overwrite: "auto" });
 
         return;
       }
@@ -140,7 +140,7 @@ export default function Scene({ sentence, flavor }: SkyDiveProps) {
 
       scrollTl
         .to("body", {
-          backgroundColor: "#E4EBE0",
+          backgroundColor: "#F7F8F5",
           overwrite: "auto",
           duration: 0.1,
         })

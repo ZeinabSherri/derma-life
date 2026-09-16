@@ -1,16 +1,101 @@
-import React from "react";
+"use client";
 
-type Props = {};
+import { useState } from "react";
 
-export default function Header({}: Props) {
+const SECTION_LINKS = [
+  { label: "About Us", href: "/#about" },
+  { label: "Products", href: "/#products" },
+  { label: "Services", href: "/#services" },
+];
+
+// Blog and Contact Us are real pages, not in-page sections - plain anchors
+// (not next/link) throughout this menu, same reason as everywhere else in
+// this site: GSAP's ScrollTrigger pins don't survive a client-side route
+// change cleanly, so every cross-page link here is a full navigation.
+export default function Header() {
+  const [open, setOpen] = useState(false);
+
   return (
-    <header className="-mb-28 flex justify-center py-4">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/social-logo.png"
-        alt="DermaLife"
-        className="z-10 h-20 w-auto cursor-pointer"
-      />
+    <header className="sticky top-0 z-[100] border-b border-[#2B302B]/10 bg-white">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
+        <a href="/" className="shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/social-logo.png"
+            alt="DermaLife"
+            className="h-14 w-auto md:h-16 lg:h-20"
+          />
+        </a>
+
+        <nav className="hidden items-center gap-8 font-sans text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B] lg:flex">
+          {SECTION_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="transition-colors duration-150 hover:text-[#6B8F71]"
+            >
+              {link.label}
+            </a>
+          ))}
+          <a
+            href="/blog"
+            className="transition-colors duration-150 hover:text-[#6B8F71]"
+          >
+            Blog
+          </a>
+        </nav>
+
+        <a
+          href="/contact"
+          className="hidden items-center gap-2 rounded-full border border-[#2B302B] px-5 py-2.5 font-sans text-sm font-medium uppercase tracking-[0.1em] text-[#2B302B] transition-colors duration-150 hover:bg-[#2B302B] hover:text-white lg:inline-flex"
+        >
+          Contact Us
+          <span aria-hidden="true">↗</span>
+        </a>
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle menu"
+          aria-expanded={open}
+          className="flex flex-col gap-1.5 lg:hidden"
+        >
+          <span
+            className={`h-0.5 w-6 bg-[#2B302B] transition-transform duration-150 ${open ? "translate-y-2 rotate-45" : ""}`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-[#2B302B] transition-opacity duration-150 ${open ? "opacity-0" : ""}`}
+          />
+          <span
+            className={`h-0.5 w-6 bg-[#2B302B] transition-transform duration-150 ${open ? "-translate-y-2 -rotate-45" : ""}`}
+          />
+        </button>
+      </div>
+
+      {open && (
+        <nav className="flex flex-col gap-1 border-t border-[#2B302B]/10 bg-white px-4 py-4 font-sans lg:hidden">
+          {[...SECTION_LINKS, { label: "Blog", href: "/blog" }].map(
+            (link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="py-2 text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B]"
+              >
+                {link.label}
+              </a>
+            ),
+          )}
+          <a
+            href="/contact"
+            onClick={() => setOpen(false)}
+            className="mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-[#2B302B] px-5 py-2.5 text-sm font-medium uppercase tracking-[0.1em] text-[#2B302B]"
+          >
+            Contact Us
+            <span aria-hidden="true">↗</span>
+          </a>
+        </nav>
+      )}
     </header>
   );
 }

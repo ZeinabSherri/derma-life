@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Anchor-nav links (header menu -> in-page sections) jump smoothly instead
+   of snapping instantly. */
+html {
+  scroll-behavior: smooth;
+}

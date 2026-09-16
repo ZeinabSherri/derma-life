@@ -22,7 +22,10 @@ export default function Scene({}: Props) {
   // Use lg instead of md so tablets get the simpler centered/no-pin version.
   const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
-  const bgColors = ["#EDE3DD", "#E3E0EA", "#DCE8D5", "#E4EBE0"];
+  // Barely-tinted whites instead of the previous pastel cream/lavender/sage
+  // set, so the section-to-section transition stays perceptible without
+  // breaking the site's white-dominant palette.
+  const bgColors = ["#FFFFFF", "#FAF9F7", "#F6F7F4", "#FAFBF8"];
 
   useGSAP(
     () => {
