@@ -2,16 +2,23 @@
 
 import { useState } from "react";
 
-const SECTION_LINKS = [
+const NAV_LINKS = [
   { label: "About Us", href: "/#about" },
   { label: "Products", href: "/#products" },
   { label: "Services", href: "/#services" },
+  { label: "Blog", href: "/blog" },
 ];
 
 // Blog and Contact Us are real pages, not in-page sections - plain anchors
 // (not next/link) throughout this menu, same reason as everywhere else in
 // this site: GSAP's ScrollTrigger pins don't survive a client-side route
 // change cleanly, so every cross-page link here is a full navigation.
+//
+// Matches https://dermalife-3d.norma313.chatgpt.site/'s header structure:
+// exactly two flex children under justify-between - the logo alone, and one
+// nav element grouping the section links + Blog + the Contact Us pill
+// together - so the logo sits isolated on the far left instead of the nav
+// links floating toward the header's center.
 export default function Header() {
   const [open, setOpen] = useState(false);
 
@@ -27,8 +34,8 @@ export default function Header() {
           />
         </a>
 
-        <nav className="hidden items-center gap-8 font-sans text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B] lg:flex">
-          {SECTION_LINKS.map((link) => (
+        <nav className="hidden items-center gap-7 font-sans text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B] lg:flex">
+          {NAV_LINKS.map((link) => (
             <a
               key={link.label}
               href={link.href}
@@ -38,20 +45,13 @@ export default function Header() {
             </a>
           ))}
           <a
-            href="/blog"
-            className="transition-colors duration-150 hover:text-[#6B8F71]"
+            href="/contact"
+            className="inline-flex items-center gap-2 rounded-full border border-[#2B302B] px-5 py-2.5 tracking-[0.1em] transition-colors duration-150 hover:bg-[#2B302B] hover:text-white"
           >
-            Blog
+            Contact Us
+            <span aria-hidden="true">↗</span>
           </a>
         </nav>
-
-        <a
-          href="/contact"
-          className="hidden items-center gap-2 rounded-full border border-[#2B302B] px-5 py-2.5 font-sans text-sm font-medium uppercase tracking-[0.1em] text-[#2B302B] transition-colors duration-150 hover:bg-[#2B302B] hover:text-white lg:inline-flex"
-        >
-          Contact Us
-          <span aria-hidden="true">↗</span>
-        </a>
 
         <button
           type="button"
@@ -74,18 +74,16 @@ export default function Header() {
 
       {open && (
         <nav className="flex flex-col gap-1 border-t border-[#2B302B]/10 bg-white px-4 py-4 font-sans lg:hidden">
-          {[...SECTION_LINKS, { label: "Blog", href: "/blog" }].map(
-            (link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="py-2 text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B]"
-              >
-                {link.label}
-              </a>
-            ),
-          )}
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="py-2 text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B]"
+            >
+              {link.label}
+            </a>
+          ))}
           <a
             href="/contact"
             onClick={() => setOpen(false)}

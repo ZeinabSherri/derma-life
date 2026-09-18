@@ -3,9 +3,13 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      // Matches https://dermalife-3d.norma313.chatgpt.site/ exactly: no
+      // custom web font, just the system stacks it uses directly in its
+      // own CSS (`body{font-family:Helvetica Neue,Arial,sans-serif}`,
+      // `em{font-family:Georgia,serif}`).
       fontFamily: {
-        sans: ["var(--font-alpino)", "sans-serif"],
-        serif: ["var(--font-playfair)", "serif"],
+        sans: ['"Helvetica Neue"', "Arial", "sans-serif"],
+        serif: ["Georgia", '"Times New Roman"', "serif"],
       },
       keyframes: {
         "slide-left": {
