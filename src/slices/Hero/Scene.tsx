@@ -130,7 +130,7 @@ export default function Scene({}: Props) {
   // Smaller than SodaCan's default (2.3) so all 7 bottles read as a compact,
   // fully-visible cluster next to the text-side content instead of
   // overlapping/crowding each other or clipping the section's bottom edge.
-  const BOTTLE_SCALE = 1.5;
+  const BOTTLE_SCALE = 1.2;
 
   return (
     <group ref={groupRef}>

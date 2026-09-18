@@ -8,7 +8,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Center, Environment, View } from "@react-three/drei";
 
 import { Bounded } from "@/components/Bounded";
-import Button from "@/components/Button";
 import { TextSplitter } from "@/components/TextSplitter";
 import FloatingCan from "@/components/FloatingCan";
 import Scene from "./Scene";
@@ -65,11 +64,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         .from(".hero-body", {
           opacity: 0,
           y: 10,
-        })
-        .from(".hero-button", {
-          opacity: 0,
-          y: 10,
-          duration: 0.6,
         });
 
       const scrollTl = gsap.timeline({
@@ -152,7 +146,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   <FloatingCan
                     flavor="blackCherry"
                     position={[-0.55, 0, 0]}
-                    scale={1.3}
+                    scale={1.1}
                     floatIntensity={1.1}
                     rotationIntensity={0.8}
                     floatSpeed={1.4}
@@ -160,7 +154,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   <FloatingCan
                     flavor="lemonLime"
                     position={[0.55, 0, 0]}
-                    scale={1.3}
+                    scale={1.1}
                     floatIntensity={1.1}
                     rotationIntensity={0.8}
                     floatSpeed={1.7}
@@ -194,11 +188,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 Skincare. Haircare. Body care. World-class, worldwide.
               </p>
             </div>
-            <Button
-              buttonLink={slice.primary.button_link}
-              buttonText="Read More"
-              className="hero-button mt-12"
-            />
           </div>
         </div>
 

@@ -30,7 +30,7 @@ export default function Header() {
           <img
             src="/social-logo.png"
             alt="DermaLife"
-            className="h-14 w-auto md:h-16 lg:h-20"
+            className="h-16 w-auto md:h-20 lg:h-28"
           />
         </a>
 
