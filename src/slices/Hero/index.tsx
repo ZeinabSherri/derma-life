@@ -119,6 +119,20 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         y: 20,
         opacity: 0,
       });
+
+    // Kicker line draws in from the left - same treatment as every other
+    // "0X - Label" kicker across the site (What We Do, The Process), but
+    // this useGSAP call has no `scope`, so it must use a class unique to
+    // this section rather than the shared ".section-kicker-line" - a plain
+    // string selector like that would match ALL of them site-wide here,
+    // colliding with WhatWeDo/OurProcess's own (properly scoped) queries.
+    gsap.from(".hero-kicker-line", {
+      scaleX: 0,
+      transformOrigin: "left center",
+      duration: 0.9,
+      ease: "power3.out",
+      scrollTrigger: { trigger: "#about", start: "top 85%" },
+    });
   });
 
   return (
@@ -221,7 +235,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
                 01 &mdash; Who We Are
               </p>
-              <span className="h-px w-full bg-[#2B302B]/20" />
+              <span className="hero-kicker-line h-px w-full bg-[#2B302B]/20" />
             </div>
             <p className="mt-6 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Who We Are.

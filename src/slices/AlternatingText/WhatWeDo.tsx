@@ -108,6 +108,13 @@ export default function WhatWeDo() {
 
   useGSAP(
     () => {
+      gsap.from(".section-kicker-line", {
+        scaleX: 0,
+        transformOrigin: "left center",
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+      });
       gsap.from(".what-we-do-card", {
         y: 40,
         opacity: 0,
@@ -137,7 +144,7 @@ export default function WhatWeDo() {
         <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
           03 &mdash; What We Do
         </p>
-        <span className="h-px w-full bg-[#2B302B]/20" />
+        <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
       </div>
 
       <div className="what-we-do-heading mt-10 grid gap-6 lg:grid-cols-2 lg:items-end lg:gap-12">
