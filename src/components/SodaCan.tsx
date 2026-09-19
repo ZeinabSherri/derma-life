@@ -14,8 +14,8 @@ useGLTF.preload("/Bottle-baked.glb");
 export const flavorColors = {
   lemonLime: "#F0EBE2", // Green Tea Glow - pale warm white
   grape: "#DCCFBC", // Niacinamide Balance - soft beige
-  blackCherry: "#C9A883", // Collagen Boost - the two colors in active use
-  strawberryLemonade: "#D9BA98", // Vitamin C Brighten - site-wide
+  blackCherry: "#FFFFFF", // Collagen Boost - the two colors in active use
+  strawberryLemonade: "#FFFFFF", // Vitamin C Brighten - site-wide
   watermelon: "#C98F5E", // Hyaluronic Hydrate - warm tan
 };
 
