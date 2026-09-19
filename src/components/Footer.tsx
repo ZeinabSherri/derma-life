@@ -12,7 +12,7 @@ export default function Footer({}: Props) {
             <img
               src="/social-logo.png"
               alt="DermaLife"
-              className="h-12 w-auto invert"
+              className="h-44 w-auto invert"
             />
           </div>
           <p className="max-w-md text-[#F5F3EE]/80 md:text-right">
@@ -29,22 +29,8 @@ export default function Footer({}: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-4 text-sm text-[#F5F3EE]/70 md:flex-row md:items-center md:justify-between">
+        <div className="text-sm text-[#F5F3EE]/70">
           <p>&copy; {new Date().getFullYear()} Derma Life.</p>
-          <div className="flex items-center gap-6">
-            <a
-              href="/privacy-policy"
-              className="text-[#8FAEC0] transition-colors duration-150 hover:text-white"
-            >
-              Privacy Policy
-            </a>
-            <a
-              href="/terms-and-conditions"
-              className="text-[#8FAEC0] transition-colors duration-150 hover:text-white"
-            >
-              Terms and Conditions
-            </a>
-          </div>
         </div>
       </div>
     </footer>
