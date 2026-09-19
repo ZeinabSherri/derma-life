@@ -12,17 +12,18 @@ import { TextSplitter } from "@/components/TextSplitter";
 import FloatingCan from "@/components/FloatingCan";
 import { SodaCanProps } from "@/components/SodaCan";
 import CategoryTicker from "@/components/CategoryTicker";
-import CrossingBottles from "./CrossingBottles";
+import Scene from "./Scene";
+import { useStore } from "@/hooks/useStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-// Mobile/tablet-only: a small, non-scroll-tied pair that just floats in
-// place (same pattern as Carousel/ContactTeaser). Desktop gets the bigger
-// crossing-over-the-text pair below instead, driven by its own scoped
-// scroll animation - kept separate because that dramatic large-scale
-// version crowds/overlaps on narrower canvases (less horizontal 3D
-// world-space for the same vertical FOV below ~1024px).
+// Mobile/tablet-only: the desktop hero-scene below is a sticky full-bleed
+// canvas whose 9 bottles are driven entirely by a scroll-scrubbed GSAP
+// timeline tuned for wide screens - the positions crowd/overlap on narrower
+// canvases (less horizontal 3D world-space for the same vertical FOV) below
+// ~1024px, so this is a small, self-contained, non-scroll-tied pair instead
+// (same pattern as Carousel/ContactTeaser) that just floats in place.
 const MOBILE_FIRST_SECTION_BOTTLES: {
   flavor: SodaCanProps["flavor"];
   position: [number, number, number];
@@ -30,25 +31,6 @@ const MOBILE_FIRST_SECTION_BOTTLES: {
 }[] = [
   { flavor: "blackCherry", position: [0.35, 0, 0], floatSpeed: 1.4 },
   { flavor: "strawberryLemonade", position: [0.85, 0, 0], floatSpeed: 1.7 },
-];
-
-// Six bottles standing beside each other on the right side of Who We Are -
-// tight, near-even x offsets (not a loose cluster) so they read as a lineup,
-// alternating between just the two bottle colors used site-wide. Same total
-// spread as the old 3-bottle version (roughly +-1.3) since this still has
-// to fit inside the same narrow aspect-[4/5] card - scale is reduced
-// accordingly so 6 fit where 3 used to.
-const WHO_WE_ARE_BOTTLES: {
-  flavor: SodaCanProps["flavor"];
-  position: [number, number, number];
-  floatSpeed: number;
-}[] = [
-  { flavor: "blackCherry", position: [-1.3, -0.05, 0.1], floatSpeed: 1.1 },
-  { flavor: "strawberryLemonade", position: [-0.78, 0.08, -0.1], floatSpeed: 1.4 },
-  { flavor: "blackCherry", position: [-0.26, -0.05, 0.1], floatSpeed: 1.6 },
-  { flavor: "strawberryLemonade", position: [0.26, 0.08, -0.1], floatSpeed: 1.3 },
-  { flavor: "blackCherry", position: [0.78, -0.05, 0.1], floatSpeed: 1.7 },
-  { flavor: "strawberryLemonade", position: [1.3, 0.08, -0.1], floatSpeed: 1.2 },
 ];
 
 /**
@@ -60,99 +42,97 @@ export type HeroProps = SliceComponentProps<Content.HeroSlice>;
  * Component for "Hero" Slices.
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
+  const ready = useStore((state) => state.ready);
   const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
-  // isDesktop isn't referenced in here (it only gates which JSX renders
-  // below) - no dependency array, so this doesn't re-run when it settles
-  // from its SSR-fallback default shortly after mount, which would replay
-  // the intro reveal mid-way through and leave elements looking half-faded.
-  useGSAP(() => {
-    const introTl = gsap.timeline();
+  useGSAP(
+    () => {
+      if (!ready && isDesktop) return;
 
-    introTl
-      .set(".hero", { opacity: 1 })
-      .from(".hero-eyebrow", {
-        opacity: 0,
-        y: 10,
-      })
-      .from(".hero-header-word", {
-        scale: 3,
-        opacity: 0,
-        ease: "power4.in",
-        delay: 0.3,
-        stagger: 1,
-      })
-      .from(
-        ".hero-subheading",
-        {
+      const introTl = gsap.timeline();
+
+      introTl
+        .set(".hero", { opacity: 1 })
+        .from(".hero-eyebrow", {
           opacity: 0,
-          y: 30,
+          y: 10,
+        })
+        .from(".hero-header-word", {
+          scale: 3,
+          opacity: 0,
+          ease: "power4.in",
+          delay: 0.3,
+          stagger: 1,
+        })
+        .from(
+          ".hero-subheading",
+          {
+            opacity: 0,
+            y: 30,
+          },
+          "+=.8",
+        )
+        .from(".hero-body", {
+          opacity: 0,
+          y: 10,
+        });
+
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1.5,
         },
-        "+=.8",
-      )
-      .from(".hero-body", {
-        opacity: 0,
-        y: 10,
       });
 
-    const scrollTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: ".hero",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 1.5,
-      },
-    });
-
-    scrollTl
-      .fromTo(
-        "body",
-        {
-          backgroundColor: "#FFFFFF",
-        },
-        {
-          backgroundColor: "#F7F8F5",
-          overwrite: "auto",
-        },
-        1,
-      )
-      // Starts alongside the body-color tween (position "1", not
-      // sequentially after it) and uses a tighter stagger/duration - the
-      // #about nav link jumps straight to the top of this section, and
-      // this scrub-linked reveal needs to already be finished by then or
-      // the last few characters land visibly faded/half-revealed.
-      .from(
-        ".text-side-heading .split-char",
-        {
-          scale: 1.3,
-          y: 40,
-          rotate: -25,
+      scrollTl
+        .fromTo(
+          "body",
+          {
+            backgroundColor: "#FFFFFF",
+          },
+          {
+            backgroundColor: "#F7F8F5",
+            overwrite: "auto",
+          },
+          1,
+        )
+        // Starts alongside the body-color tween (position "1", not
+        // sequentially after it) and uses a tighter stagger/duration - the
+        // #about nav link jumps straight to the top of this section, and
+        // this scrub-linked reveal needs to already be finished by then or
+        // the last few characters land visibly faded/half-revealed.
+        .from(
+          ".text-side-heading .split-char",
+          {
+            scale: 1.3,
+            y: 40,
+            rotate: -25,
+            opacity: 0,
+            stagger: 0.03,
+            ease: "back.out(3)",
+            duration: 0.3,
+          },
+          1,
+        )
+        .from(".text-side-body", {
+          y: 20,
           opacity: 0,
-          stagger: 0.03,
-          ease: "back.out(3)",
-          duration: 0.3,
-        },
-        1,
-      )
-      .from(".text-side-body", {
-        y: 20,
-        opacity: 0,
-      });
+        });
 
-    // Kicker line draws in from the left - same treatment as every other
-    // "0X - Label" kicker across the site (What We Do, The Process), but
-    // this useGSAP call has no `scope`, so it must use a class unique to
-    // this section rather than the shared ".section-kicker-line" - a plain
-    // string selector like that would match ALL of them site-wide here,
-    // colliding with WhatWeDo/OurProcess's own (properly scoped) queries.
-    gsap.from(".hero-kicker-line", {
-      scaleX: 0,
-      transformOrigin: "left center",
-      duration: 0.9,
-      ease: "power3.out",
-      scrollTrigger: { trigger: "#about", start: "top 85%" },
-    });
-  });
+      // Kicker line draws in from the left - same treatment as every other
+      // "0X - Label" kicker across the site (What We Do, The Process).
+      gsap.from(".hero-kicker-line", {
+        scaleX: 0,
+        transformOrigin: "left center",
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: { trigger: "#about", start: "top 85%" },
+      });
+    },
+    { dependencies: [ready, isDesktop] },
+  );
 
   return (
     <Bounded
@@ -160,42 +140,26 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       data-slice-variation={slice.variation}
       className="hero opacity-0"
     >
-      <div className="grid">
-        <div className="hero-first-section relative grid h-screen place-items-center">
-          {/*
-            Desktop only: the two bottles cross diagonally over the "BEAUTY"
-            heading, then float apart/away as the user scrolls through this
-            one section (see the scoped ScrollTrigger in useGSAP above) -
-            this is what used to be the sticky, scroll-scrubbed 9-bottle
-            scene. Only the canvas is pinned, and only for this section's own
-            height, so nothing lingers or bleeds into the sections below it
-            the way the old full-slice-length sticky scene did.
-          */}
-          {isDesktop && (
-            // drei's View forces `position: relative` via inline style,
-            // which beats a Tailwind `absolute` class on the View itself -
-            // so the actual absolute positioning lives on this plain
-            // wrapper div instead, and the View just fills it with h-full/
-            // w-full (percentage sizing against this wrapper's now-real
-            // pixel dimensions).
-            <div className="pointer-events-none absolute inset-0 z-10 hidden lg:block">
-              <View className="hero-first-scene h-full w-full">
-                <CrossingBottles />
-                <Environment
-                  files="/hdr/lobby.hdr"
-                  environmentIntensity={1.2}
-                />
-                <directionalLight intensity={5} position={[0, 1, 1]} />
-              </View>
-            </div>
-          )}
+      {isDesktop && (
+        <View className="hero-scene pointer-events-none sticky top-0 z-50 -mt-[100vh] hidden h-screen w-screen lg:block">
+          <Scene />
+        </View>
+      )}
 
+      <div className="grid">
+        <div className="grid h-screen place-items-center">
           <div className="grid auto-rows-min place-items-center text-center">
             {/*
-              Mobile/tablet only: the desktop version above crowds/overlaps
-              on narrower canvases, so this is a small, self-contained,
-              non-scroll-tied pair instead (same pattern as
-              Carousel/ContactTeaser) that just floats in place.
+              Mobile/tablet only: the desktop hero-scene above is a sticky
+              full-bleed canvas whose 9 bottles are driven entirely by a
+              scroll-scrubbed GSAP timeline tuned for wide screens - the
+              positions crowd/overlap on narrower viewports (see the isDesktop
+              comment below) and the scroll-hijack style pin is heavy on
+              touch scrolling anyway. Rather than showing nothing here, this
+              is a small, self-contained, non-scroll-tied pair of bottles
+              (same pattern as Carousel/ContactTeaser) that just floats in
+              place - no position/rotation tween keyed to scroll progress.
+              Desktop is untouched: this block doesn't render there at all.
             */}
             {!isDesktop && (
               <View className="mb-4 aspect-[2/1] h-[26vh] max-h-56 w-full max-w-sm">
@@ -292,33 +256,12 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
 
           <div className="relative mx-auto w-full max-w-md">
-            {/*
-              No background/clipping here on purpose - a View's 3D content
-              is drawn on the single shared fixed canvas from ViewCanvas.tsx
-              (behind normal page content), not as real DOM children, so an
-              opaque container painted above it in the stacking order would
-              hide the bottles entirely rather than frame them. Every other
-              bottle cluster on this site (ContactTeaser, Carousel, the
-              mobile Hero pair) follows the same bare-View convention.
-            */}
-            <View className="aspect-[4/5] w-full">
-              <Center>
-                {WHO_WE_ARE_BOTTLES.map((bottle, i) => (
-                  <FloatingCan
-                    key={i}
-                    flavor={bottle.flavor}
-                    position={bottle.position}
-                    scale={0.95}
-                    floatIntensity={0.55}
-                    rotationIntensity={0.4}
-                    floatingRange={[-0.08, 0.08]}
-                    floatSpeed={bottle.floatSpeed}
-                  />
-                ))}
-              </Center>
-              <Environment files="/hdr/lobby.hdr" environmentIntensity={1.2} />
-              <directionalLight intensity={5} position={[0, 1, 1]} />
-            </View>
+            {/* Empty spacer - just holds the aspect ratio the badge/cards
+                below are positioned against. The sticky hero-scene canvas
+                above already keeps bottles visible through this whole
+                section as the user scrolls, so this column doesn't need
+                its own separate bottle group too. */}
+            <div className="aspect-[4/5] w-full" />
 
             <svg
               viewBox="0 0 200 200"
