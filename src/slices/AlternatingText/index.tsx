@@ -170,7 +170,7 @@ const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
         <WhyChooseUs />
       </Bounded>
 
-      <Bounded className="flex h-screen items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F5F3EE_16%,#F5F3EE_84%,#ffffff_100%)] text-[#2B302B]">
+      <Bounded className="flex h-screen items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F6F3EB_16%,#F6F3EB_84%,#ffffff_100%)] text-[#2B302B]">
         <OurProcess />
       </Bounded>
 

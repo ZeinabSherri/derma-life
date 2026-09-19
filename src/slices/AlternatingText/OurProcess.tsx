@@ -4,10 +4,15 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import clsx from "clsx";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+// Copy, structure and every measurement below (colors, font-sizes, grid
+// splits, hover treatment, the decorative circle's position/gradient, the
+// short breathing kicker line) are pulled directly from the reference
+// site's own compiled CSS/HTML for this section, not eyeballed from
+// screenshots - see ref.css/.process, .process-step, .section-number,
+// .cursor-* if this ever needs re-diffing against a reference update.
 const STEPS = [
   {
     title: "Order Samples + Determine Products",
@@ -22,35 +27,35 @@ const STEPS = [
   {
     title: "Design Your Label",
     text: "Create labels with our design team or your own designer.",
-    parallax: 0.048,
+    parallax: 0.049,
   },
   {
     title: "Consider Finishing Touches",
     text: "Complete your range with boxes, shrink-wrap, inserts, and more.",
-    parallax: 0.06,
+    parallax: 0.061,
   },
 ];
 
 export default function OurProcess() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLSpanElement>(null);
+  const kickerLineRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
-      // Kicker line draws in from the left, same treatment every section
-      // with this pattern (Who We Are / What We Do / The Process) shares.
-      gsap.from(".section-kicker-line", {
-        scaleX: 0,
+      // The reference's kicker line isn't a scroll-triggered draw-in - it's
+      // a short 42px rule that continuously "breathes" (scaleX 1<->1.8,
+      // opacity 1<->.4) on an infinite 3.4s loop the whole time it's on
+      // screen.
+      gsap.to(kickerLineRef.current, {
+        scaleX: 1.8,
+        opacity: 0.4,
+        duration: 1.7,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
         transformOrigin: "left center",
-        duration: 0.9,
-        ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
       });
 
-      // Intro block: fade + lift, matching the reference's .reveal timing
-      // (opacity/transform, .9s, cubic-bezier(.22,1,.36,1) - approximated
-      // with power3.out since no CustomEase plugin is registered here).
       gsap.from(".our-process-heading", {
         y: 35,
         opacity: 0,
@@ -59,8 +64,6 @@ export default function OurProcess() {
         scrollTrigger: { trigger: sectionRef.current, start: "top 75%" },
       });
 
-      // Each step: the reference's more dramatic card variant - a slight
-      // 3D tilt/lift settling into place, staggered.
       gsap.from(".our-process-row", {
         y: 55,
         z: -90,
@@ -90,108 +93,63 @@ export default function OurProcess() {
           },
         });
       });
-
-      // Reference's cursor-follow circle: a small ring that tracks the
-      // mouse while it's over the step list, fading in/out at the edges.
-      // Desktop/hover-capable only - there's no cursor to follow on touch.
-      const mm = gsap.matchMedia();
-      mm.add("(hover: hover)", () => {
-        const list = listRef.current;
-        const cursor = cursorRef.current;
-        if (!list || !cursor) return;
-
-        gsap.set(cursor, { xPercent: -50, yPercent: -50 });
-        const xTo = gsap.quickTo(cursor, "x", { duration: 0.4, ease: "power3" });
-        const yTo = gsap.quickTo(cursor, "y", { duration: 0.4, ease: "power3" });
-
-        const handleMove = (e: MouseEvent) => {
-          const rect = list.getBoundingClientRect();
-          xTo(e.clientX - rect.left);
-          yTo(e.clientY - rect.top);
-        };
-        const handleEnter = () =>
-          gsap.to(cursor, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" });
-        const handleLeave = () =>
-          gsap.to(cursor, { opacity: 0, scale: 0.7, duration: 0.3, ease: "power2.in" });
-
-        list.addEventListener("mousemove", handleMove);
-        list.addEventListener("mouseenter", handleEnter);
-        list.addEventListener("mouseleave", handleLeave);
-
-        return () => {
-          list.removeEventListener("mousemove", handleMove);
-          list.removeEventListener("mouseenter", handleEnter);
-          list.removeEventListener("mouseleave", handleLeave);
-        };
-      });
     },
     { scope: sectionRef },
   );
 
   return (
     <div ref={sectionRef} className="our-process relative w-full overflow-hidden py-6">
+      {/* Decorative circle: bottom-8%/left:-11vw, clamp(220px,31vw,520px),
+          radial white-to-mint gradient, forest-tinted 1px border. */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -left-48 top-16 hidden size-[30rem] rounded-full bg-[#6B8F71]/10 lg:block"
+        className="pointer-events-none absolute -left-[11vw] bottom-[8%] hidden aspect-square w-[clamp(220px,31vw,520px)] rounded-full border border-[#173F31]/[0.13] bg-[radial-gradient(circle_at_34%_28%,#ffffffc7,#dceadd3d_42%,transparent_67%)] shadow-[inset_24px_18px_70px_#ffffff5c,0_35px_90px_#173f3112] lg:block"
       />
 
-      <div className="relative flex items-center gap-4">
-        <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+      <div className="relative border-t border-[#17231D]/[0.16] pt-4">
+        <p className="flex items-center text-[0.66rem] font-bold uppercase tracking-[0.18em] text-[#17231D]">
           04 &mdash; The Process
+          <span
+            ref={kickerLineRef}
+            aria-hidden="true"
+            className="ml-4 inline-block h-px w-[42px] bg-current"
+          />
         </p>
-        <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
       </div>
 
-      <div className="our-process-heading relative mt-4 grid gap-2 lg:mt-6 lg:grid-cols-2 lg:items-end lg:gap-12">
+      <div className="our-process-heading relative mt-[clamp(2.5rem,6vw,4.5rem)] grid gap-2 lg:grid-cols-2 lg:items-start lg:gap-[7rem]">
         <div>
           <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
             Here&apos;s How To Get Started.
           </p>
-          <h2 className="mt-1 text-balance font-serif text-2xl font-bold leading-[1.05] text-[#2B302B] lg:mt-2 lg:text-6xl">
+          <h2 className="mt-1 text-balance font-serif text-[clamp(2rem,4.4vw,4.65rem)] font-bold leading-[1.05] text-[#17231D] lg:mt-2">
             Your vision, <em className="font-normal italic">made real.</em>
           </h2>
         </div>
-        <p className="hidden text-base font-normal text-[#2B302B]/80 sm:block lg:text-lg">
+        <p className="mt-2 max-w-[34rem] text-[0.98rem] font-normal leading-[1.5] text-[#637067] lg:mt-5 lg:text-[1.06rem] lg:leading-[1.8]">
           We collaborate with you to create a private label line that
           reflects your brand.
         </p>
       </div>
 
-      <div
-        ref={listRef}
-        className="relative mt-4 border-t border-[#2B302B]/10 lg:mt-6"
-      >
-        <span
-          ref={cursorRef}
-          aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 z-10 hidden size-9 items-center justify-center rounded-full border border-[#2B302B]/25 bg-white/40 opacity-0 backdrop-blur-sm lg:flex"
-        >
-          <span className="size-1.5 rounded-full bg-[#B9803A]" />
-        </span>
+      <div className="relative mt-8">
         {STEPS.map((step, i) => (
           <div
             key={step.title}
             data-parallax={step.parallax}
-            className="our-process-row group relative grid grid-cols-[auto,auto,1fr] items-center gap-x-2 gap-y-0.5 overflow-hidden border-b border-[#2B302B]/10 bg-[length:200%_100%] bg-[position:0%_0] bg-[linear-gradient(90deg,transparent,rgba(107,143,113,.12),transparent)] py-2 transition-[background-position,padding-left] duration-500 hover:bg-[position:100%_0] hover:pl-3 md:grid-cols-[auto,auto,1fr,1fr] md:gap-6 md:py-3"
+            className="our-process-row relative grid grid-cols-[12%,1fr] items-start gap-8 border-t border-[#17231D]/[0.16] bg-[linear-gradient(90deg,#dceadd00,#dceadd3d,#dceadd00)] bg-[length:200%_100%] bg-[position:0%_0] py-[1.3rem] transition-[padding,background-position,box-shadow] duration-500 hover:bg-[position:100%_0] hover:pl-6 hover:shadow-[0_24px_70px_#173f3112] lg:py-[2.3rem]"
           >
-            <span className="font-serif text-lg italic text-[#2B302B]/25 md:text-2xl">
+            <span className="font-serif text-[1.3rem] italic text-[#6B8F71]">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span
-              aria-hidden="true"
-              className={clsx(
-                "size-2.5 shrink-0 rounded-full transition-colors duration-300 md:size-3",
-                i === 0
-                  ? "bg-[#6B8F71]"
-                  : "bg-[#2B302B]/15 group-hover:bg-[#6B8F71]/60",
-              )}
-            />
-            <p className="text-sm font-bold text-[#2B302B] md:text-lg">
-              {step.title}
-            </p>
-            <p className="col-span-3 pl-9 text-xs text-[#2B302B]/70 md:col-span-1 md:pl-0 md:text-sm md:text-right">
-              {step.text}
-            </p>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-16">
+              <h3 className="text-[1.22rem] font-bold tracking-[-0.02em] text-[#17231D] lg:text-[1.5rem]">
+                {step.title}
+              </h3>
+              <p className="text-[0.84rem] leading-[1.45] text-[#667269] lg:text-[0.92rem] lg:leading-[1.65] lg:text-right">
+                {step.text}
+              </p>
+            </div>
           </div>
         ))}
       </div>

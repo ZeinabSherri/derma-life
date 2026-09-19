@@ -5,6 +5,7 @@ import "./app.css";
 import Header from "@/components/Header";
 import ViewCanvas from "@/components/ViewCanvas";
 import Footer from "@/components/Footer";
+import CustomCursor from "@/components/CustomCursor";
 
 // No custom web font - matching the reference site exactly, which uses
 // only system fonts (Helvetica Neue/Arial for body+headings, Georgia for
@@ -17,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="overflow-x-hidden bg-white">
+        <CustomCursor />
         <Header />
         <main>
           {children}
