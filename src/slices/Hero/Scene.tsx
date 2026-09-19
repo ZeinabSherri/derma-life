@@ -211,6 +211,15 @@ export default function Scene({}: Props) {
         floatSpeed={FLOAT_SPEED}
       />
 
+      {/* Environment-only lighting left the far side of every bottle
+          falling off to near-black/tan, since the HDR's own bright spot
+          only lights one side - a soft ambient fill (matching the
+          directional fill every other bottle scene on the site already
+          has) keeps the off-white body color reading as off-white all the
+          way around instead of just on the lit highlight. */}
+      <ambientLight intensity={1.4} />
+      <directionalLight intensity={2.5} position={[0, 1, 1]} />
+      <directionalLight intensity={1.2} position={[0, -1, -1]} />
       <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
     </group>
   );
