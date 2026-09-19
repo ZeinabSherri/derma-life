@@ -142,7 +142,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
           label="Previous Flavor"
         />
         {/* Can */}
-        <View className="aspect-square h-[70vmin] min-h-40">
+        <View className="aspect-square h-[34vh] max-h-72 min-h-32">
           <Center position={[0, 0, 0]}>
             <FloatingCan
               ref={sodaCanRef}
