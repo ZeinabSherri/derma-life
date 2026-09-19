@@ -7,7 +7,16 @@ import { View } from "@react-three/drei";
 import Scene from "./Scene";
 import { BlogTeaser } from "./BlogTeaser";
 import { ContactTeaser } from "./ContactTeaser";
+import WhatWeDo from "./WhatWeDo";
+import WhyChooseUs from "./WhyChooseUs";
+import OurProcess from "./OurProcess";
 import clsx from "clsx";
+
+// The old plain-stacked "Our Services / Who We Serve / Why Choose Us / How
+// It Works" sections below are hidden (not deleted) in favor of the
+// WhatWeDo/WhyChooseUs/OurProcess replicas - flip this back to true to
+// restore them.
+const SHOW_LEGACY_SERVICES = false;
 
 /**
  * Props for `AlternatingText`.
@@ -77,64 +86,87 @@ const TEXT_GROUP: TextItem[] = [
 const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
   return (
     <>
+      {SHOW_LEGACY_SERVICES && (
+        <Bounded
+          data-slice-type={slice.slice_type}
+          data-slice-variation={slice.variation}
+          className="alternating-text-container relative bg-white text-[#2B302B]"
+        >
+          <div>
+            <div className="relative z-[100] grid">
+              <View className="alternating-text-view absolute left-0 top-0 h-screen w-full">
+                <Scene />
+              </View>
+
+              {TEXT_GROUP.map((item, index) => (
+                <div
+                  key={item.heading}
+                  id={
+                    item.heading === "Our Services" ? "services" : undefined
+                  }
+                  className="alternating-section grid min-h-screen scroll-mt-20 place-items-center gap-x-12 py-16 lg:grid-cols-2"
+                >
+                  <div
+                    className={clsx(
+                      index % 2 === 0 ? "col-start-1" : "lg:col-start-2",
+
+                      "rounded-lg p-4 backdrop-blur-lg max-lg:bg-white/30",
+                    )}
+                  >
+                    <h2 className="text-balance font-serif text-6xl font-bold">
+                      {item.heading}
+                    </h2>
+                    {item.items ? (
+                      <div className="mt-4 space-y-4 text-xl">
+                        {item.items.map((service) => (
+                          <p key={service.label}>
+                            <span className="font-bold">
+                              {service.label}:{" "}
+                            </span>
+                            {service.text}
+                          </p>
+                        ))}
+                      </div>
+                    ) : item.steps ? (
+                      <ol className="mt-4 space-y-4 text-xl">
+                        {item.steps.map((step, stepIndex) => (
+                          <li key={step} className="flex items-start gap-4">
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#6B8F71] text-base font-bold text-white">
+                              {stepIndex + 1}
+                            </span>
+                            <span className="pt-0.5">{step}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <div className="mt-4 text-xl">
+                        <p>{item.body}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Bounded>
+      )}
+
       <Bounded
         data-slice-type={slice.slice_type}
         data-slice-variation={slice.variation}
-        className="alternating-text-container relative bg-white text-[#2B302B]"
+        className="bg-[#F5F3EE] text-[#2B302B]"
       >
-        <div>
-          <div className="relative z-[100] grid">
-            <View className="alternating-text-view absolute left-0 top-0 h-screen w-full">
-              <Scene />
-            </View>
-
-            {TEXT_GROUP.map((item, index) => (
-              <div
-                key={item.heading}
-                id={item.heading === "Our Services" ? "services" : undefined}
-                className="alternating-section grid min-h-screen scroll-mt-20 place-items-center gap-x-12 py-16 lg:grid-cols-2"
-              >
-                <div
-                  className={clsx(
-                    index % 2 === 0 ? "col-start-1" : "lg:col-start-2",
-
-                    "rounded-lg p-4 backdrop-blur-lg max-lg:bg-white/30",
-                  )}
-                >
-                  <h2 className="text-balance font-serif text-6xl font-bold">
-                    {item.heading}
-                  </h2>
-                  {item.items ? (
-                    <div className="mt-4 space-y-4 text-xl">
-                      {item.items.map((service) => (
-                        <p key={service.label}>
-                          <span className="font-bold">{service.label}: </span>
-                          {service.text}
-                        </p>
-                      ))}
-                    </div>
-                  ) : item.steps ? (
-                    <ol className="mt-4 space-y-4 text-xl">
-                      {item.steps.map((step, stepIndex) => (
-                        <li key={step} className="flex items-start gap-4">
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#6B8F71] text-base font-bold text-white">
-                            {stepIndex + 1}
-                          </span>
-                          <span className="pt-0.5">{step}</span>
-                        </li>
-                      ))}
-                    </ol>
-                  ) : (
-                    <div className="mt-4 text-xl">
-                      <p>{item.body}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <WhatWeDo />
       </Bounded>
+
+      <Bounded className="bg-white text-[#2B302B]">
+        <WhyChooseUs />
+      </Bounded>
+
+      <Bounded className="bg-[#F5F3EE] text-[#2B302B]">
+        <OurProcess />
+      </Bounded>
+
       <BlogTeaser />
       <ContactTeaser />
     </>
