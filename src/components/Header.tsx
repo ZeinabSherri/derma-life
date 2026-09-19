@@ -19,11 +19,16 @@ const NAV_LINKS = [
 // nav element grouping the section links + Blog + the Contact Us pill
 // together - so the logo sits isolated on the far left instead of the nav
 // links floating toward the header's center.
+//
+// Absolutely positioned over the hero (not sticky/in-flow, and no bg/border)
+// so it reads as part of the hero section instead of a separate bar sitting
+// on top of it - the hero's own content is vertically centered in its
+// h-screen block, which leaves clear space at the top for this to overlay.
 export default function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-[#2B302B]/10 bg-white">
+    <header className="absolute inset-x-0 top-0 z-[100]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
         <a href="/" className="shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -39,9 +44,13 @@ export default function Header() {
             <a
               key={link.label}
               href={link.href}
-              className="transition-colors duration-150 hover:text-[#6B8F71]"
+              className="group relative inline-block py-1 transition-colors duration-150 hover:text-[#6B8F71]"
             >
               {link.label}
+              <span
+                aria-hidden="true"
+                className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-current transition-transform duration-300 ease-out group-hover:scale-x-100"
+              />
             </a>
           ))}
           <a
