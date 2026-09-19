@@ -10,12 +10,26 @@ import { Center, Environment, View } from "@react-three/drei";
 import { Bounded } from "@/components/Bounded";
 import { TextSplitter } from "@/components/TextSplitter";
 import FloatingCan from "@/components/FloatingCan";
+import { SodaCanProps } from "@/components/SodaCan";
 import CategoryTicker from "@/components/CategoryTicker";
 import Scene from "./Scene";
 import { useStore } from "@/hooks/useStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
+
+// A lineup rather than a loose cluster - small, near-even x offsets and a
+// shared y/z baseline so the three bottles read as standing "beside each
+// other" in the Who We Are image card instead of overlapping at odd angles.
+const WHO_WE_ARE_BOTTLES: {
+  flavor: SodaCanProps["flavor"];
+  position: [number, number, number];
+  floatSpeed: number;
+}[] = [
+  { flavor: "blackCherry", position: [-0.85, -0.05, 0], floatSpeed: 1.2 },
+  { flavor: "lemonLime", position: [0, 0.1, 0.15], floatSpeed: 1.5 },
+  { flavor: "grape", position: [0.85, -0.05, 0], floatSpeed: 1.3 },
+];
 
 /**
  * Props for `Hero`.
@@ -214,7 +228,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 <TextSplitter text="beauty." />
               </span>
             </h2>
-            <div className="text-side-body mt-6 max-w-xl space-y-4 text-lg font-normal text-[#2B302B]/90">
+            <div className="text-side-body mt-6 max-w-xl space-y-4 text-lg font-normal text-[#2B302B]">
               <p>
                 DermaLife is dedicated to crafting world-class skincare,
                 haircare, and body care products for renowned brands
@@ -241,14 +255,33 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
 
           <div className="relative mx-auto w-full max-w-md">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] rounded-tr-[7rem]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/blog/trending-ingredients.jpg"
-                alt="DermaLife formulation ingredients"
-                className="h-full w-full object-cover"
-              />
-            </div>
+            {/*
+              No background/clipping here on purpose - a View's 3D content
+              is drawn on the single shared fixed canvas from ViewCanvas.tsx
+              (behind normal page content), not as real DOM children, so an
+              opaque container painted above it in the stacking order would
+              hide the bottles entirely rather than frame them. Every other
+              bottle cluster on this site (ContactTeaser, Carousel, the
+              mobile Hero pair) follows the same bare-View convention.
+            */}
+            <View className="aspect-[4/5] w-full">
+              <Center>
+                {WHO_WE_ARE_BOTTLES.map((bottle, i) => (
+                  <FloatingCan
+                    key={i}
+                    flavor={bottle.flavor}
+                    position={bottle.position}
+                    scale={1.5}
+                    floatIntensity={0.6}
+                    rotationIntensity={0.4}
+                    floatingRange={[-0.08, 0.08]}
+                    floatSpeed={bottle.floatSpeed}
+                  />
+                ))}
+              </Center>
+              <Environment files="/hdr/lobby.hdr" environmentIntensity={1.2} />
+              <directionalLight intensity={5} position={[0, 1, 1]} />
+            </View>
 
             <svg
               viewBox="0 0 200 200"
