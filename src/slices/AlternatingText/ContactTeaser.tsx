@@ -21,21 +21,25 @@ type ClusterBottle = {
 
 // Small loose clusters instead of one bottle per side - each entry gets its
 // own float speed so the group bobs asynchronously rather than in lockstep,
-// which reads as much more clearly "alive" than a single bottle did.
+// which reads as much more clearly "alive" than a single bottle did. Only
+// the two flavors used site-wide (blackCherry/strawberryLemonade) - this
+// used to pull in grape/lemonLime/watermelon too, which meant these
+// bottles kept showing old colors while every other bottle on the site was
+// updated to just these two.
 const LEFT_CLUSTER: ClusterBottle[] = [
   { flavor: "blackCherry", position: [-0.4, 0.15, 0], floatSpeed: 1.4 },
-  { flavor: "grape", position: [0.3, -0.2, -0.35], floatSpeed: 1.9 },
-  { flavor: "lemonLime", position: [0, 0.42, 0.3], floatSpeed: 1.1 },
+  { flavor: "strawberryLemonade", position: [0.3, -0.2, -0.35], floatSpeed: 1.9 },
+  { flavor: "blackCherry", position: [0, 0.42, 0.3], floatSpeed: 1.1 },
 ];
 
 const RIGHT_CLUSTER: ClusterBottle[] = [
-  { flavor: "watermelon", position: [0.4, 0.1, 0], floatSpeed: 1.3 },
+  { flavor: "strawberryLemonade", position: [0.4, 0.1, 0], floatSpeed: 1.3 },
   {
-    flavor: "strawberryLemonade",
+    flavor: "blackCherry",
     position: [-0.3, -0.25, -0.35],
     floatSpeed: 1.7,
   },
-  { flavor: "blackCherry", position: [0, 0.4, 0.3], floatSpeed: 1.0 },
+  { flavor: "strawberryLemonade", position: [0, 0.4, 0.3], floatSpeed: 1.0 },
 ];
 
 /**
