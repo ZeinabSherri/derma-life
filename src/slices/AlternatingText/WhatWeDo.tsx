@@ -4,7 +4,6 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import clsx from "clsx";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -158,39 +157,20 @@ export default function WhatWeDo() {
       </div>
 
       <div className="mt-12 grid gap-px overflow-hidden rounded-2xl bg-[#2B302B]/10 sm:grid-cols-2 lg:grid-cols-4">
-        {SERVICES.map((service, i) => (
+        {SERVICES.map((service) => (
           <div
             key={service.number}
-            className={clsx(
-              "what-we-do-card group flex min-h-72 flex-col justify-between p-8 transition-colors duration-300",
-              i === 0
-                ? "bg-[#1F3A2E] text-white"
-                : "bg-[#F5F3EE] text-[#2B302B] hover:bg-[#1F3A2E] hover:text-white",
-            )}
+            className="what-we-do-card group flex min-h-72 flex-col justify-between bg-[#F5F3EE] p-8 text-[#2B302B] transition-colors duration-300 hover:bg-[#1F3A2E] hover:text-white"
           >
             <div className="flex items-center justify-between">
-              <span
-                className={clsx(
-                  "text-xs font-bold uppercase tracking-wide transition-colors duration-300",
-                  i === 0
-                    ? "text-white/60"
-                    : "text-[#2B302B]/50 group-hover:text-white/60",
-                )}
-              >
+              <span className="text-xs font-bold uppercase tracking-wide text-[#2B302B]/50 transition-colors duration-300 group-hover:text-white/60">
                 {service.number}
               </span>
               {ICONS[service.icon]}
             </div>
             <div className="mt-8">
               <h3 className="text-xl font-bold">{service.title}</h3>
-              <p
-                className={clsx(
-                  "mt-3 text-sm transition-colors duration-300",
-                  i === 0
-                    ? "text-white/80"
-                    : "text-[#2B302B]/70 group-hover:text-white/80",
-                )}
-              >
+              <p className="mt-3 text-sm text-[#2B302B]/70 transition-colors duration-300 group-hover:text-white/80">
                 {service.text}
               </p>
               <span aria-hidden="true" className="mt-6 inline-block text-lg">
