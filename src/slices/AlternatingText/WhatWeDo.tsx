@@ -162,17 +162,19 @@ export default function WhatWeDo() {
           <div
             key={service.number}
             className={clsx(
-              "what-we-do-card flex min-h-72 flex-col justify-between p-8",
+              "what-we-do-card group flex min-h-72 flex-col justify-between p-8 transition-colors duration-300",
               i === 0
                 ? "bg-[#1F3A2E] text-white"
-                : "bg-[#F5F3EE] text-[#2B302B]",
+                : "bg-[#F5F3EE] text-[#2B302B] hover:bg-[#1F3A2E] hover:text-white",
             )}
           >
             <div className="flex items-center justify-between">
               <span
                 className={clsx(
-                  "text-xs font-bold uppercase tracking-wide",
-                  i === 0 ? "text-white/60" : "text-[#2B302B]/50",
+                  "text-xs font-bold uppercase tracking-wide transition-colors duration-300",
+                  i === 0
+                    ? "text-white/60"
+                    : "text-[#2B302B]/50 group-hover:text-white/60",
                 )}
               >
                 {service.number}
@@ -183,8 +185,10 @@ export default function WhatWeDo() {
               <h3 className="text-xl font-bold">{service.title}</h3>
               <p
                 className={clsx(
-                  "mt-3 text-sm",
-                  i === 0 ? "text-white/80" : "text-[#2B302B]/70",
+                  "mt-3 text-sm transition-colors duration-300",
+                  i === 0
+                    ? "text-white/80"
+                    : "text-[#2B302B]/70 group-hover:text-white/80",
                 )}
               >
                 {service.text}
