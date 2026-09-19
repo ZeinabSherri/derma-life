@@ -929,10 +929,6 @@ export default function WhyChooseUs() {
 
       <section className="wcu-section" ref={sectionRef}>
         <div className="wcu-grain" />
-        <div className="wcu-amb wcu-amb-1" />
-        <div className="wcu-amb wcu-amb-2" />
-        <div className="wcu-amb wcu-amb-3" />
-        <div className="wcu-ring" />
         <span className="wcu-spark" ref={sparkRef} />
 
         <div className="wcu-wrap">

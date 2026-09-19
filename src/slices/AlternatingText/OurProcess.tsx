@@ -98,14 +98,7 @@ export default function OurProcess() {
   );
 
   return (
-    <div ref={sectionRef} className="our-process relative w-full overflow-hidden py-6">
-      {/* Decorative circle: bottom-8%/left:-11vw, clamp(220px,31vw,520px),
-          radial white-to-mint gradient, forest-tinted 1px border. */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -left-[11vw] bottom-[8%] hidden aspect-square w-[clamp(220px,31vw,520px)] rounded-full border border-[#173F31]/[0.13] bg-[radial-gradient(circle_at_34%_28%,#ffffffc7,#dceadd3d_42%,transparent_67%)] shadow-[inset_24px_18px_70px_#ffffff5c,0_35px_90px_#173f3112] lg:block"
-      />
-
+    <div ref={sectionRef} className="our-process relative w-full overflow-hidden py-4">
       <div className="relative border-t border-[#17231D]/[0.16] pt-4">
         <p className="flex items-center text-[0.66rem] font-bold uppercase tracking-[0.18em] text-[#17231D]">
           04 &mdash; The Process
@@ -117,27 +110,27 @@ export default function OurProcess() {
         </p>
       </div>
 
-      <div className="our-process-heading relative mt-[clamp(2.5rem,6vw,4.5rem)] grid gap-2 lg:grid-cols-2 lg:items-start lg:gap-[7rem]">
+      <div className="our-process-heading relative mt-[clamp(1.5rem,4vw,2.5rem)] grid gap-2 lg:grid-cols-2 lg:items-start lg:gap-[7rem]">
         <div>
           <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
             Here&apos;s How To Get Started.
           </p>
-          <h2 className="mt-1 text-balance font-serif text-[clamp(2rem,4.4vw,4.65rem)] font-bold leading-[1.05] text-[#17231D] lg:mt-2">
+          <h2 className="mt-1 text-balance font-serif text-[clamp(1.75rem,3.6vw,3.5rem)] font-bold leading-[1.05] text-[#17231D] lg:mt-2">
             Your vision, <em className="font-normal italic">made real.</em>
           </h2>
         </div>
-        <p className="mt-2 max-w-[34rem] text-[0.98rem] font-normal leading-[1.5] text-[#637067] lg:mt-5 lg:text-[1.06rem] lg:leading-[1.8]">
+        <p className="mt-2 max-w-[34rem] text-[0.98rem] font-normal leading-[1.5] text-[#637067] lg:mt-3 lg:text-[1.06rem] lg:leading-[1.6]">
           We collaborate with you to create a private label line that
           reflects your brand.
         </p>
       </div>
 
-      <div className="relative mt-8">
+      <div className="relative mt-4 lg:mt-6">
         {STEPS.map((step, i) => (
           <div
             key={step.title}
             data-parallax={step.parallax}
-            className="our-process-row relative grid grid-cols-[12%,1fr] items-start gap-8 border-t border-[#17231D]/[0.16] bg-[linear-gradient(90deg,#dceadd00,#dceadd3d,#dceadd00)] bg-[length:200%_100%] bg-[position:0%_0] py-[1.3rem] transition-[padding,background-position,box-shadow] duration-500 hover:bg-[position:100%_0] hover:pl-6 hover:shadow-[0_24px_70px_#173f3112] lg:py-[2.3rem]"
+            className="our-process-row relative grid grid-cols-[12%,1fr] items-start gap-8 border-t border-[#17231D]/[0.16] bg-[linear-gradient(90deg,#dceadd00,#dceadd3d,#dceadd00)] bg-[length:200%_100%] bg-[position:0%_0] py-[1.1rem] transition-[padding,background-position,box-shadow] duration-500 hover:bg-[position:100%_0] hover:pl-6 hover:shadow-[0_24px_70px_#173f3112] lg:py-[1.5rem]"
           >
             <span className="font-serif text-[1.3rem] italic text-[#6B8F71]">
               {String(i + 1).padStart(2, "0")}
