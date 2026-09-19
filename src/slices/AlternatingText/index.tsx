@@ -166,7 +166,7 @@ const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
         <WhatWeDo />
       </Bounded>
 
-      <Bounded className="overflow-hidden bg-white text-[#2B302B]">
+      <Bounded className="overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#FBFAF8_16%,#FBFAF8_84%,#ffffff_100%)] text-[#2B302B]">
         <WhyChooseUs />
       </Bounded>
 

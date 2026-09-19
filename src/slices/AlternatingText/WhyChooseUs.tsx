@@ -1145,7 +1145,7 @@ const WCU_CSS = `
   --mono:"SFMono-Regular",Menlo,Consolas,monospace;
   --e:cubic-bezier(.16,1,.3,1);
   --back:cubic-bezier(.2,1.25,.3,1);
-  background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
 }
 .wcu *{box-sizing:border-box}
 .wcu-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}

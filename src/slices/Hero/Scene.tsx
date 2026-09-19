@@ -99,36 +99,36 @@ export default function Scene({}: Props) {
       // Rotate can group
       .to(groupRef.current.rotation, { y: Math.PI * 2 })
 
-      // Final layout: one tight, evenly-spaced stack - each bottle sits
-      // right up against its neighbor (no gaps) instead of scattered
-      // around to "fill" open space. Small alternating y/z keeps it
-      // reading as a slightly overlapping pile rather than a flat line.
-      .to(can1Ref.current.position, { x: -1.2, y: 0.12, z: -1.15 }, 0)
-      .to(can1Ref.current.rotation, { z: 0.12 }, 0)
+      // Final layout: still one tight cluster (no gaps between neighbors),
+      // but each bottle's y/z/rotation is its own irregular offset instead
+      // of a mechanical alternating up/down pattern - reads as bottles that
+      // landed beside each other naturally rather than a rigid zigzag.
+      .to(can1Ref.current.position, { x: -1.25, y: 0.08, z: -1.1 }, 0)
+      .to(can1Ref.current.rotation, { z: 0.15 }, 0)
 
-      .to(can2Ref.current.position, { x: -0.9, y: -0.1, z: -1 }, 0)
-      .to(can2Ref.current.rotation, { z: -0.08 }, 0)
+      .to(can2Ref.current.position, { x: -0.95, y: -0.18, z: -1.3 }, 0)
+      .to(can2Ref.current.rotation, { z: -0.22 }, 0)
 
-      .to(can3Ref.current.position, { x: -0.6, y: 0.12, z: -1.15 }, 0)
-      .to(can3Ref.current.rotation, { z: 0.1 }, 0)
+      .to(can3Ref.current.position, { x: -0.68, y: 0.2, z: -0.95 }, 0)
+      .to(can3Ref.current.rotation, { z: 0.08 }, 0)
 
-      .to(can4Ref.current.position, { x: -0.3, y: -0.1, z: -1 }, 0)
+      .to(can4Ref.current.position, { x: -0.3, y: -0.05, z: -1.25 }, 0)
       .to(can4Ref.current.rotation, { z: -0.1 }, 0)
 
-      .to(can5Ref.current.position, { x: 0, y: 0.12, z: -1.15 }, 0)
-      .to(can5Ref.current.rotation, { z: 0.08 }, 0)
+      .to(can5Ref.current.position, { x: 0.05, y: 0.15, z: -1 }, 0)
+      .to(can5Ref.current.rotation, { z: 0.2 }, 0)
 
-      .to(can6Ref.current.position, { x: 0.3, y: -0.1, z: -1 }, 0)
-      .to(can6Ref.current.rotation, { z: -0.12 }, 0)
+      .to(can6Ref.current.position, { x: 0.35, y: -0.2, z: -1.3 }, 0)
+      .to(can6Ref.current.rotation, { z: -0.15 }, 0)
 
-      .to(can7Ref.current.position, { x: 0.6, y: 0.12, z: -1.15 }, 0)
+      .to(can7Ref.current.position, { x: 0.6, y: 0.1, z: -1.05 }, 0)
       .to(can7Ref.current.rotation, { z: 0.1 }, 0)
 
-      .to(can8Ref.current.position, { x: 0.9, y: -0.1, z: -1 }, 0)
+      .to(can8Ref.current.position, { x: 0.92, y: -0.12, z: -1.2 }, 0)
       .to(can8Ref.current.rotation, { z: -0.08 }, 0)
 
-      .to(can9Ref.current.position, { x: 1.2, y: 0.12, z: -1.15 }, 0)
-      .to(can9Ref.current.rotation, { z: 0.12 }, 0)
+      .to(can9Ref.current.position, { x: 1.3, y: 0.18, z: -1 }, 0)
+      .to(can9Ref.current.rotation, { z: 0.18 }, 0)
       .to(
         groupRef.current.position,
         { x: 1, y: 0.15, duration: 3, ease: "sine.inOut" },
