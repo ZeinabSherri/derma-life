@@ -32,19 +32,6 @@ const MOBILE_FIRST_SECTION_BOTTLES: {
   { flavor: "strawberryLemonade", position: [0.85, 0, 0], floatSpeed: 1.7 },
 ];
 
-// A lineup rather than a loose cluster - small, near-even x offsets and a
-// shared y/z baseline so the three bottles read as standing "beside each
-// other" in the Who We Are image card instead of overlapping at odd angles.
-const WHO_WE_ARE_BOTTLES: {
-  flavor: SodaCanProps["flavor"];
-  position: [number, number, number];
-  floatSpeed: number;
-}[] = [
-  { flavor: "blackCherry", position: [-0.85, -0.05, 0], floatSpeed: 1.2 },
-  { flavor: "lemonLime", position: [0, 0.1, 0.15], floatSpeed: 1.5 },
-  { flavor: "grape", position: [0.85, -0.05, 0], floatSpeed: 1.3 },
-];
-
 /**
  * Props for `Hero`.
  */
@@ -272,33 +259,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
 
           <div className="relative mx-auto w-full max-w-md">
-            {/*
-              No background/clipping here on purpose - a View's 3D content
-              is drawn on the single shared fixed canvas from ViewCanvas.tsx
-              (behind normal page content), not as real DOM children, so an
-              opaque container painted above it in the stacking order would
-              hide the bottles entirely rather than frame them. Every other
-              bottle cluster on this site (ContactTeaser, Carousel, the
-              mobile Hero pair) follows the same bare-View convention.
-            */}
-            <View className="aspect-[4/5] w-full">
-              <Center>
-                {WHO_WE_ARE_BOTTLES.map((bottle, i) => (
-                  <FloatingCan
-                    key={i}
-                    flavor={bottle.flavor}
-                    position={bottle.position}
-                    scale={1.5}
-                    floatIntensity={0.6}
-                    rotationIntensity={0.4}
-                    floatingRange={[-0.08, 0.08]}
-                    floatSpeed={bottle.floatSpeed}
-                  />
-                ))}
-              </Center>
-              <Environment files="/hdr/lobby.hdr" environmentIntensity={1.2} />
-              <directionalLight intensity={5} position={[0, 1, 1]} />
-            </View>
+            {/* Empty spacer - just holds the aspect ratio the badge/cards
+                below are positioned against; no bottles in this section
+                anymore. */}
+            <div className="aspect-[4/5] w-full" />
 
             <svg
               viewBox="0 0 200 200"
