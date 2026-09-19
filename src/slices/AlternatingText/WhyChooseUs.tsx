@@ -1163,7 +1163,7 @@ const WCU_CSS = `
 @keyframes wcu-spin{to{transform:rotate(360deg)}}
 
 .wcu-visual{position:relative;perspective:1300px}
-.wcu-frame{position:relative;aspect-ratio:1/1;max-height:min(440px,52vh);border-radius:12px;overflow:hidden;background:var(--surface);
+.wcu-frame{position:relative;aspect-ratio:1/1;max-height:min(500px,58vh);max-width:min(500px,58vh);margin:0 auto;border-radius:12px;overflow:hidden;background:var(--surface);
   box-shadow:0 1px 2px rgba(0,0,0,.05),0 22px 48px rgba(28,38,33,.08);
   clip-path:circle(0% at 50% 50%);transition:transform .5s var(--e)}
 .wcu-layer{position:absolute;inset:0;overflow:hidden}
