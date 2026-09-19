@@ -33,6 +33,8 @@ const STEPS = [
 
 export default function OurProcess() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
@@ -88,6 +90,40 @@ export default function OurProcess() {
           },
         });
       });
+
+      // Reference's cursor-follow circle: a small ring that tracks the
+      // mouse while it's over the step list, fading in/out at the edges.
+      // Desktop/hover-capable only - there's no cursor to follow on touch.
+      const mm = gsap.matchMedia();
+      mm.add("(hover: hover)", () => {
+        const list = listRef.current;
+        const cursor = cursorRef.current;
+        if (!list || !cursor) return;
+
+        gsap.set(cursor, { xPercent: -50, yPercent: -50 });
+        const xTo = gsap.quickTo(cursor, "x", { duration: 0.4, ease: "power3" });
+        const yTo = gsap.quickTo(cursor, "y", { duration: 0.4, ease: "power3" });
+
+        const handleMove = (e: MouseEvent) => {
+          const rect = list.getBoundingClientRect();
+          xTo(e.clientX - rect.left);
+          yTo(e.clientY - rect.top);
+        };
+        const handleEnter = () =>
+          gsap.to(cursor, { opacity: 1, scale: 1, duration: 0.35, ease: "power2.out" });
+        const handleLeave = () =>
+          gsap.to(cursor, { opacity: 0, scale: 0.7, duration: 0.3, ease: "power2.in" });
+
+        list.addEventListener("mousemove", handleMove);
+        list.addEventListener("mouseenter", handleEnter);
+        list.addEventListener("mouseleave", handleLeave);
+
+        return () => {
+          list.removeEventListener("mousemove", handleMove);
+          list.removeEventListener("mouseenter", handleEnter);
+          list.removeEventListener("mouseleave", handleLeave);
+        };
+      });
     },
     { scope: sectionRef },
   );
@@ -96,7 +132,7 @@ export default function OurProcess() {
     <div ref={sectionRef} className="our-process relative w-full overflow-hidden py-6">
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute -left-32 bottom-0 hidden size-96 rounded-full bg-[#6B8F71]/10 lg:block"
+        className="pointer-events-none absolute -left-48 top-16 hidden size-[30rem] rounded-full bg-[#6B8F71]/10 lg:block"
       />
 
       <div className="relative flex items-center gap-4">
@@ -121,7 +157,17 @@ export default function OurProcess() {
         </p>
       </div>
 
-      <div className="relative mt-4 border-t border-[#2B302B]/10 lg:mt-6">
+      <div
+        ref={listRef}
+        className="relative mt-4 border-t border-[#2B302B]/10 lg:mt-6"
+      >
+        <span
+          ref={cursorRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-10 hidden size-9 items-center justify-center rounded-full border border-[#2B302B]/25 bg-white/40 opacity-0 backdrop-blur-sm lg:flex"
+        >
+          <span className="size-1.5 rounded-full bg-[#B9803A]" />
+        </span>
         {STEPS.map((step, i) => (
           <div
             key={step.title}
