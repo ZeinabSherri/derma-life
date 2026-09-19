@@ -12,16 +12,18 @@ import { TextSplitter } from "@/components/TextSplitter";
 import FloatingCan from "@/components/FloatingCan";
 import { SodaCanProps } from "@/components/SodaCan";
 import CategoryTicker from "@/components/CategoryTicker";
+import CrossingBottles from "./CrossingBottles";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-// Replaces the old sticky, scroll-scrubbed 9-bottle scene, which stayed
-// pinned for the whole Hero slice's scroll range and bled through every
-// section below it. This is just the original mobile/tablet pair's pattern
-// extended to every breakpoint - close, near-even x offsets so the bottles
-// stand beside each other, with no bottle on the left (kept clear of the
-// centered hero text instead of crossing behind it).
-const FIRST_SECTION_BOTTLES: {
+// Mobile/tablet-only: a small, non-scroll-tied pair that just floats in
+// place (same pattern as Carousel/ContactTeaser). Desktop gets the bigger
+// crossing-over-the-text pair below instead, driven by its own scoped
+// scroll animation - kept separate because that dramatic large-scale
+// version crowds/overlaps on narrower canvases (less horizontal 3D
+// world-space for the same vertical FOV below ~1024px).
+const MOBILE_FIRST_SECTION_BOTTLES: {
   flavor: SodaCanProps["flavor"];
   position: [number, number, number];
   floatSpeed: number;
@@ -52,6 +54,12 @@ export type HeroProps = SliceComponentProps<Content.HeroSlice>;
  * Component for "Hero" Slices.
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
+
+  // isDesktop isn't referenced in here (it only gates which JSX renders
+  // below) - no dependency array, so this doesn't re-run when it settles
+  // from its SSR-fallback default shortly after mount, which would replay
+  // the intro reveal mid-way through and leave elements looking half-faded.
   useGSAP(() => {
     const introTl = gsap.timeline();
 
@@ -133,35 +141,64 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       className="hero opacity-0"
     >
       <div className="grid">
-        <div className="grid h-screen place-items-center">
+        <div className="hero-first-section relative grid h-screen place-items-center">
+          {/*
+            Desktop only: the two bottles cross diagonally over the "BEAUTY"
+            heading, then float apart/away as the user scrolls through this
+            one section (see the scoped ScrollTrigger in useGSAP above) -
+            this is what used to be the sticky, scroll-scrubbed 9-bottle
+            scene. Only the canvas is pinned, and only for this section's own
+            height, so nothing lingers or bleeds into the sections below it
+            the way the old full-slice-length sticky scene did.
+          */}
+          {isDesktop && (
+            // drei's View forces `position: relative` via inline style,
+            // which beats a Tailwind `absolute` class on the View itself -
+            // so the actual absolute positioning lives on this plain
+            // wrapper div instead, and the View just fills it with h-full/
+            // w-full (percentage sizing against this wrapper's now-real
+            // pixel dimensions).
+            <div className="pointer-events-none absolute inset-0 z-10 hidden lg:block">
+              <View className="hero-first-scene h-full w-full">
+                <CrossingBottles />
+                <Environment
+                  files="/hdr/lobby.hdr"
+                  environmentIntensity={1.2}
+                />
+                <directionalLight intensity={5} position={[0, 1, 1]} />
+              </View>
+            </div>
+          )}
+
           <div className="grid auto-rows-min place-items-center text-center">
             {/*
-              No more sticky full-bleed scroll-scrubbed scene - that canvas
-              stayed pinned for the entire Hero slice's scroll range, so its
-              bottles kept bleeding through every section below (Who We
-              Are's text and its own bottle group included). This is a
-              small, self-contained, non-scroll-tied group instead (same
-              pattern as Carousel/ContactTeaser) that just floats in place
-              on every breakpoint - no position/rotation tween keyed to
-              scroll progress, and nothing rendered outside this one block.
+              Mobile/tablet only: the desktop version above crowds/overlaps
+              on narrower canvases, so this is a small, self-contained,
+              non-scroll-tied pair instead (same pattern as
+              Carousel/ContactTeaser) that just floats in place.
             */}
-            <View className="mb-4 aspect-[2/1] h-[26vh] max-h-56 w-full max-w-sm">
-              <Center>
-                {FIRST_SECTION_BOTTLES.map((bottle, i) => (
-                  <FloatingCan
-                    key={i}
-                    flavor={bottle.flavor}
-                    position={bottle.position}
-                    scale={1.1}
-                    floatIntensity={1.1}
-                    rotationIntensity={0.8}
-                    floatSpeed={bottle.floatSpeed}
-                  />
-                ))}
-              </Center>
-              <Environment files="/hdr/lobby.hdr" environmentIntensity={1.2} />
-              <directionalLight intensity={5} position={[0, 1, 1]} />
-            </View>
+            {!isDesktop && (
+              <View className="mb-4 aspect-[2/1] h-[26vh] max-h-56 w-full max-w-sm">
+                <Center>
+                  {MOBILE_FIRST_SECTION_BOTTLES.map((bottle, i) => (
+                    <FloatingCan
+                      key={i}
+                      flavor={bottle.flavor}
+                      position={bottle.position}
+                      scale={1.1}
+                      floatIntensity={1.1}
+                      rotationIntensity={0.8}
+                      floatSpeed={bottle.floatSpeed}
+                    />
+                  ))}
+                </Center>
+                <Environment
+                  files="/hdr/lobby.hdr"
+                  environmentIntensity={1.2}
+                />
+                <directionalLight intensity={5} position={[0, 1, 1]} />
+              </View>
+            )}
             <p className="hero-eyebrow font-sans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
               Innovation Skin Technology
             </p>
