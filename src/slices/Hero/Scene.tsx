@@ -24,6 +24,8 @@ export default function Scene({}: Props) {
   const can5Ref = useRef<Group>(null);
   const can6Ref = useRef<Group>(null);
   const can7Ref = useRef<Group>(null);
+  const can8Ref = useRef<Group>(null);
+  const can9Ref = useRef<Group>(null);
 
   const can1GroupRef = useRef<Group>(null);
   const can2GroupRef = useRef<Group>(null);
@@ -41,6 +43,8 @@ export default function Scene({}: Props) {
       !can5Ref.current ||
       !can6Ref.current ||
       !can7Ref.current ||
+      !can8Ref.current ||
+      !can9Ref.current ||
       !can1GroupRef.current ||
       !can2GroupRef.current ||
       !groupRef.current
@@ -61,6 +65,8 @@ export default function Scene({}: Props) {
     gsap.set(can5Ref.current.position, { y: -5 });
     gsap.set(can6Ref.current.position, { x: -2, y: -4, z: 2 });
     gsap.set(can7Ref.current.position, { x: 2, y: -5, z: 1 });
+    gsap.set(can8Ref.current.position, { x: -2.5, y: 2, z: 1 });
+    gsap.set(can9Ref.current.position, { x: 2.5, y: -2, z: 2 });
 
     const introTl = gsap.timeline({
       defaults: {
@@ -120,6 +126,14 @@ export default function Scene({}: Props) {
       // Can 7 - Grape (fills the lower-right gap)
       .to(can7Ref.current.position, { x: 1.7, y: -0.45, z: -1.7 }, 0)
       .to(can7Ref.current.rotation, { z: -0.15 }, 0)
+
+      // Can 8 - Lemon Lime (fills the upper-left gap)
+      .to(can8Ref.current.position, { x: -1.3, y: 0.55, z: -0.8 }, 0)
+      .to(can8Ref.current.rotation, { z: 0.15 }, 0)
+
+      // Can 9 - Strawberry Lemonade (fills the far-right gap)
+      .to(can9Ref.current.position, { x: 2.1, y: 0.1, z: -1.3 }, 0)
+      .to(can9Ref.current.rotation, { z: -0.3 }, 0)
       .to(
         groupRef.current.position,
         { x: 1, y: 0.15, duration: 3, ease: "sine.inOut" },
@@ -127,7 +141,7 @@ export default function Scene({}: Props) {
       );
   });
 
-  // Smaller than SodaCan's default (2.3) so all 7 bottles read as a compact,
+  // Smaller than SodaCan's default (2.3) so all 9 bottles read as a compact,
   // fully-visible cluster next to the text-side content instead of
   // overlapping/crowding each other or clipping the section's bottom edge.
   const BOTTLE_SCALE = 1.2;
@@ -182,6 +196,20 @@ export default function Scene({}: Props) {
       <FloatingCan
         ref={can7Ref}
         flavor="grape"
+        scale={BOTTLE_SCALE}
+        floatSpeed={FLOAT_SPEED}
+      />
+
+      <FloatingCan
+        ref={can8Ref}
+        flavor="lemonLime"
+        scale={BOTTLE_SCALE}
+        floatSpeed={FLOAT_SPEED}
+      />
+
+      <FloatingCan
+        ref={can9Ref}
+        flavor="strawberryLemonade"
         scale={BOTTLE_SCALE}
         floatSpeed={FLOAT_SPEED}
       />

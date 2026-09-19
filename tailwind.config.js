@@ -16,10 +16,18 @@ module.exports = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-100%)" },
         },
+        // Content is rendered twice back-to-back (see CategoryTicker), so
+        // -50% is exactly one copy's width - the loop point is seamless
+        // regardless of how wide the label text ends up being.
+        marquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "slide-left": "slide-left 3s linear infinite",
         "spin-slow": "spin 6s linear infinite",
+        marquee: "marquee 22s linear infinite",
       },
     },
   },

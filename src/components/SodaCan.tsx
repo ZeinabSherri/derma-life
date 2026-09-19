@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 useGLTF.preload("/Bottle-baked.glb");
@@ -46,6 +47,23 @@ export function SodaCan({
   ...props
 }: SodaCanProps) {
   const { nodes, materials } = useGLTF("/Bottle-baked.glb");
+  const gl = useThree((state) => state.gl);
+
+  // The label's baked texture reads as blurry/illegible at a distance or on
+  // small bottles (the default anisotropy is 1, so mipmapping washes out
+  // the printed text at any oblique viewing angle) - raising it to the
+  // renderer's max sharpens every bottle's label site-wide, since these
+  // materials are shared across every mounted SodaCan instance.
+  useEffect(() => {
+    const maxAnisotropy = gl.capabilities.getMaxAnisotropy();
+    Object.values(materials).forEach((material) => {
+      const map = (material as THREE.MeshStandardMaterial).map;
+      if (map) {
+        map.anisotropy = maxAnisotropy;
+        map.needsUpdate = true;
+      }
+    });
+  }, [materials, gl]);
 
   const bottleMaterial = materials.bottle as THREE.MeshStandardMaterial;
 

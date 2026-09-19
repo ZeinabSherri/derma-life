@@ -10,6 +10,7 @@ import { Center, Environment, View } from "@react-three/drei";
 import { Bounded } from "@/components/Bounded";
 import { TextSplitter } from "@/components/TextSplitter";
 import FloatingCan from "@/components/FloatingCan";
+import CategoryTicker from "@/components/CategoryTicker";
 import Scene from "./Scene";
 import { useStore } from "@/hooks/useStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -26,7 +27,7 @@ export type HeroProps = SliceComponentProps<Content.HeroSlice>;
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
   const ready = useStore((state) => state.ready);
-  // The 5 floating bottles are positioned in fixed 3D world coordinates
+  // The 9 floating bottles are positioned in fixed 3D world coordinates
   // tuned for wide desktop screens - on a narrower canvas the camera shows
   // less horizontal world-space for the same vertical FOV, so they crowd
   // and overlap below ~1024px (this bites tablets in the 768-1023px range
@@ -130,7 +131,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           <div className="grid auto-rows-min place-items-center text-center">
             {/*
               Mobile/tablet only: the desktop hero-scene above is a sticky
-              full-bleed canvas whose 7 bottles are driven entirely by a
+              full-bleed canvas whose 9 bottles are driven entirely by a
               scroll-scrubbed GSAP timeline tuned for wide screens - the
               positions crowd/overlap on narrow viewports (see the isDesktop
               comment below) and the scroll-hijack style pin is heavy on
@@ -191,19 +192,113 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
         </div>
 
+        <CategoryTicker />
+
         <div
           id="about"
-          className="text-side relative z-[80] grid h-screen scroll-mt-24 items-center gap-4 md:grid-cols-2"
+          className="text-side relative z-[80] grid items-center gap-16 py-24 md:grid-cols-2 md:gap-8 md:py-32"
         >
           <div>
-            <h2 className="text-side-heading text-balance font-serif text-6xl font-bold text-[#2B302B] lg:text-8xl">
-              <TextSplitter text="Where Science Meets Beauty" />
+            <div className="flex items-center gap-4">
+              <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+                01 &mdash; Who We Are
+              </p>
+              <span className="h-px w-full bg-[#2B302B]/20" />
+            </div>
+            <p className="mt-6 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+              Who We Are.
+            </p>
+            <h2 className="text-side-heading mt-2 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+              <TextSplitter text="Where science meets" />{" "}
+              <span className="font-normal italic">
+                <TextSplitter text="beauty." />
+              </span>
             </h2>
-            <div className="text-side-body mt-4 max-w-xl text-balance text-xl font-normal text-[#2B302B]">
+            <div className="text-side-body mt-6 max-w-xl space-y-4 text-lg font-normal text-[#2B302B]/90">
               <p>
-                DermaLife is a skincare leader in contract manufacturing, crafting world-class skincare, haircare, and 
-body care products for renowned brands worldwide with the quality and innovation to set your brand 
-apart.
+                DermaLife is dedicated to crafting world-class skincare,
+                haircare, and body care products for renowned brands
+                worldwide.
+              </p>
+              <p>
+                As experts in contract manufacturing, we specialize in
+                producing cosmetics and cosmeceuticals that not only make a
+                difference but also leave a lasting impression.
+              </p>
+              <p>
+                Our commitment to excellence ensures that every product we
+                create meets the highest standards of quality and efficacy,
+                setting your brand apart in the competitive market.
+              </p>
+            </div>
+            <a
+              href="/#services"
+              className="mt-8 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
+            >
+              Read More
+              <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-md">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[3rem] rounded-tr-[7rem]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/blog/trending-ingredients.jpg"
+                alt="DermaLife formulation ingredients"
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            <svg
+              viewBox="0 0 200 200"
+              className="absolute left-2 top-2 h-24 w-24 drop-shadow-lg lg:-left-8 lg:-top-8 lg:h-32 lg:w-32"
+            >
+              <circle cx="100" cy="100" r="98" fill="#1F3A2E" />
+              <path
+                id="who-we-are-badge-ring"
+                d="M 100,100 m -74,0 a 74,74 0 1,1 148,0 a 74,74 0 1,1 -148,0"
+                fill="none"
+              />
+              <text
+                fill="white"
+                fontSize="11"
+                fontWeight="700"
+                letterSpacing="2.5"
+              >
+                <textPath href="#who-we-are-badge-ring" startOffset="0%">
+                  SCIENCE &bull; INNOVATION &bull; SKINCARE &bull; SCIENCE
+                  &bull; INNOVATION &bull; SKINCARE &bull;
+                </textPath>
+              </text>
+              <text
+                x="100"
+                y="114"
+                textAnchor="middle"
+                fontSize="38"
+                fontFamily="Georgia, serif"
+                fontStyle="italic"
+                fill="white"
+              >
+                DL
+              </text>
+            </svg>
+
+            <div className="absolute right-3 bottom-24 rounded-2xl bg-white px-5 py-4 shadow-xl lg:-right-8">
+              <p className="font-serif text-2xl font-bold text-[#2B302B]">
+                500+
+              </p>
+              <p className="font-sans text-[0.65rem] font-bold uppercase tracking-wide text-[#2B302B]/60">
+                Ingredients
+              </p>
+            </div>
+
+            <div className="absolute left-3 bottom-6 rounded-2xl bg-white px-5 py-4 shadow-xl lg:-left-8">
+              <p className="font-serif text-lg font-bold text-[#2B302B]">
+                GMP &middot; ISO
+              </p>
+              <p className="font-sans text-[0.65rem] font-bold uppercase tracking-wide text-[#2B302B]/60">
+                Standards
               </p>
             </div>
           </div>

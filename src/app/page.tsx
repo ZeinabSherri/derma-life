@@ -27,5 +27,12 @@ export default async function Index() {
   const client = createClient();
   const home = await client.getByUID("page", "home");
 
-  return <SliceZone slices={home.data.slices} components={components} />;
+  // SkyDive is removed from the site entirely - filtered here rather than
+  // deleted from Prismic content, so it stays out even though editors could
+  // still re-add it in the CMS without a code change.
+  const slices = home.data.slices.filter(
+    (slice) => slice.slice_type !== "sky_dive",
+  );
+
+  return <SliceZone slices={slices} components={components} />;
 }
