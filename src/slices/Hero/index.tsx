@@ -211,7 +211,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
         <div
           id="about"
-          className="text-side relative z-[80] grid items-center gap-16 py-24 md:grid-cols-2 md:gap-8 md:py-32"
+          className="text-side relative z-[80] grid h-screen items-center gap-4 overflow-hidden py-6 md:grid-cols-2 md:gap-8 md:py-10"
         >
           <div>
             <div className="flex items-center gap-4">
@@ -220,27 +220,27 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               </p>
               <span className="hero-kicker-line h-px w-full bg-[#2B302B]/20" />
             </div>
-            <p className="mt-6 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+            <p className="mt-4 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Who We Are.
             </p>
-            <h2 className="text-side-heading mt-2 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+            <h2 className="text-side-heading mt-2 text-balance font-serif text-3xl font-bold leading-[1.05] text-[#2B302B] md:text-4xl lg:text-6xl">
               <TextSplitter text="Where science meets" />{" "}
               <span className="font-normal italic">
                 <TextSplitter text="beauty." />
               </span>
             </h2>
-            <div className="text-side-body mt-6 max-w-xl space-y-4 text-lg font-normal text-[#2B302B]">
+            <div className="text-side-body mt-3 max-w-xl space-y-2 text-sm font-normal text-[#2B302B] md:text-base lg:text-lg">
               <p>
                 DermaLife is dedicated to crafting world-class skincare,
                 haircare, and body care products for renowned brands
                 worldwide.
               </p>
-              <p>
+              <p className="hidden md:block">
                 As experts in contract manufacturing, we specialize in
                 producing cosmetics and cosmeceuticals that not only make a
                 difference but also leave a lasting impression.
               </p>
-              <p>
+              <p className="hidden lg:block">
                 Our commitment to excellence ensures that every product we
                 create meets the highest standards of quality and efficacy,
                 setting your brand apart in the competitive market.
@@ -248,24 +248,24 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             </div>
             <a
               href="/#services"
-              className="mt-8 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
+              className="mt-4 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71] md:mt-8"
             >
               Read More
               <span aria-hidden="true">↗</span>
             </a>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md">
+          <div className="relative mx-auto h-[22vh] w-full max-w-md md:h-auto">
             {/* Empty spacer - just holds the aspect ratio the badge/cards
                 below are positioned against. The sticky hero-scene canvas
                 above already keeps bottles visible through this whole
                 section as the user scrolls, so this column doesn't need
                 its own separate bottle group too. */}
-            <div className="aspect-[4/5] w-full" />
+            <div className="aspect-[4/5] h-full w-full md:h-auto" />
 
             <svg
               viewBox="0 0 200 200"
-              className="absolute left-2 top-2 h-24 w-24 drop-shadow-lg lg:-left-8 lg:-top-8 lg:h-32 lg:w-32"
+              className="absolute left-2 top-2 h-14 w-14 drop-shadow-lg md:h-24 md:w-24 lg:-left-8 lg:-top-8 lg:h-32 lg:w-32"
             >
               <circle cx="100" cy="100" r="98" fill="#1F3A2E" />
               <path
@@ -297,20 +297,20 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               </text>
             </svg>
 
-            <div className="absolute right-3 bottom-24 rounded-2xl bg-white px-5 py-4 shadow-xl lg:-right-8">
-              <p className="font-serif text-2xl font-bold text-[#2B302B]">
+            <div className="absolute right-2 bottom-10 rounded-xl bg-white px-3 py-2 shadow-xl md:right-3 md:bottom-24 md:rounded-2xl md:px-5 md:py-4 lg:-right-8">
+              <p className="font-serif text-base font-bold text-[#2B302B] md:text-2xl">
                 500+
               </p>
-              <p className="font-sans text-[0.65rem] font-bold uppercase tracking-wide text-[#2B302B]/60">
+              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
                 Ingredients
               </p>
             </div>
 
-            <div className="absolute left-3 bottom-6 rounded-2xl bg-white px-5 py-4 shadow-xl lg:-left-8">
-              <p className="font-serif text-lg font-bold text-[#2B302B]">
+            <div className="absolute left-2 bottom-2 rounded-xl bg-white px-3 py-2 shadow-xl md:left-3 md:bottom-6 md:rounded-2xl md:px-5 md:py-4 lg:-left-8">
+              <p className="font-serif text-sm font-bold text-[#2B302B] md:text-lg">
                 GMP &middot; ISO
               </p>
-              <p className="font-sans text-[0.65rem] font-bold uppercase tracking-wide text-[#2B302B]/60">
+              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
                 Standards
               </p>
             </div>

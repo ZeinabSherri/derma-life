@@ -102,9 +102,10 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
       id="products"
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      className="carousel relative grid min-h-screen scroll-mt-20 grid-rows-[auto,auto,4fr,auto] justify-center overflow-hidden py-24 text-[#2B302B]"
+      className="carousel relative grid h-screen scroll-mt-20 grid-rows-[auto,auto,4fr,auto] justify-center overflow-hidden py-8 text-[#2B302B]"
       style={{
-        background: "linear-gradient(135deg, #FDFBF7 0%, #FFB88C 100%)",
+        background:
+          "linear-gradient(to bottom, #ffffff 0%, transparent 14%, transparent 86%, #ffffff 100%), linear-gradient(135deg, #FDFBF7 0%, #FFB88C 100%)",
       }}
     >
       <WavyCircles className="pointer-events-none absolute left-1/2 top-1/2 h-[120vmin] -translate-x-1/2 -translate-y-1/2 text-[#2B302B]/10" />
@@ -117,16 +118,16 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
           <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-end lg:gap-12">
+        <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-end lg:gap-12">
           <div>
             <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Our Products
             </p>
-            <h2 className="mt-2 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+            <h2 className="mt-2 text-balance font-serif text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-6xl">
               Premium care, <em className="font-normal italic">engineered.</em>
             </h2>
           </div>
-          <p className="text-lg font-normal text-[#2B302B]/80 lg:text-xl">
+          <p className="text-base font-normal text-[#2B302B]/80 lg:text-lg">
             DermaLife crafts premium skincare and haircare products with
             consistent quality.
           </p>
@@ -167,10 +168,10 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
       </div>
 
       <div className="text-area relative z-10 mx-auto text-center">
-        <div className="text-wrapper font-serif text-4xl font-bold text-[#2B302B]">
+        <div className="text-wrapper font-serif text-3xl font-bold text-[#2B302B]">
           <p>{FLAVORS[currentFlavorIndex].name}</p>
         </div>
-        <div className="mt-2 text-2xl font-normal text-[#2B302B]/80">
+        <div className="mt-1 text-lg font-normal text-[#2B302B]/80">
           <p>Private label &amp; custom formulation available</p>
         </div>
       </div>

@@ -127,8 +127,8 @@ export function ContactTeaser() {
   });
 
   return (
-    <Bounded className="contact-teaser relative overflow-hidden bg-white text-[#2B302B]">
-      <div className="relative grid w-full items-center gap-8 py-16 lg:grid-cols-[1fr,auto,1fr] lg:gap-6 lg:py-24">
+    <Bounded className="contact-teaser relative flex h-screen items-center overflow-hidden bg-white text-[#2B302B]">
+      <div className="relative grid w-full items-center gap-6 lg:grid-cols-[1fr,auto,1fr] lg:gap-6">
         <View className="aspect-square h-[42vmin] min-h-56 justify-self-center">
           <Center>
             {LEFT_CLUSTER.map((bottle, i) => (

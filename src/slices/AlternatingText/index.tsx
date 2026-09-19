@@ -161,16 +161,16 @@ const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
       <Bounded
         data-slice-type={slice.slice_type}
         data-slice-variation={slice.variation}
-        className="bg-[#F5F3EE] text-[#2B302B]"
+        className="flex h-screen items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F5F3EE_16%,#F5F3EE_84%,#ffffff_100%)] text-[#2B302B]"
       >
         <WhatWeDo />
       </Bounded>
 
-      <Bounded className="bg-white text-[#2B302B]">
+      <Bounded className="overflow-hidden bg-white text-[#2B302B]">
         <WhyChooseUs />
       </Bounded>
 
-      <Bounded className="bg-[#F5F3EE] text-[#2B302B]">
+      <Bounded className="flex h-screen items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F5F3EE_16%,#F5F3EE_84%,#ffffff_100%)] text-[#2B302B]">
         <OurProcess />
       </Bounded>
 

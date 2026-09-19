@@ -44,10 +44,10 @@ export function BlogTeaser() {
   });
 
   return (
-    <Bounded className="blog-teaser relative overflow-hidden bg-white text-[#2B302B]">
+    <Bounded className="blog-teaser relative flex h-screen items-center overflow-hidden bg-white text-[#2B302B]">
       <WavyCircles className="pointer-events-none absolute left-1/2 top-1/2 h-[90vmin] -translate-x-1/2 -translate-y-1/2 text-[#6B8F71]/10" />
 
-      <div className="relative mx-auto grid max-w-2xl place-items-center gap-4 py-24 text-center">
+      <div className="relative mx-auto grid max-w-2xl place-items-center gap-4 text-center">
         <h2 className="blog-teaser-heading text-balance font-serif text-5xl font-bold lg:text-6xl">
           From Our Blog
         </h2>

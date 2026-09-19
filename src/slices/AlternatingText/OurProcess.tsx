@@ -93,7 +93,7 @@ export default function OurProcess() {
   );
 
   return (
-    <div ref={sectionRef} className="our-process relative overflow-hidden py-24">
+    <div ref={sectionRef} className="our-process relative w-full overflow-hidden py-6">
       <span
         aria-hidden="true"
         className="pointer-events-none absolute -left-32 bottom-0 hidden size-96 rounded-full bg-[#6B8F71]/10 lg:block"
@@ -106,42 +106,46 @@ export default function OurProcess() {
         <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
       </div>
 
-      <div className="our-process-heading relative mt-10 grid gap-6 lg:grid-cols-2 lg:items-end lg:gap-12">
+      <div className="our-process-heading relative mt-4 grid gap-2 lg:mt-6 lg:grid-cols-2 lg:items-end lg:gap-12">
         <div>
           <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
             Here&apos;s How To Get Started.
           </p>
-          <h2 className="mt-2 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+          <h2 className="mt-1 text-balance font-serif text-2xl font-bold leading-[1.05] text-[#2B302B] lg:mt-2 lg:text-6xl">
             Your vision, <em className="font-normal italic">made real.</em>
           </h2>
         </div>
-        <p className="text-lg font-normal text-[#2B302B]/80 lg:text-xl">
+        <p className="hidden text-base font-normal text-[#2B302B]/80 sm:block lg:text-lg">
           We collaborate with you to create a private label line that
           reflects your brand.
         </p>
       </div>
 
-      <div className="relative mt-12 border-t border-[#2B302B]/10">
+      <div className="relative mt-4 border-t border-[#2B302B]/10 lg:mt-6">
         {STEPS.map((step, i) => (
           <div
             key={step.title}
             data-parallax={step.parallax}
-            className="our-process-row group relative grid items-center gap-3 overflow-hidden border-b border-[#2B302B]/10 bg-[length:200%_100%] bg-[position:0%_0] bg-[linear-gradient(90deg,transparent,rgba(107,143,113,.12),transparent)] py-6 transition-[background-position,padding-left] duration-500 hover:bg-[position:100%_0] hover:pl-3 md:grid-cols-[auto,auto,1fr,1fr] md:gap-6"
+            className="our-process-row group relative grid grid-cols-[auto,auto,1fr] items-center gap-x-2 gap-y-0.5 overflow-hidden border-b border-[#2B302B]/10 bg-[length:200%_100%] bg-[position:0%_0] bg-[linear-gradient(90deg,transparent,rgba(107,143,113,.12),transparent)] py-2 transition-[background-position,padding-left] duration-500 hover:bg-[position:100%_0] hover:pl-3 md:grid-cols-[auto,auto,1fr,1fr] md:gap-6 md:py-3"
           >
-            <span className="font-serif text-3xl italic text-[#2B302B]/25">
+            <span className="font-serif text-lg italic text-[#2B302B]/25 md:text-2xl">
               {String(i + 1).padStart(2, "0")}
             </span>
             <span
               aria-hidden="true"
               className={clsx(
-                "size-3 shrink-0 rounded-full transition-colors duration-300",
+                "size-2.5 shrink-0 rounded-full transition-colors duration-300 md:size-3",
                 i === 0
                   ? "bg-[#6B8F71]"
                   : "bg-[#2B302B]/15 group-hover:bg-[#6B8F71]/60",
               )}
             />
-            <p className="text-xl font-bold text-[#2B302B]">{step.title}</p>
-            <p className="text-[#2B302B]/70 md:text-right">{step.text}</p>
+            <p className="text-sm font-bold text-[#2B302B] md:text-lg">
+              {step.title}
+            </p>
+            <p className="col-span-3 pl-9 text-xs text-[#2B302B]/70 md:col-span-1 md:pl-0 md:text-sm md:text-right">
+              {step.text}
+            </p>
           </div>
         ))}
       </div>
