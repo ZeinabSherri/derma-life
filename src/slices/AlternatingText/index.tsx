@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Bounded } from "@/components/Bounded";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
@@ -8,9 +9,15 @@ import Scene from "./Scene";
 import { BlogTeaser } from "./BlogTeaser";
 import { ContactTeaser } from "./ContactTeaser";
 import WhatWeDo from "./WhatWeDo";
-import WhyChooseUs from "./WhyChooseUs";
 import OurProcess from "./OurProcess";
 import clsx from "clsx";
+
+// Client-only: this is a heavy, imperative Web-Animations-API-driven
+// component (raw DOM refs + element.animate(), not React state), which is
+// inherently fragile to hydrate byte-for-byte against its own server render
+// - ssr:false sidesteps that mismatch class of bug entirely rather than
+// chasing it, which is the standard Next.js pattern for this kind of widget.
+const WhyChooseUs = dynamic(() => import("./WhyChooseUs"), { ssr: false });
 
 // The old plain-stacked "Our Services / Who We Serve / Why Choose Us / How
 // It Works" sections below are hidden (not deleted) in favor of the
