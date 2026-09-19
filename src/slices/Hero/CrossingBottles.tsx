@@ -58,7 +58,7 @@ export default function CrossingBottles() {
     <>
       <FloatingCan
         ref={can1Ref}
-        flavor="lemonLime"
+        flavor="blackCherry"
         scale={1.2}
         floatIntensity={0.5}
         rotationIntensity={0.3}

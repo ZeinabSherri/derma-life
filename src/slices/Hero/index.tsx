@@ -28,8 +28,27 @@ const MOBILE_FIRST_SECTION_BOTTLES: {
   position: [number, number, number];
   floatSpeed: number;
 }[] = [
-  { flavor: "lemonLime", position: [0.35, 0, 0], floatSpeed: 1.4 },
+  { flavor: "blackCherry", position: [0.35, 0, 0], floatSpeed: 1.4 },
   { flavor: "strawberryLemonade", position: [0.85, 0, 0], floatSpeed: 1.7 },
+];
+
+// Six bottles standing beside each other on the right side of Who We Are -
+// tight, near-even x offsets (not a loose cluster) so they read as a lineup,
+// alternating between just the two bottle colors used site-wide. Same total
+// spread as the old 3-bottle version (roughly +-1.3) since this still has
+// to fit inside the same narrow aspect-[4/5] card - scale is reduced
+// accordingly so 6 fit where 3 used to.
+const WHO_WE_ARE_BOTTLES: {
+  flavor: SodaCanProps["flavor"];
+  position: [number, number, number];
+  floatSpeed: number;
+}[] = [
+  { flavor: "blackCherry", position: [-1.3, -0.05, 0.1], floatSpeed: 1.1 },
+  { flavor: "strawberryLemonade", position: [-0.78, 0.08, -0.1], floatSpeed: 1.4 },
+  { flavor: "blackCherry", position: [-0.26, -0.05, 0.1], floatSpeed: 1.6 },
+  { flavor: "strawberryLemonade", position: [0.26, 0.08, -0.1], floatSpeed: 1.3 },
+  { flavor: "blackCherry", position: [0.78, -0.05, 0.1], floatSpeed: 1.7 },
+  { flavor: "strawberryLemonade", position: [1.3, 0.08, -0.1], floatSpeed: 1.2 },
 ];
 
 /**
@@ -273,10 +292,33 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           </div>
 
           <div className="relative mx-auto w-full max-w-md">
-            {/* Empty spacer - just holds the aspect ratio the badge/cards
-                below are positioned against; no bottles in this section
-                anymore. */}
-            <div className="aspect-[4/5] w-full" />
+            {/*
+              No background/clipping here on purpose - a View's 3D content
+              is drawn on the single shared fixed canvas from ViewCanvas.tsx
+              (behind normal page content), not as real DOM children, so an
+              opaque container painted above it in the stacking order would
+              hide the bottles entirely rather than frame them. Every other
+              bottle cluster on this site (ContactTeaser, Carousel, the
+              mobile Hero pair) follows the same bare-View convention.
+            */}
+            <View className="aspect-[4/5] w-full">
+              <Center>
+                {WHO_WE_ARE_BOTTLES.map((bottle, i) => (
+                  <FloatingCan
+                    key={i}
+                    flavor={bottle.flavor}
+                    position={bottle.position}
+                    scale={0.95}
+                    floatIntensity={0.55}
+                    rotationIntensity={0.4}
+                    floatingRange={[-0.08, 0.08]}
+                    floatSpeed={bottle.floatSpeed}
+                  />
+                ))}
+              </Center>
+              <Environment files="/hdr/lobby.hdr" environmentIntensity={1.2} />
+              <directionalLight intensity={5} position={[0, 1, 1]} />
+            </View>
 
             <svg
               viewBox="0 0 200 200"

@@ -63,6 +63,22 @@ export function SodaCan({
         map.needsUpdate = true;
       }
     });
+
+    // The label specifically still reads soft even with anisotropy maxed
+    // out - mipmapping (the default minFilter) blends in progressively
+    // blurrier downsampled versions of the texture, which smears fine
+    // printed text even head-on. The label is always shown close/large
+    // enough in this design that the moire/aliasing mipmaps exist to
+    // prevent isn't a real tradeoff, so turning mipmaps off entirely for
+    // just this one texture trades that (irrelevant here) benefit for
+    // consistently sharp text.
+    const labelMap = (materials["label ageles "] as THREE.MeshStandardMaterial | undefined)?.map;
+    if (labelMap) {
+      labelMap.generateMipmaps = false;
+      labelMap.minFilter = THREE.LinearFilter;
+      labelMap.magFilter = THREE.LinearFilter;
+      labelMap.needsUpdate = true;
+    }
   }, [materials, gl]);
 
   const bottleMaterial = materials.bottle as THREE.MeshStandardMaterial;
