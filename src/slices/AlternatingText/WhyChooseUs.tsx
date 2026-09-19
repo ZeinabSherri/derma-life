@@ -18,7 +18,7 @@ const ROWS: Row[] = [
     val: "99.8",
     suf: "%",
     cap: "Batch consistency",
-    image: "/blog/trending-ingredients.jpg",
+    image: "/derma-life-science-innovation-skincare-product-body-care-4.webp",
   },
   {
     title: "Our expert quality team maintains the highest standards.",
@@ -26,7 +26,7 @@ const ROWS: Row[] = [
     val: "32",
     suf: "",
     cap: "Checks per batch",
-    image: "/blog/professional-grade.jpg",
+    image: "/derma-life-science-innovation-skincare-switching-manufacturers-1.webp",
   },
   {
     title: "Premium ingredient combinations help products stand apart.",
@@ -34,7 +34,7 @@ const ROWS: Row[] = [
     val: "48",
     suf: "h",
     cap: "Measured hydration",
-    image: "/blog/spf-comparison.jpg",
+    image: "/derma-life-science-innovation-skincare-product-testing-1.webp",
   },
   {
     title: "We ethically source over 500 high-quality ingredients.",
@@ -42,7 +42,7 @@ const ROWS: Row[] = [
     val: "500",
     suf: "+",
     cap: "Traceable ingredients",
-    image: "/blog/spf-product.jpg",
+    image: "/derma-life-science-innovation-skincare-product-body-care-1.webp",
   },
   {
     title: "GMP and ISO compliant, with FDA licensing.",
@@ -50,7 +50,7 @@ const ROWS: Row[] = [
     val: "100",
     suf: "%",
     cap: "Documented traceability",
-    image: "/blog/sunscreen-guide.jpg",
+    image: "/derma-life-science-innovation-skincare-product-testing-2.webp",
   },
 ];
 
