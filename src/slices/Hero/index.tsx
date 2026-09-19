@@ -135,6 +135,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   );
 
   return (
+    <>
     <Bounded
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
@@ -206,8 +207,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             </div>
           </div>
         </div>
-
-        <CategoryTicker />
 
         <div
           id="about"
@@ -318,6 +317,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         </div>
       </div>
     </Bounded>
+    {/* Full-bleed, outside the Bounded's max-w-7xl content column so it
+        truly spans edge to edge - sits between Who We Are and Our
+        Products (Carousel is the next slice after Hero in the page). */}
+    <CategoryTicker />
+    </>
   );
 };
 
