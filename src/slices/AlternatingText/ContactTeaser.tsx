@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { Bounded } from "@/components/Bounded";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -16,7 +17,29 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  * brand-tint shapes so they read against white instead of disappearing.
  */
 export function ContactTeaser() {
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
+
   useGSAP(() => {
+    if (!isDesktop) {
+      // Defensive: useMediaQuery's serverFallback briefly reports
+      // isDesktop:true on first render even on mobile (until the real
+      // client-side match resolves), so the animation below can run once
+      // and apply its opacity:0/translateY "from" state before this
+      // effect re-runs with the correct value - explicitly clear it
+      // rather than relying on cleanup timing.
+      gsap.set(
+        [
+          ".contact-teaser-kicker",
+          ".contact-teaser-heading",
+          ".contact-teaser-body",
+          ".contact-teaser-button",
+          ".contact-teaser-phone",
+        ],
+        { clearProps: "all" },
+      );
+      return;
+    }
+
     gsap
       .timeline({
         scrollTrigger: {
@@ -50,10 +73,10 @@ export function ContactTeaser() {
         { y: 16, opacity: 0, duration: 0.5, ease: "power2.out" },
         "-=0.3",
       );
-  });
+  }, { dependencies: [isDesktop] });
 
   return (
-    <Bounded className="contact-teaser relative flex h-screen items-center overflow-hidden bg-white text-[#2B302B]">
+    <Bounded className="contact-teaser relative flex items-center overflow-hidden bg-white py-16 text-[#2B302B] lg:h-screen lg:py-0">
       {/* Decorative motifs from the reference - re-tinted as soft brand
           washes instead of the reference's opaque tan shapes so they read
           against white. */}

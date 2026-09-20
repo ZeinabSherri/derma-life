@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import { Bounded } from "@/components/Bounded";
 import { WavyCircles } from "@/slices/Carousel/WavyCircles";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -21,9 +22,24 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
  */
 export function BlogTeaser() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
   useGSAP(
     () => {
+      if (!isDesktop) {
+        // Defensive: useMediaQuery's serverFallback briefly reports
+        // isDesktop:true on first render even on mobile (until the real
+        // client-side match resolves), so these opacity-animated tweens
+        // can run once and apply their hidden "from" state before this
+        // effect re-runs with the correct value - explicitly clear it
+        // rather than relying on cleanup timing.
+        gsap.set(
+          [".blog-teaser-heading", ".blog-teaser-body", ".blog-teaser-button"],
+          { clearProps: "all" },
+        );
+        return;
+      }
+
       gsap.from(".section-kicker-line", {
         scaleX: 0,
         transformOrigin: "left center",
@@ -56,7 +72,7 @@ export function BlogTeaser() {
           "-=0.3",
         );
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [isDesktop] },
   );
 
   return (

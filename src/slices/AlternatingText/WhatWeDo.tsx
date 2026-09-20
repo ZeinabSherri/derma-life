@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const ICONS: Record<string, JSX.Element> = {
@@ -105,9 +107,26 @@ const SERVICES: {
 
 export default function WhatWeDo() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  // Scroll-reveal animations are desktop-only - mobile gets the content
+  // fully visible immediately instead of fading/staggering in, for a
+  // cleaner, jank-free feel on touch scrolling.
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
   useGSAP(
     () => {
+      if (!isDesktop) {
+        // Defensive: useMediaQuery's serverFallback briefly reports
+        // isDesktop:true on first render even on mobile (until the real
+        // client-side match resolves), so these opacity-animated tweens
+        // can run once and apply their hidden "from" state before this
+        // effect re-runs with the correct value - explicitly clear it
+        // rather than relying on cleanup timing.
+        gsap.set([".what-we-do-card", ".what-we-do-heading"], {
+          clearProps: "all",
+        });
+        return;
+      }
+
       gsap.from(".section-kicker-line", {
         scaleX: 0,
         transformOrigin: "left center",
@@ -131,7 +150,7 @@ export default function WhatWeDo() {
         scrollTrigger: { trigger: sectionRef.current, start: "top 80%" },
       });
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [isDesktop] },
   );
 
   return (

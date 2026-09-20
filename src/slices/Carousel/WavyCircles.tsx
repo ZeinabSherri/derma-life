@@ -4,10 +4,19 @@ import { SVGProps } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 gsap.registerPlugin(useGSAP);
 
 export function WavyCircles(props: SVGProps<SVGSVGElement>) {
+  // Continuous decorative rotation is desktop-only - a permanently
+  // spinning background motif isn't worth the battery/attention cost on
+  // mobile, so it just sits still there as a static backdrop shape.
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
+
   useGSAP(() => {
+    if (!isDesktop) return;
+
     gsap.to(".wavy-circles-inner", {
       transformOrigin: "center",
       rotate: "360",
@@ -23,7 +32,7 @@ export function WavyCircles(props: SVGProps<SVGSVGElement>) {
       ease: "none",
       repeat: -1,
     });
-  });
+  }, { dependencies: [isDesktop] });
 
   return (
     <svg

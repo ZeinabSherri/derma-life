@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 // Copy, structure and every measurement below (colors, font-sizes, grid
@@ -39,9 +41,27 @@ const STEPS = [
 export default function OurProcess() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const kickerLineRef = useRef<HTMLSpanElement>(null);
+  // Scroll-reveal/parallax/breathing-line animations are desktop-only -
+  // mobile gets the static final layout immediately, no scroll-scrubbed
+  // motion (which reads as janky on touch anyway).
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
   useGSAP(
     () => {
+      if (!isDesktop) {
+        // Defensive: useMediaQuery's serverFallback briefly reports
+        // isDesktop:true on first render even on mobile (until the real
+        // client-side match resolves), so these tweens can run once and
+        // apply their hidden/offset "from" state before this effect
+        // re-runs with the correct value - explicitly clear it rather
+        // than relying on cleanup timing.
+        gsap.set([".our-process-heading", ".our-process-row"], {
+          clearProps: "all",
+        });
+        gsap.set(kickerLineRef.current, { clearProps: "all" });
+        return;
+      }
+
       // The reference's kicker line isn't a scroll-triggered draw-in - it's
       // a short 42px rule that continuously "breathes" (scaleX 1<->1.8,
       // opacity 1<->.4) on an infinite 3.4s loop the whole time it's on
@@ -94,7 +114,7 @@ export default function OurProcess() {
         });
       });
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [isDesktop] },
   );
 
   return (

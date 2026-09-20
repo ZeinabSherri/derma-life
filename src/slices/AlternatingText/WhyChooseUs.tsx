@@ -113,7 +113,14 @@ export default function WhyChooseUs() {
   const imgRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Treat mobile/tablet the same as prefers-reduced-motion: the whole
+    // entrance choreography (drop/ripple/frame-reveal/text-reveal) and the
+    // auto-advancing row cycle short-circuit to their settled end state
+    // instead of animating - same breakpoint as this component's own
+    // mobile CSS override below (max-width:900px).
+    const reduced =
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      matchMedia("(max-width: 900px)").matches;
     const sec = sectionRef.current;
     const visual = visualRef.current;
     const frame = frameRef.current;
@@ -1278,6 +1285,17 @@ const WCU_CSS = `
   .wcu-foot{margin-top:2px}
   .wcu-hint{font-size:10px}
   .wcu-orb{width:42px;height:42px;margin:-21px 0 0 -21px}
+
+  /* Same "settle immediately, no animation" treatment as the
+     prefers-reduced-motion block below - the JS side already treats
+     this breakpoint as reduced motion too, this is its CSS half. */
+  .wcu *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  .wcu-frame{clip-path:none}
+  .wcu-sheen,.wcu-drop,.wcu-ripple,.wcu-orb,.wcu-scan,.wcu-spark{display:none}
+  .wcu-eyebrow,.wcu-foot,.wcu-idx,.wcu-row-title,.wcu-plus{opacity:1}
+  .wcu-ln .wcu-ch{opacity:1}
+  .wcu-ln.wcu-mask > span{clip-path:none}
+  .wcu-ln.wcu-it > span{transform:none;opacity:1}
 }
 @media (prefers-reduced-motion:reduce){
   .wcu *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}

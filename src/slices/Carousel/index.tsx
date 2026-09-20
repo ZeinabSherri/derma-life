@@ -12,6 +12,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import FloatingCan from "@/components/FloatingCan";
 import { SodaCanProps } from "@/components/SodaCan";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ArrowIcon } from "./ArrowIcon";
 import { WavyCircles } from "./WavyCircles";
 
@@ -50,9 +51,12 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
   const [currentFlavorIndex, setCurrentFlavorIndex] = useState(0);
   const sodaCanRef = useRef<Group>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
   useGSAP(
     () => {
+      if (!isDesktop) return;
+
       gsap.from(".section-kicker-line", {
         scaleX: 0,
         transformOrigin: "left center",
@@ -61,7 +65,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
         scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
       });
     },
-    { scope: sectionRef },
+    { scope: sectionRef, dependencies: [isDesktop] },
   );
 
   function changeFlavor(index: number) {

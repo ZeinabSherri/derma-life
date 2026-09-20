@@ -60,50 +60,55 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     () => {
       if (!ready && isDesktop) return;
 
-      const introTl = gsap.timeline();
+      // The section-visibility flip (opacity-0 -> 1) is not itself an
+      // animation to remove - it's what makes the section visible at all
+      // - so it always runs. Only the fade/scale/stagger entrance below it
+      // is desktop-only; mobile gets everything visible immediately.
+      gsap.set(".hero", { opacity: 1 });
 
-      introTl
-        .set(".hero", { opacity: 1 })
-        .from(".hero-eyebrow", {
-          opacity: 0,
-          y: 10,
-        })
-        .from(".hero-header-word", {
-          scale: 3,
-          opacity: 0,
-          ease: "power4.in",
-          delay: 0.3,
-          stagger: 1,
-        })
-        .from(
-          ".hero-subheading",
-          {
+      if (isDesktop) {
+        gsap
+          .timeline()
+          .from(".hero-eyebrow", {
             opacity: 0,
-            y: 30,
+            y: 10,
+          })
+          .from(".hero-header-word", {
+            scale: 3,
+            opacity: 0,
+            ease: "power4.in",
+            delay: 0.3,
+            stagger: 1,
+          })
+          .from(
+            ".hero-subheading",
+            {
+              opacity: 0,
+              y: 30,
+            },
+            "+=.8",
+          )
+          .from(".hero-body", {
+            opacity: 0,
+            y: 10,
+          });
+      }
+
+      // Scroll-scrubbed choreography (body color, text reveal, blur,
+      // sparkle, ripple) is desktop-only, synced to Scene.tsx's bottle
+      // sequence which also only mounts on desktop - mobile has no such
+      // sequence to sync with (its bottles are a separate, non-scroll-tied
+      // pair) and gets all of this content simply visible, no scrub.
+      if (isDesktop) {
+        const scrollTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".hero",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
           },
-          "+=.8",
-        )
-        .from(".hero-body", {
-          opacity: 0,
-          y: 10,
         });
 
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 1.5,
-        },
-      });
-
-      // Desktop: body-color/text-reveal are re-anchored onto the shared
-      // HERO_TL map (plus blur/sparkle/ripple) so this timeline stays in
-      // sync with Scene.tsx's bottle sequence, which only mounts on
-      // desktop. Mobile has no such sequence to sync with (its bottles are
-      // a separate, non-scroll-tied pair) - it keeps its original timing
-      // untouched.
-      if (isDesktop) {
         scrollTl.fromTo(
           ".hero-header",
           { filter: "blur(0px)" },
@@ -144,31 +149,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             { y: 20, opacity: 0, duration: 0.3 },
             HERO_TL.descendDone + 0.3,
           );
-      } else {
-        scrollTl
-          .fromTo(
-            "body",
-            { backgroundColor: "#FFFFFF" },
-            { backgroundColor: "#F7F8F5", overwrite: "auto" },
-            1,
-          )
-          .from(
-            ".text-side-heading .split-char",
-            {
-              scale: 1.3,
-              y: 40,
-              rotate: -25,
-              opacity: 0,
-              stagger: 0.03,
-              ease: "back.out(3)",
-              duration: 0.3,
-            },
-            1,
-          )
-          .from(".text-side-body", { y: 20, opacity: 0 });
-      }
 
-      if (isDesktop) {
         // Sparkle trail: a few small gold dots (same warm-gold spark used
         // in Why Choose Us) fade in/out with a slight downward drift,
         // staggered across the bottle's descent so they read as
@@ -226,23 +207,24 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             t,
           );
         });
-      }
 
-      if (isDesktop) {
         // Anchor this timeline's total duration to HERO_TL.end so it
         // stays proportionally in sync with Scene.tsx's separate scrollTl.
         scrollTl.to({}, { duration: 0 }, HERO_TL.end);
-      }
 
-      // Kicker line draws in from the left - same treatment as every other
-      // "0X - Label" kicker across the site (What We Do, The Process).
-      gsap.from(".hero-kicker-line", {
-        scaleX: 0,
-        transformOrigin: "left center",
-        duration: 0.9,
-        ease: "power3.out",
-        scrollTrigger: { trigger: "#about", start: "top 85%" },
-      });
+        // Kicker line draws in from the left - same treatment as every
+        // other "0X - Label" kicker across the site (What We Do, The
+        // Process). Desktop-only along with the rest of this scroll
+        // choreography; mobile shows it static/fully drawn (see the
+        // .hero-kicker-line CSS default, not animated from scaleX(0)).
+        gsap.from(".hero-kicker-line", {
+          scaleX: 0,
+          transformOrigin: "left center",
+          duration: 0.9,
+          ease: "power3.out",
+          scrollTrigger: { trigger: "#about", start: "top 85%" },
+        });
+      }
     },
     { dependencies: [ready, isDesktop] },
   );
