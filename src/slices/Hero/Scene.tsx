@@ -84,15 +84,15 @@ export default function Scene({}: Props) {
       // bleeding into the next one.
       .to(
         can2Ref.current.position,
-        { x: 3.2, z: -2.5, duration: HERO_TL.exitDone - HERO_TL.exitStart },
+        { x: 5, z: -5, duration: HERO_TL.exitDone - HERO_TL.exitStart },
         HERO_TL.exitStart,
       )
       .to(
         can2Ref.current.scale,
         {
-          x: 0.05,
-          y: 0.05,
-          z: 0.05,
+          x: 0.001,
+          y: 0.001,
+          z: 0.001,
           duration: HERO_TL.exitDone - HERO_TL.exitStart,
         },
         HERO_TL.exitStart,
@@ -130,13 +130,14 @@ export default function Scene({}: Props) {
         HERO_TL.uprightStart,
       )
 
-      // can1 descends toward the "Who We Are" column, easing its scale
-      // back down so it doesn't overpower the stat cards there.
+      // can1 descends and settles centered in the "Who We Are" visual
+      // column (badge above, stat cards below), a bit larger than before
+      // now that it's the only bottle left to fill that space.
       .to(
         can1Ref.current.position,
         {
-          x: 1.1,
-          y: -0.4,
+          x: 0.7,
+          y: -0.3,
           z: 0.2,
           duration: HERO_TL.descendDone - HERO_TL.descendStart,
         },
@@ -145,9 +146,9 @@ export default function Scene({}: Props) {
       .to(
         can1Ref.current.scale,
         {
-          x: 1.1,
-          y: 1.1,
-          z: 1.1,
+          x: 1.35,
+          y: 1.35,
+          z: 1.35,
           duration: HERO_TL.descendDone - HERO_TL.descendStart,
         },
         HERO_TL.descendStart,
