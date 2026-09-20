@@ -60,7 +60,7 @@ export function BlogTeaser() {
   );
 
   return (
-    <Bounded className="blog-teaser relative flex h-screen items-center overflow-hidden bg-white text-[#2B302B]">
+    <Bounded className="blog-teaser relative flex items-center overflow-hidden bg-white py-16 text-[#2B302B]">
       <WavyCircles className="pointer-events-none absolute left-1/2 top-1/2 h-[90vmin] -translate-x-1/2 -translate-y-1/2 text-[#6B8F71]/10" />
 
       <div ref={sectionRef} className="relative z-10 w-full">
