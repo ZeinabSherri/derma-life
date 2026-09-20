@@ -95,29 +95,42 @@ const CONTACT_DETAILS: {
 export default function ContactPage() {
   return (
     <Bounded className="min-h-screen bg-white pb-24 text-[#2B302B]">
-      <div className="mx-auto mt-12 max-w-2xl text-center">
-        <h1 className="text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
-          Get In Touch
+      {/* Padding lives here, not on the Bounded/section itself - Bounded's
+          own `first:pt-10` (it's the first child of <main>) beats a plain
+          pt-* class on higher CSS specificity (pseudo-class > class),
+          which was leaving only 40px of clearance under the absolutely
+          positioned header and causing a real overlap on mobile. */}
+      <div className="mx-auto w-full max-w-2xl pt-32 text-center md:pt-40">
+        <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+          Contact Us
+        </p>
+        <h1 className="mt-2 text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
+          Get in <em className="font-normal italic">touch.</em>
         </h1>
-        <p className="mt-6 text-balance text-xl font-normal opacity-80">
+        <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
           Ready to bring your brand to life? Let&apos;s talk about your product,
           packaging, and manufacturing needs.
         </p>
       </div>
 
-      <div className="mx-auto mt-12 grid w-full max-w-4xl gap-8 lg:grid-cols-2 lg:items-start">
+      <div className="mx-auto mt-14 grid w-full max-w-4xl gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
         <ContactForm />
 
-        <div className="rounded-lg border border-[#2B302B]/10 bg-white p-6">
-          <h2 className="text-2xl font-bold text-[#6B8F71]">Keep In Touch</h2>
+        <div className="rounded-2xl bg-white p-8 shadow-xl">
+          <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+            Reach Us
+          </p>
+          <h2 className="mt-2 font-serif text-2xl font-bold text-[#2B302B]">
+            Keep in touch.
+          </h2>
           <ul className="mt-6 flex flex-col gap-5">
             {CONTACT_DETAILS.map((item) => (
               <li key={item.label} className="flex items-start gap-4">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#6B8F71]/10 text-[#6B8F71]">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#1F3A2E]/10 text-[#1F3A2E]">
                   {item.icon}
                 </span>
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-wide opacity-60">
+                  <p className="text-xs font-bold uppercase tracking-wide text-[#2B302B]/60">
                     {item.label}
                   </p>
                   {item.href ? (
@@ -125,12 +138,14 @@ export default function ContactPage() {
                       href={item.href}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
-                      className="text-lg font-medium text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
+                      className="font-serif text-lg font-bold text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
                     >
                       {item.value}
                     </a>
                   ) : (
-                    <p className="text-lg font-medium">{item.value}</p>
+                    <p className="font-serif text-lg font-bold text-[#2B302B]">
+                      {item.value}
+                    </p>
                   )}
                 </div>
               </li>
@@ -139,13 +154,14 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <div className="mx-auto mt-12 max-w-3xl text-center">
+      <div className="mx-auto mt-14 max-w-3xl text-center">
         {/* Plain anchor - see src/slices/AlternatingText/BlogTeaser.tsx for why. */}
         <a
           href="/"
-          className="inline-block rounded-xl bg-[#6B8F71] px-6 py-4 text-center text-xl font-bold uppercase tracking-wide text-white transition-colors duration-150 hover:bg-[#597861]"
+          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
         >
           Back to Home
+          <span aria-hidden="true">↗</span>
         </a>
       </div>
     </Bounded>
