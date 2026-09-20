@@ -18,13 +18,20 @@ function imageExists(filename: string) {
 export default function BlogIndexPage() {
   return (
     <Bounded className="min-h-screen bg-white pb-24 text-[#2B302B]">
-      <div className="mx-auto mt-12 max-w-3xl text-center">
-        <h1 className="text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
-          From Our Blog
+      {/* Padding lives here, not on the Bounded/section itself - see
+          src/app/contact/page.tsx for why (Bounded's own first:pt-10 beats
+          a plain pt-* class on CSS specificity since this Bounded is the
+          first child of <main>). */}
+      <div className="mx-auto w-full max-w-3xl pt-32 text-center md:pt-40">
+        <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+          Our Blog
+        </p>
+        <h1 className="mt-2 text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
+          From our <em className="font-normal italic">blog.</em>
         </h1>
-        <p className="mt-6 text-balance text-xl font-normal opacity-80">
+        <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
           Insights on skincare science, formulation trends, and industry
-          updates — stay ahead with DermaLife&apos;s latest articles.
+          updates &mdash; stay ahead with DermaLife&apos;s latest articles.
         </p>
       </div>
 
@@ -35,7 +42,7 @@ export default function BlogIndexPage() {
             <a
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group flex flex-col overflow-hidden rounded-lg border border-[#2B302B]/10 bg-white shadow-sm transition-shadow duration-150 hover:shadow-md"
+              className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-lg transition-shadow duration-150 hover:shadow-2xl"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#EDE3DD]">
                 {hasImage ? (
@@ -61,10 +68,10 @@ export default function BlogIndexPage() {
                 >
                   {post.category}
                 </span>
-                <h2 className="text-balance text-2xl font-bold leading-tight group-hover:underline">
+                <h2 className="text-balance font-serif text-2xl font-bold leading-tight text-[#2B302B] group-hover:text-[#6B8F71]">
                   {post.title}
                 </h2>
-                <p className="text-base font-normal opacity-80">
+                <p className="text-base font-normal text-[#2B302B]/80">
                   {post.excerpt}
                 </p>
               </div>
@@ -77,9 +84,10 @@ export default function BlogIndexPage() {
         {/* Plain anchor - see BlogTeaser.tsx for why. */}
         <a
           href="/"
-          className="inline-block rounded-xl bg-[#6B8F71] px-6 py-4 text-center text-xl font-bold uppercase tracking-wide text-white transition-colors duration-150 hover:bg-[#597861]"
+          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
         >
           Back to Home
+          <span aria-hidden="true">↗</span>
         </a>
       </div>
     </Bounded>

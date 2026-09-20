@@ -35,27 +35,32 @@ export default function BlogPostPage({ params }: Props) {
 
   return (
     <Bounded className="min-h-screen bg-white pb-24 text-[#2B302B]">
-      <div className="mx-auto mt-12 max-w-3xl">
+      {/* Padding lives here, not on the Bounded/section itself - see
+          src/app/contact/page.tsx for why (Bounded's own first:pt-10 beats
+          a plain pt-* class on CSS specificity since this Bounded is the
+          first child of <main>). */}
+      <div className="mx-auto w-full max-w-3xl pt-32 md:pt-40">
         {/* Plain anchor - see BlogTeaser.tsx for why. */}
         <a
           href="/blog"
-          className="text-sm font-bold uppercase tracking-wide text-[#6B8F71] hover:underline"
+          className="inline-flex items-center gap-2 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
         >
-          ← Back to Blog
+          <span aria-hidden="true">←</span>
+          Back to Blog
         </a>
 
         <span
-          className="mt-6 block w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
+          className="mt-8 block w-fit rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
           style={{ backgroundColor: post.categoryColor }}
         >
           {post.category}
         </span>
 
-        <h1 className="mt-4 text-balance font-serif text-4xl font-bold leading-tight lg:text-5xl">
+        <h1 className="mt-4 text-balance font-serif text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-5xl">
           {post.title}
         </h1>
 
-        <div className="mt-8 aspect-[16/9] w-full overflow-hidden rounded-lg bg-[#F3F1EC]">
+        <div className="mt-8 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-[#F3F1EC] shadow-lg">
           {hasImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -73,11 +78,14 @@ export default function BlogPostPage({ params }: Props) {
           )}
         </div>
 
-        <div className="mt-10 flex flex-col gap-5 text-lg leading-relaxed">
+        <div className="mt-10 flex flex-col gap-5 text-lg leading-relaxed text-[#2B302B]/90">
           {post.body.map((block, i) => {
             if (block.type === "heading") {
               return (
-                <h2 key={i} className="mt-4 text-2xl font-bold">
+                <h2
+                  key={i}
+                  className="mt-4 font-serif text-2xl font-bold text-[#2B302B]"
+                >
                   {block.text}
                 </h2>
               );
@@ -88,7 +96,9 @@ export default function BlogPostPage({ params }: Props) {
                   {block.items.map((item, j) => (
                     <li key={j}>
                       {item.label && (
-                        <span className="font-bold">{item.label}: </span>
+                        <span className="font-bold text-[#2B302B]">
+                          {item.label}:{" "}
+                        </span>
                       )}
                       {item.text}
                     </li>
@@ -104,7 +114,7 @@ export default function BlogPostPage({ params }: Props) {
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-[#2B302B]/5 px-3 py-1 text-sm font-medium opacity-70"
+              className="rounded-full bg-[#2B302B]/5 px-3 py-1 text-sm font-medium text-[#2B302B]/70"
             >
               {tag}
             </span>
@@ -115,9 +125,15 @@ export default function BlogPostPage({ params }: Props) {
           {/* Plain anchor - see BlogTeaser.tsx for why. */}
           <a
             href="/blog"
-            className="inline-block rounded-xl bg-[#6B8F71] px-6 py-4 text-center text-xl font-bold uppercase tracking-wide text-white transition-colors duration-150 hover:bg-[#597861]"
+            className="inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
           >
             Back to Blog
+            <span
+              aria-hidden="true"
+              className="flex size-9 items-center justify-center rounded-full bg-white/15 text-lg"
+            >
+              ↗
+            </span>
           </a>
         </div>
       </div>
