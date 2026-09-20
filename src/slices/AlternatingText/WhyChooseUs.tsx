@@ -1269,7 +1269,11 @@ const WCU_CSS = `
 @media (max-width:900px){
   .wcu-section{height:100vh;padding:10px 14px;overflow:hidden}
   .wcu-wrap{grid-template-columns:1fr;gap:4px}
-  .wcu-frame{max-height:14vh}
+  /* No height cap here - the base rule's max-width:min(500px,58vh)
+     still applies and, combined with aspect-ratio:1/1, was previously
+     losing to this 14vh height cap and shrinking the image down to a
+     tiny square instead of filling .wcu-visual's actual width. */
+  .wcu-frame{max-height:none}
   .wcu-visual{max-width:420px;margin:0 auto;width:100%}
   .wcu-ring{width:190px;height:190px;right:-60px;top:-60px}
   .wcu-display{font-size:clamp(19px,6vw,28px);margin-bottom:4px}
