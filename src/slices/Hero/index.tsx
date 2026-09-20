@@ -15,6 +15,7 @@ import CategoryTicker from "@/components/CategoryTicker";
 import Scene from "./Scene";
 import { useStore } from "@/hooks/useStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { HERO_TL } from "./heroScrollTimeline";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -31,6 +32,16 @@ const MOBILE_FIRST_SECTION_BOTTLES: {
 }[] = [
   { flavor: "blackCherry", position: [0.35, 0, 0], floatSpeed: 1.4 },
   { flavor: "strawberryLemonade", position: [0.85, 0, 0], floatSpeed: 1.7 },
+];
+
+// Screen-space (vh/vw) waypoints for the sparkle trail, roughly tracing
+// the surviving bottle's downward-and-right path from center screen
+// toward the "Who We Are" column as it descends.
+const SPARK_POSITIONS: { top: string; left: string }[] = [
+  { top: "42vh", left: "54vw" },
+  { top: "52vh", left: "60vw" },
+  { top: "62vh", left: "66vw" },
+  { top: "70vh", left: "70vw" },
 ];
 
 /**
@@ -86,40 +97,142 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         },
       });
 
-      scrollTl
-        .fromTo(
-          "body",
+      // Desktop: body-color/text-reveal are re-anchored onto the shared
+      // HERO_TL map (plus blur/sparkle/ripple) so this timeline stays in
+      // sync with Scene.tsx's bottle sequence, which only mounts on
+      // desktop. Mobile has no such sequence to sync with (its bottles are
+      // a separate, non-scroll-tied pair) - it keeps its original timing
+      // untouched.
+      if (isDesktop) {
+        scrollTl.fromTo(
+          ".hero-header",
+          { filter: "blur(0px)" },
           {
-            backgroundColor: "#FFFFFF",
-          },
-          {
-            backgroundColor: "#F7F8F5",
+            filter: "blur(14px)",
             overwrite: "auto",
+            duration: HERO_TL.blurDone - HERO_TL.blurStart,
           },
-          1,
-        )
-        // Starts alongside the body-color tween (position "1", not
-        // sequentially after it) and uses a tighter stagger/duration - the
-        // #about nav link jumps straight to the top of this section, and
-        // this scrub-linked reveal needs to already be finished by then or
-        // the last few characters land visibly faded/half-revealed.
-        .from(
-          ".text-side-heading .split-char",
-          {
-            scale: 1.3,
-            y: 40,
-            rotate: -25,
-            opacity: 0,
-            stagger: 0.03,
-            ease: "back.out(3)",
-            duration: 0.3,
+          HERO_TL.blurStart,
+        );
+
+        scrollTl
+          .fromTo(
+            "body",
+            { backgroundColor: "#FFFFFF" },
+            {
+              backgroundColor: "#F7F8F5",
+              overwrite: "auto",
+              duration: 0.3,
+            },
+            HERO_TL.descendDone,
+          )
+          .from(
+            ".text-side-heading .split-char",
+            {
+              scale: 1.3,
+              y: 40,
+              rotate: -25,
+              opacity: 0,
+              stagger: 0.03,
+              ease: "back.out(3)",
+              duration: 0.3,
+            },
+            HERO_TL.descendDone,
+          )
+          .from(
+            ".text-side-body",
+            { y: 20, opacity: 0, duration: 0.3 },
+            HERO_TL.descendDone + 0.3,
+          );
+      } else {
+        scrollTl
+          .fromTo(
+            "body",
+            { backgroundColor: "#FFFFFF" },
+            { backgroundColor: "#F7F8F5", overwrite: "auto" },
+            1,
+          )
+          .from(
+            ".text-side-heading .split-char",
+            {
+              scale: 1.3,
+              y: 40,
+              rotate: -25,
+              opacity: 0,
+              stagger: 0.03,
+              ease: "back.out(3)",
+              duration: 0.3,
+            },
+            1,
+          )
+          .from(".text-side-body", { y: 20, opacity: 0 });
+      }
+
+      if (isDesktop) {
+        // Sparkle trail: a few small gold dots (same warm-gold spark used
+        // in Why Choose Us) fade in/out with a slight downward drift,
+        // staggered across the bottle's descent so they read as
+        // intermittent trailing dust rather than one blob.
+        [".hero-spark-1", ".hero-spark-2", ".hero-spark-3", ".hero-spark-4"].forEach(
+          (sel, i) => {
+            const t = HERO_TL.sparkleStart + i * 0.25;
+            // immediateRender:false - these tweens sit well past position 0
+            // in an already-scrubbing timeline; without this, GSAP renders
+            // their target state as soon as they're added instead of
+            // waiting for the scrubbed playhead to actually reach them.
+            scrollTl.fromTo(
+              sel,
+              { opacity: 0, y: 0 },
+              {
+                opacity: 1,
+                y: 40,
+                duration: 0.4,
+                ease: "power1.out",
+                immediateRender: false,
+              },
+              t,
+            );
+            scrollTl.to(
+              sel,
+              {
+                opacity: 0,
+                duration: 0.3,
+                ease: "power1.in",
+                immediateRender: false,
+              },
+              t + 0.4,
+            );
           },
-          1,
-        )
-        .from(".text-side-body", {
-          y: 20,
-          opacity: 0,
+        );
+
+        // Ripple/puddle cue: two expanding rings fire once the bottle
+        // nears its final resting spot, echoing Why Choose Us's
+        // impact-ring visual but driven by scroll position so it
+        // scrubs/reverses cleanly. Timed to land fully within HERO_TL.end
+        // so the trailing anchor tween below is the timeline's true
+        // latest end time.
+        [".hero-ripple-1", ".hero-ripple-2"].forEach((sel, i) => {
+          const t = HERO_TL.rippleFire + i * 0.1;
+          scrollTl.fromTo(
+            sel,
+            { scale: 0.3, opacity: 0.7 },
+            {
+              scale: 4,
+              opacity: 0,
+              duration: 0.45,
+              ease: "power1.out",
+              immediateRender: false,
+            },
+            t,
+          );
         });
+      }
+
+      if (isDesktop) {
+        // Anchor this timeline's total duration to HERO_TL.end so it
+        // stays proportionally in sync with Scene.tsx's separate scrollTl.
+        scrollTl.to({}, { duration: 0 }, HERO_TL.end);
+      }
 
       // Kicker line draws in from the left - same treatment as every other
       // "0X - Label" kicker across the site (What We Do, The Process).
@@ -145,6 +258,24 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         <View className="hero-scene pointer-events-none sticky top-0 z-50 -mt-[100vh] hidden h-screen w-screen lg:block">
           <Scene />
         </View>
+      )}
+
+      {isDesktop && (
+        <div className="hero-sparkles pointer-events-none sticky top-0 z-[55] -mt-[100vh] hidden h-screen w-screen lg:block">
+          {SPARK_POSITIONS.map((pos, i) => (
+            <span
+              key={i}
+              className={`hero-spark-${i + 1} absolute size-3 rounded-full opacity-0`}
+              style={{
+                top: pos.top,
+                left: pos.left,
+                background:
+                  "radial-gradient(circle at 35% 35%, #E3B575, #B9803A)",
+                boxShadow: "0 0 14px rgba(185,128,58,.75)",
+              }}
+            />
+          ))}
+        </div>
       )}
 
       <div className="grid">
@@ -261,6 +392,22 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 section as the user scrolls, so this column doesn't need
                 its own separate bottle group too. */}
             <div className="aspect-[4/5] h-full w-full md:h-auto" />
+
+            {/* Rippling puddle cue: fires once the descending bottle in
+                Scene.tsx nears this column, via the shared HERO_TL
+                position map. Desktop-only, same as Scene.tsx's canvas. */}
+            {isDesktop && (
+              <>
+                <span
+                  className="hero-ripple-1 pointer-events-none absolute bottom-6 left-1/2 size-10 -translate-x-1/2 rounded-full opacity-0"
+                  style={{ border: "1.5px solid rgba(47,79,67,.4)" }}
+                />
+                <span
+                  className="hero-ripple-2 pointer-events-none absolute bottom-6 left-1/2 size-10 -translate-x-1/2 rounded-full opacity-0"
+                  style={{ border: "1.5px solid rgba(47,79,67,.4)" }}
+                />
+              </>
+            )}
 
             <svg
               viewBox="0 0 200 200"
