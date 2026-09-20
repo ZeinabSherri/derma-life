@@ -102,7 +102,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
       id="products"
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      className="carousel relative grid h-screen scroll-mt-20 grid-rows-[auto,auto,4fr,auto] justify-center overflow-hidden py-8 text-[#2B302B]"
+      className="carousel relative grid scroll-mt-20 grid-rows-[auto,auto,auto,auto] justify-center overflow-hidden py-14 text-[#2B302B]"
       style={{
         background:
           "linear-gradient(to bottom, #ffffff 0%, transparent 14%, transparent 86%, #ffffff 100%), linear-gradient(135deg, #FDFBF7 0%, #FFB88C 100%)",
@@ -142,7 +142,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
           label="Previous Flavor"
         />
         {/* Can */}
-        <View className="aspect-square h-[34vh] max-h-72 min-h-32">
+        <View className="aspect-square h-[42vh] max-h-96 min-h-40">
           <Center position={[0, 0, 0]}>
             <FloatingCan
               ref={sodaCanRef}
@@ -195,7 +195,7 @@ function ArrowButton({
   return (
     <button
       onClick={onClick}
-      className="size-12 rounded-full border-2 border-[#2B302B] bg-[#2B302B]/10 p-3 text-[#2B302B] opacity-85 ring-[#2B302B] focus:outline-none focus-visible:opacity-100 focus-visible:ring-4 md:size-16 lg:size-20"
+      className="size-9 rounded-full border-2 border-[#2B302B] bg-[#2B302B]/10 p-2 text-[#2B302B] opacity-85 ring-[#2B302B] focus:outline-none focus-visible:opacity-100 focus-visible:ring-4 md:size-11 lg:size-12"
     >
       <ArrowIcon className={clsx(direction === "right" && "-scale-x-100")} />
       <span className="sr-only">{label}</span>
