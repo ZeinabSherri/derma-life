@@ -1,3 +1,4 @@
+import { Jost } from "next/font/google";
 import { PrismicPreview } from "@prismicio/next";
 import { repositoryName } from "@/prismicio";
 
@@ -7,9 +8,19 @@ import ViewCanvas from "@/components/ViewCanvas";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 
-// No custom web font - matching the reference site exactly, which uses
-// only system fonts (Helvetica Neue/Arial for body+headings, Georgia for
-// the italic accent word). See tailwind.config.js `fontFamily`.
+// The site otherwise uses only system fonts (Helvetica Neue/Arial, Georgia
+// - see tailwind.config.js `fontFamily`). Jost is loaded here as a CSS
+// variable only, scoped via the `font-heroSans` utility to the Header and
+// Hero restyle - registering the variable on <body> doesn't change body's
+// own font-family (that's still the `sans`/`serif` Tailwind classes below),
+// it just makes `var(--font-jost)` available to opt into further down.
+const jost = Jost({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-jost",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="overflow-x-hidden bg-white">
+      <body className={`${jost.variable} overflow-x-hidden bg-white`}>
         <CustomCursor />
         <Header />
         <main>

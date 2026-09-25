@@ -109,6 +109,47 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           },
         });
 
+        // Left-edge progress rail: not tweened/eased (unlike everything
+        // else in this file) because it should track the raw scrollbar
+        // position 1:1, the same way a native scrollbar thumb would -
+        // self.progress is already 0-1 across the same trigger range
+        // scrollTl uses, independent of HERO_TL's internal beat units.
+        ScrollTrigger.create({
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom bottom",
+          onUpdate: (self) => {
+            gsap.set(".hero-rail-fill", { scaleY: self.progress });
+            const railNum = document.querySelector(".hero-rail-num");
+            if (railNum) {
+              railNum.textContent = self.progress < 0.5 ? "01" : "02";
+            }
+          },
+        });
+
+        // SCROLL hint fades out almost immediately - it's only meant to
+        // read before the user has started scrolling at all.
+        scrollTl.to(
+          ".hero-scroll-hint",
+          { opacity: 0, duration: 0.4, overwrite: "auto" },
+          HERO_TL.start,
+        );
+
+        // The rail itself has to be gone before the "Who We Are" column
+        // scrolls into the same screen-space it occupies - it's sticky
+        // within the viewport while that column is normal-flow content
+        // moving underneath it, so left unfaded the "01"/"02" label ends
+        // up visually overlapping the body copy once that section arrives.
+        scrollTl.to(
+          ".hero-rail",
+          {
+            opacity: 0,
+            duration: HERO_TL.uprightPeak - HERO_TL.uprightStart,
+            overwrite: "auto",
+          },
+          HERO_TL.uprightStart,
+        );
+
         scrollTl.fromTo(
           ".hero-header",
           { filter: "blur(0px)" },
@@ -234,7 +275,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     <Bounded
       data-slice-type={slice.slice_type}
       data-slice-variation={slice.variation}
-      className="hero opacity-0"
+      className="hero font-heroSans opacity-0"
     >
       {isDesktop && (
         <View className="hero-scene pointer-events-none sticky top-0 z-50 -mt-[100vh] hidden h-screen w-screen lg:block">
@@ -257,6 +298,23 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               }}
             />
           ))}
+        </div>
+      )}
+
+      {isDesktop && (
+        <div className="hero-rail pointer-events-none sticky top-0 z-[60] -mt-[100vh] hidden h-screen w-screen lg:block">
+          <div className="absolute left-6 top-1/2 flex h-[180px] -translate-y-1/2 flex-col items-center gap-3 lg:left-10">
+            <div className="relative w-px flex-1 overflow-hidden rounded-full bg-[#2B302B]/15">
+              <div className="hero-rail-fill absolute inset-x-0 top-0 h-full w-full origin-top scale-y-0 bg-[#6B8F71]" />
+            </div>
+            <span className="hero-rail-num font-heroSans text-xs font-medium tracking-[0.12em] text-[#2B302B]">
+              01
+            </span>
+          </div>
+
+          <span className="hero-scroll-hint absolute bottom-7 left-1/2 -translate-x-1/2 font-heroSans text-xs tracking-[0.3em] text-[#2B302B]/50">
+            SCROLL
+          </span>
         </div>
       )}
 
@@ -297,7 +355,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 <directionalLight intensity={5} position={[0, 1, 1]} />
               </View>
             )}
-            <p className="hero-eyebrow font-sans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
+            <p className="hero-eyebrow font-heroSans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
               Innovation Skin Technology
             </p>
             <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#2B302B] md:text-[9rem] lg:text-[13rem]">
@@ -327,12 +385,12 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         >
           <div>
             <div className="flex items-center gap-4">
-              <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+              <p className="whitespace-nowrap font-heroSans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
                 01 &mdash; Who We Are
               </p>
               <span className="hero-kicker-line h-px w-full bg-[#2B302B]/20" />
             </div>
-            <p className="mt-4 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+            <p className="mt-4 font-heroSans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Who We Are.
             </p>
             <h2 className="text-side-heading mt-2 text-balance font-serif text-3xl font-bold leading-[1.05] text-[#2B302B] md:text-4xl lg:text-6xl">
@@ -360,7 +418,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             </div>
             <a
               href="/#services"
-              className="mt-4 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71] md:mt-8"
+              className="mt-4 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-heroSans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71] md:mt-8"
             >
               Read More
               <span aria-hidden="true">↗</span>
@@ -429,7 +487,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <p className="font-serif text-base font-bold text-[#2B302B] md:text-2xl">
                 500+
               </p>
-              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
+              <p className="font-heroSans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
                 Ingredients
               </p>
             </div>
@@ -438,7 +496,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <p className="font-serif text-sm font-bold text-[#2B302B] md:text-lg">
                 GMP &middot; ISO
               </p>
-              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
+              <p className="font-heroSans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
                 Standards
               </p>
             </div>

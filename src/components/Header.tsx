@@ -39,7 +39,7 @@ export default function Header() {
           />
         </a>
 
-        <nav className="hidden items-center gap-7 font-sans text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B] lg:flex">
+        <nav className="hidden items-center gap-[34px] font-heroSans text-[15px] font-normal uppercase tracking-[0.16em] text-[#2B302B] lg:flex">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
@@ -82,13 +82,13 @@ export default function Header() {
       </div>
 
       {open && (
-        <nav className="flex flex-col gap-1 border-t border-[#2B302B]/10 bg-white px-4 py-4 font-sans lg:hidden">
+        <nav className="flex flex-col gap-1 border-t border-[#2B302B]/10 bg-white px-4 py-4 font-heroSans lg:hidden">
           {NAV_LINKS.map((link) => (
             <a
               key={link.label}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="py-2 text-sm font-medium uppercase tracking-[0.15em] text-[#2B302B]"
+              className="py-2 text-sm font-normal uppercase tracking-[0.16em] text-[#2B302B]"
             >
               {link.label}
             </a>

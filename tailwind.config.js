@@ -10,6 +10,9 @@ module.exports = {
       fontFamily: {
         sans: ['"Helvetica Neue"', "Arial", "sans-serif"],
         serif: ["Georgia", '"Times New Roman"', "serif"],
+        // Scoped to the Header + Hero restyle only (see layout.tsx) - the
+        // rest of the site keeps the system `sans`/`serif` stacks above.
+        heroSans: ["var(--font-jost)", '"Helvetica Neue"', "Arial", "sans-serif"],
       },
       keyframes: {
         "slide-left": {

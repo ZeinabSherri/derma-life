@@ -39,11 +39,16 @@ const CENTER_OFFSET_Y = -0.19459;
 export type SodaCanProps = {
   flavor?: keyof typeof flavorColors;
   scale?: number;
+  /** Opacity of the tinted glass body, 1 = fully opaque (every other
+   *  SodaCan site-wide). Only the Hero's two bottles pass a value below 1,
+   *  so a liquid mesh rendered inside them can be seen through the glass. */
+  bottleOpacity?: number;
 };
 
 export function SodaCan({
   flavor = "blackCherry",
   scale = 2.3,
+  bottleOpacity = 1,
   ...props
 }: SodaCanProps) {
   const { nodes, materials } = useGLTF("/Bottle-baked.glb");
@@ -88,8 +93,10 @@ export function SodaCan({
   const tintedBottleMaterial = useMemo(() => {
     const mat = bottleMaterial.clone();
     mat.color = new THREE.Color(flavorColors[flavor]);
+    mat.opacity = bottleOpacity;
+    mat.transparent = bottleOpacity < 1;
     return mat;
-  }, [bottleMaterial, flavor]);
+  }, [bottleMaterial, flavor, bottleOpacity]);
 
   return (
     <group {...props} dispose={null} scale={scale}>

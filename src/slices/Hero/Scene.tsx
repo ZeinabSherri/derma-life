@@ -1,15 +1,44 @@
 "use client";
 
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Environment } from "@react-three/drei";
-import { Group } from "three";
+import { CanvasTexture, Group, Mesh, MeshBasicMaterial } from "three";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import FloatingCan from "@/components/FloatingCan";
+import { flavorColors } from "@/components/SodaCan";
+import LiquidSurface from "@/components/LiquidSurface";
 import { useStore } from "@/hooks/useStore";
 import { HERO_TL } from "./heroScrollTimeline";
+
+// Cheap soft ground shadow: a black-to-transparent radial gradient baked
+// into a canvas texture once and reused for both bottles' shadow discs,
+// rather than shipping/decoding an external shadow image for what's a
+// generic, non-brand-specific blur.
+function createShadowTexture() {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  const gradient = ctx.createRadialGradient(
+    size / 2,
+    size / 2,
+    0,
+    size / 2,
+    size / 2,
+    size / 2,
+  );
+  gradient.addColorStop(0, "rgba(0,0,0,0.45)");
+  gradient.addColorStop(0.7, "rgba(0,0,0,0.18)");
+  gradient.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  return new CanvasTexture(canvas);
+}
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -25,6 +54,13 @@ export default function Scene({}: Props) {
   const can2GroupRef = useRef<Group>(null);
 
   const groupRef = useRef<Group>(null);
+
+  const shadowRef = useRef<Mesh>(null);
+  const shadowMaterialRef = useRef<MeshBasicMaterial>(null);
+  const shadowTexture = useMemo(
+    () => (typeof document !== "undefined" ? createShadowTexture() : null),
+    [],
+  );
 
   const FLOAT_SPEED = 1.5;
 
@@ -47,6 +83,13 @@ export default function Scene({}: Props) {
 
     gsap.set(can2Ref.current.position, { x: 1.5 });
     gsap.set(can2Ref.current.rotation, { z: 0.5 });
+
+    if (shadowMaterialRef.current) {
+      gsap.set(shadowMaterialRef.current, { opacity: 0 });
+    }
+    if (shadowRef.current) {
+      gsap.set(shadowRef.current.scale, { x: 0.5, y: 0.5, z: 0.5 });
+    }
 
     const introTl = gsap.timeline({
       defaults: {
@@ -157,12 +200,43 @@ export default function Scene({}: Props) {
       // Anchor this timeline's total duration to HERO_TL.end so it stays
       // proportionally in sync with index.tsx's separate scrollTl.
       .to({}, { duration: 0 }, HERO_TL.end);
+
+    // Soft ground shadow fades/grows in under can1 as it lands - only
+    // can1 gets one, since can2 has already vanished by this point.
+    if (shadowMaterialRef.current && shadowRef.current) {
+      scrollTl
+        .to(
+          shadowMaterialRef.current,
+          {
+            opacity: 0.9,
+            duration: HERO_TL.descendDone - HERO_TL.descendStart,
+            immediateRender: false,
+          },
+          HERO_TL.descendStart,
+        )
+        .to(
+          shadowRef.current.scale,
+          {
+            x: 1.35,
+            y: 1.35,
+            z: 1.35,
+            duration: HERO_TL.descendDone - HERO_TL.descendStart,
+            immediateRender: false,
+          },
+          HERO_TL.descendStart,
+        );
+    }
   });
 
   // Smaller than SodaCan's default (2.3) so the bottle reads at a
   // deliberate, controlled size next to the text-side content instead of
   // overwhelming it.
   const BOTTLE_SCALE = 1.2;
+
+  // Only these two Hero bottles get a frosted, slightly translucent glass
+  // (every other SodaCan site-wide defaults to fully opaque) - opaque glass
+  // would otherwise hide the LiquidSurface mesh rendered inside it entirely.
+  const BOTTLE_OPACITY = 0.88;
 
   const FLOAT_PROPS = {
     floatIntensity: 1.6,
@@ -180,18 +254,50 @@ export default function Scene({}: Props) {
           ref={can1Ref}
           flavor="blackCherry"
           scale={BOTTLE_SCALE}
+          bottleOpacity={BOTTLE_OPACITY}
           floatSpeed={FLOAT_SPEED}
           {...FLOAT_PROPS}
-        />
+        >
+          <LiquidSurface
+            motionRef={can1Ref}
+            color={flavorColors.blackCherry}
+            radius={0.17 * BOTTLE_SCALE}
+            y={-0.18 * BOTTLE_SCALE}
+          />
+          {shadowTexture && (
+            <mesh
+              ref={shadowRef}
+              position={[0, -0.5 * BOTTLE_SCALE, 0]}
+              rotation-x={-Math.PI / 2}
+            >
+              <circleGeometry args={[0.45 * BOTTLE_SCALE, 24]} />
+              <meshBasicMaterial
+                ref={shadowMaterialRef}
+                map={shadowTexture}
+                transparent
+                opacity={0}
+                depthWrite={false}
+              />
+            </mesh>
+          )}
+        </FloatingCan>
       </group>
       <group ref={can2GroupRef}>
         <FloatingCan
           ref={can2Ref}
           flavor="strawberryLemonade"
           scale={BOTTLE_SCALE}
+          bottleOpacity={BOTTLE_OPACITY}
           floatSpeed={FLOAT_SPEED}
           {...FLOAT_PROPS}
-        />
+        >
+          <LiquidSurface
+            motionRef={can2Ref}
+            color={flavorColors.strawberryLemonade}
+            radius={0.17 * BOTTLE_SCALE}
+            y={-0.18 * BOTTLE_SCALE}
+          />
+        </FloatingCan>
       </group>
 
       {/* Environment-only lighting left the far side of every bottle
