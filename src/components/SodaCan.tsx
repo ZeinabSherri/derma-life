@@ -20,8 +20,8 @@ export const flavorColors = {
   // Hero-only tints (not tied to any Prismic flavor option) - matching the
   // reference's two named bottles without touching the shared "watermelon"/
   // "lemonLime" hexes above, which are also used on Carousel/SkyDive.
-  ageless: "#F8F6F2", // near-white
-  radiance: "#F6C9A2", // light peach, not the darker warm tan above
+  ageless: "#FAFAF8", // near-white, brighter than the first pass
+  radiance: "#FBDAB9", // light peach, softer/lighter than the first pass
 };
 
 // Model has 5 separate parts (label, glass body, inner tube, cap, rubber

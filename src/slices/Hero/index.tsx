@@ -36,7 +36,10 @@ const KEYFRAMES = {
   ],
   R: [
     [370, 478, 48.6, 0.7],
-    [370, 466, 48.6, 0.7],
+    // Was [370, 466, ...], nearly touching bottle A's own mid-scroll
+    // waypoint [206, 372, ...] once both bottles' tilt/size are accounted
+    // for - moved further right/down so the two don't visually cross.
+    [470, 560, 48.6, 0.7],
     [844, 550, 18, 0.62],
   ],
 } as const;
@@ -151,7 +154,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           tilt -= arcK * 22;
           sc *= 1 - arcK * 0.12;
         } else {
-          y -= arcK * 34;
+          // Pushed opposite A's arc (down instead of up) so the two
+          // bottles clear each other vertically while their paths cross
+          // horizontally mid-scroll, instead of visually overlapping.
+          y += arcK * 70;
           tilt += arcK * 10;
         }
 
