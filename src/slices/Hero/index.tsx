@@ -41,14 +41,19 @@ const KEYFRAMES = {
   ],
 } as const;
 
-// [offsetX, offsetY, boxW, boxH] - identical to the source's SHADOW.
+// [offsetX, offsetY, boxW, boxH]. The source's own offsetY (564/652) was
+// meant relative to each bottle's *landed* keyframe position, not its live
+// animated one - adding it to the live y here (needed so the shadow tracks
+// the bottle while it's still floating, not just once landed) pushed the
+// shadow hundreds of px below the stage. Replaced with a small grounding
+// offset so it sits directly under the bottle at any point in the scroll.
 const SHADOW = {
-  A: [-7, 564, 520, 250],
-  R: [-12, 652, 560, 270],
+  A: [-7, 90, 520, 250],
+  R: [-12, 100, 560, 270],
 } as const;
 
 const FLOAT_AMT = 1; // source's default `float` prop
-const BOTTLE_BOX = { w: 480, h: 650 };
+const BOTTLE_BOX = { w: 560, h: 760 };
 
 function clamp(v: number, a = 0, b = 1) {
   return Math.min(b, Math.max(a, v));
@@ -165,7 +170,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         const sh = SHADOW[id];
         const shadowEl = shadowRef.current;
         if (shadowEl) {
-          shadowEl.style.opacity = (land * 0.95).toFixed(3);
+          // A baseline shadow is always visible under the bottle (not just
+          // once it "lands" near the end of the scroll like the source),
+          // so it reads as grounded throughout, with extra emphasis as it
+          // settles.
+          shadowEl.style.opacity = (0.28 + land * 0.65).toFixed(3);
           shadowEl.style.transform = `translate(${x + sh[0] - sh[2] / 2}px,${y + sh[1] - sh[3] / 2}px) scale(${0.55 + 0.45 * land})`;
         }
       });
@@ -413,8 +422,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               >
                 <group ref={groupARef}>
                   <Center>
-                    {/* "Ageless Skin" bottle in the reference - pale/white glass. */}
-                    <SodaCan flavor="lemonLime" scale={1.15} />
+                    {/* "Ageless Skin" bottle in the reference - near-white glass. */}
+                    <SodaCan flavor="ageless" scale={1.4} />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />
@@ -445,8 +454,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               >
                 <group ref={groupRRef}>
                   <Center>
-                    {/* "Radiance" bottle in the reference - warm tan/orange. */}
-                    <SodaCan flavor="watermelon" scale={1.15} />
+                    {/* "Radiance" bottle in the reference - light peach. */}
+                    <SodaCan flavor="radiance" scale={1.4} />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />

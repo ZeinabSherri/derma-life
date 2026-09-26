@@ -17,6 +17,11 @@ export const flavorColors = {
   blackCherry: "#F5F1E6", // Collagen Boost - the two colors in active use
   strawberryLemonade: "#F5F1E6", // Vitamin C Brighten - site-wide
   watermelon: "#C98F5E", // Hyaluronic Hydrate - warm tan
+  // Hero-only tints (not tied to any Prismic flavor option) - matching the
+  // reference's two named bottles without touching the shared "watermelon"/
+  // "lemonLime" hexes above, which are also used on Carousel/SkyDive.
+  ageless: "#F8F6F2", // near-white
+  radiance: "#F6C9A2", // light peach, not the darker warm tan above
 };
 
 // Model has 5 separate parts (label, glass body, inner tube, cap, rubber
