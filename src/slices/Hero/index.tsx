@@ -358,20 +358,20 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             <p className="hero-eyebrow font-heroSans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
               Innovation Skin Technology
             </p>
-            <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#2B302B] md:text-[9rem] lg:text-[13rem]">
+            <h1 className="hero-header text-5xl font-black uppercase leading-[.9] text-[#2B302B] md:text-6xl lg:text-7xl">
               <TextSplitter
                 text="Beauty"
                 wordDisplayStyle="block"
                 className="hero-header-word"
               />
             </h1>
-            <div className="hero-subheading mt-12 font-serif text-5xl text-[#2B302B] lg:text-6xl">
+            <div className="hero-subheading mt-4 font-serif text-3xl text-[#2B302B] md:text-4xl lg:text-5xl">
               <p>
                 <span className="font-bold">Formulating</span>{" "}
                 <span className="italic">for success.</span>
               </p>
             </div>
-            <div className="hero-body text-2xl font-normal text-[#2B302B]">
+            <div className="hero-body mt-2 text-base font-normal text-[#2B302B] md:text-lg">
               <p>
                 Skincare. Haircare. Body care. World-class, worldwide.
               </p>
