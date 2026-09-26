@@ -47,7 +47,7 @@ const SHADOW = {
 } as const;
 
 const FLOAT_AMT = 1; // source's default `float` prop
-const BOTTLE_BOX = { w: 420, h: 620 };
+const BOTTLE_BOX = { w: 620, h: 820 };
 
 function clamp(v: number, a = 0, b = 1) {
   return Math.min(b, Math.max(a, v));
@@ -231,24 +231,24 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               style={{
                 position: "absolute",
                 left: 60,
-                top: 184,
-                width: 520,
+                top: 160,
+                width: 640,
                 willChange: "transform,opacity",
               }}
             >
               <div
                 style={{
-                  fontSize: 26,
+                  fontSize: 32,
                   fontWeight: 500,
                   letterSpacing: "0.12em",
-                  marginBottom: 22,
+                  marginBottom: 26,
                 }}
               >
                 WHO WE ARE
               </div>
               <div
                 style={{
-                  fontSize: 50,
+                  fontSize: 66,
                   fontWeight: 400,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
@@ -266,8 +266,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               style={{
                 position: "absolute",
                 right: 56,
-                top: 108,
-                width: 520,
+                top: 84,
+                width: 640,
                 textAlign: "right",
                 opacity: 0,
                 willChange: "transform,opacity",
@@ -275,17 +275,17 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             >
               <div
                 style={{
-                  fontSize: 26,
+                  fontSize: 32,
                   fontWeight: 500,
                   letterSpacing: "0.12em",
-                  marginBottom: 22,
+                  marginBottom: 26,
                 }}
               >
                 WHO WE ARE
               </div>
               <div
                 style={{
-                  fontSize: 50,
+                  fontSize: 66,
                   fontWeight: 400,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
@@ -303,25 +303,25 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               style={{
                 position: "absolute",
                 left: 60,
-                top: 150,
-                width: 560,
+                top: 120,
+                width: 680,
                 opacity: 0,
                 willChange: "transform,opacity",
               }}
             >
               <div
                 style={{
-                  fontSize: 26,
+                  fontSize: 32,
                   fontWeight: 500,
                   letterSpacing: "0.12em",
-                  marginBottom: 22,
+                  marginBottom: 26,
                 }}
               >
                 WHO WE ARE
               </div>
               <div
                 style={{
-                  fontSize: 50,
+                  fontSize: 66,
                   fontWeight: 400,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
@@ -335,9 +335,9 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               </div>
               <div
                 style={{
-                  marginTop: 30,
-                  maxWidth: 380,
-                  fontSize: 19,
+                  marginTop: 34,
+                  maxWidth: 420,
+                  fontSize: 22,
                   fontWeight: 300,
                   lineHeight: 1.5,
                   color: "#3a4247",
@@ -401,7 +401,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 }}
               >
                 <Center>
-                  <SodaCan flavor="blackCherry" scale={0.85} />
+                  <SodaCan flavor="blackCherry" scale={1.7} />
                 </Center>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
@@ -430,7 +430,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 }}
               >
                 <Center>
-                  <SodaCan flavor="strawberryLemonade" scale={0.85} />
+                  <SodaCan flavor="strawberryLemonade" scale={1.7} />
                 </Center>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
