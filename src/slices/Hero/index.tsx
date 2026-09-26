@@ -413,7 +413,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               >
                 <group ref={groupARef}>
                   <Center>
-                    <SodaCan flavor="blackCherry" scale={1.15} />
+                    {/* "Ageless Skin" bottle in the reference - pale/white glass. */}
+                    <SodaCan flavor="lemonLime" scale={1.15} />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />
@@ -444,7 +445,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               >
                 <group ref={groupRRef}>
                   <Center>
-                    <SodaCan flavor="strawberryLemonade" scale={1.15} />
+                    {/* "Radiance" bottle in the reference - warm tan/orange. */}
+                    <SodaCan flavor="watermelon" scale={1.15} />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />
