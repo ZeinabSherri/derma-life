@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
-import { Center, Environment, View } from "@react-three/drei";
+import { Center, Environment, Float, View } from "@react-three/drei";
 import { Group } from "three";
 
 import CategoryTicker from "@/components/CategoryTicker";
@@ -280,9 +280,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           >
             <div style={{ position: "relative", width: 150, height: 220 }}>
               <View style={{ position: "absolute", inset: 0 }}>
-                <Center>
-                  <SodaCan flavor="ageless" scale={1.4} />
-                </Center>
+                <Float speed={1.6} floatIntensity={1.1} rotationIntensity={0.6}>
+                  <Center>
+                    <SodaCan flavor="ageless" scale={1.4} />
+                  </Center>
+                </Float>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
@@ -298,9 +300,13 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               }}
             >
               <View style={{ position: "absolute", inset: 0 }}>
-                <Center>
-                  <SodaCan flavor="radiance" scale={1.4} />
-                </Center>
+                {/* Slightly different speed/phase than the bottle above so
+                    the two don't bob in lockstep. */}
+                <Float speed={1.2} floatIntensity={1.3} rotationIntensity={0.6}>
+                  <Center>
+                    <SodaCan flavor="radiance" scale={1.4} />
+                  </Center>
+                </Float>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
