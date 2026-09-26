@@ -8,6 +8,7 @@ import { Group } from "three";
 
 import CategoryTicker from "@/components/CategoryTicker";
 import { SodaCan } from "@/components/SodaCan";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useStore } from "@/hooks/useStore";
 
 /**
@@ -79,6 +80,12 @@ function ease(t: number) {
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
   const isReady = useStore((state) => state.isReady);
+  // The fixed 1212x678 stage is scaled to fit by width, so on a narrow/tall
+  // phone viewport it shrinks to a tiny letterboxed strip with huge blank
+  // space above/below it. Below the same 1024px breakpoint the rest of the
+  // site treats as "desktop", this renders a normal-flow, non-scroll-scrubbed
+  // layout instead of trying to force the scaled canvas to fit.
+  const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -102,6 +109,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
   useEffect(() => {
     isReady();
+    if (!isDesktop) return;
 
     let raf = 0;
     let p = 0;
@@ -210,7 +218,101 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isDesktop]);
+
+  if (!isDesktop) {
+    return (
+      <>
+        <div
+          id="about"
+          data-slice-type={slice.slice_type}
+          data-slice-variation={slice.variation}
+          className="font-heroSans"
+          style={{
+            position: "relative",
+            background: "#F3F6F8",
+            color: "#141414",
+            padding: "72px 24px 56px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            Who We Are
+          </div>
+          <div
+            style={{
+              marginTop: 12,
+              fontSize: 34,
+              fontWeight: 400,
+              lineHeight: 1.08,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Skincare Leaders. Formulating For Success.
+          </div>
+          <div
+            style={{
+              marginTop: 16,
+              maxWidth: 420,
+              fontSize: 16,
+              fontWeight: 300,
+              lineHeight: 1.5,
+              color: "#3a4247",
+            }}
+          >
+            Science &middot; Innovation &middot; Skincare
+          </div>
+          <div
+            style={{
+              position: "relative",
+              marginTop: 4,
+              height: 220,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ position: "relative", width: 150, height: 220 }}>
+              <View style={{ position: "absolute", inset: 0 }}>
+                <Center>
+                  <SodaCan flavor="ageless" scale={1.4} />
+                </Center>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
+              </View>
+            </div>
+            <div
+              style={{
+                position: "relative",
+                width: 150,
+                height: 220,
+                marginLeft: -32,
+              }}
+            >
+              <View style={{ position: "absolute", inset: 0 }}>
+                <Center>
+                  <SodaCan flavor="radiance" scale={1.4} />
+                </Center>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
+              </View>
+            </div>
+          </div>
+        </div>
+        <CategoryTicker />
+      </>
+    );
+  }
 
   return (
     <>
