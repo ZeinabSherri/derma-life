@@ -8,8 +8,6 @@ import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import FloatingCan from "@/components/FloatingCan";
-import { flavorColors } from "@/components/SodaCan";
-import LiquidSurface from "@/components/LiquidSurface";
 import { useStore } from "@/hooks/useStore";
 import { HERO_TL } from "./heroScrollTimeline";
 
@@ -233,11 +231,6 @@ export default function Scene({}: Props) {
   // overwhelming it.
   const BOTTLE_SCALE = 1.2;
 
-  // Only these two Hero bottles get a frosted, slightly translucent glass
-  // (every other SodaCan site-wide defaults to fully opaque) - opaque glass
-  // would otherwise hide the LiquidSurface mesh rendered inside it entirely.
-  const BOTTLE_OPACITY = 0.88;
-
   const FLOAT_PROPS = {
     floatIntensity: 1.6,
     floatingRange: [-0.28, 0.28] as [number, number],
@@ -254,16 +247,9 @@ export default function Scene({}: Props) {
           ref={can1Ref}
           flavor="blackCherry"
           scale={BOTTLE_SCALE}
-          bottleOpacity={BOTTLE_OPACITY}
           floatSpeed={FLOAT_SPEED}
           {...FLOAT_PROPS}
         >
-          <LiquidSurface
-            motionRef={can1Ref}
-            color={flavorColors.blackCherry}
-            radius={0.17 * BOTTLE_SCALE}
-            y={-0.18 * BOTTLE_SCALE}
-          />
           {shadowTexture && (
             <mesh
               ref={shadowRef}
@@ -287,17 +273,9 @@ export default function Scene({}: Props) {
           ref={can2Ref}
           flavor="strawberryLemonade"
           scale={BOTTLE_SCALE}
-          bottleOpacity={BOTTLE_OPACITY}
           floatSpeed={FLOAT_SPEED}
           {...FLOAT_PROPS}
-        >
-          <LiquidSurface
-            motionRef={can2Ref}
-            color={flavorColors.strawberryLemonade}
-            radius={0.17 * BOTTLE_SCALE}
-            y={-0.18 * BOTTLE_SCALE}
-          />
-        </FloatingCan>
+        />
       </group>
 
       {/* Environment-only lighting left the far side of every bottle
