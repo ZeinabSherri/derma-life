@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
 import { Center, Environment, View } from "@react-three/drei";
+import { Group } from "three";
 
 import CategoryTicker from "@/components/CategoryTicker";
 import { SodaCan } from "@/components/SodaCan";
@@ -47,7 +48,7 @@ const SHADOW = {
 } as const;
 
 const FLOAT_AMT = 1; // source's default `float` prop
-const BOTTLE_BOX = { w: 620, h: 820 };
+const BOTTLE_BOX = { w: 480, h: 650 };
 
 function clamp(v: number, a = 0, b = 1) {
   return Math.min(b, Math.max(a, v));
@@ -78,6 +79,13 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   const t2Ref = useRef<HTMLDivElement>(null);
   const bARef = useRef<HTMLDivElement>(null);
   const bRRef = useRef<HTMLDivElement>(null);
+  // The tilt has to be applied to the 3D content itself, not the tracked
+  // DOM wrapper below - <View> sizes/positions the render viewport off
+  // that wrapper's axis-aligned getBoundingClientRect(), which a CSS
+  // rotate() on the wrapper doesn't change, so a DOM-level rotation was
+  // silently ignored and the bottle always rendered upright.
+  const groupARef = useRef<Group>(null);
+  const groupRRef = useRef<Group>(null);
   const sARef = useRef<HTMLDivElement>(null);
   const sRRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
@@ -122,10 +130,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
       (
         [
-          ["A", bARef, sARef],
-          ["R", bRRef, sRRef],
+          ["A", bARef, sARef, groupARef],
+          ["R", bRRef, sRRef, groupRRef],
         ] as const
-      ).forEach(([id, bottleRef, shadowRef]) => {
+      ).forEach(([id, bottleRef, shadowRef, groupRef]) => {
         const a = KEYFRAMES[id][seg];
         const b = KEYFRAMES[id][seg + 1];
         let x = lerp(a[0], b[0], e);
@@ -148,7 +156,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
         const bottleEl = bottleRef.current;
         if (bottleEl) {
-          bottleEl.style.transform = `translate(${x}px,${y}px) rotate(${tilt}deg) scale(${sc})`;
+          bottleEl.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+        }
+        if (groupRef.current) {
+          groupRef.current.rotation.z = (-tilt * Math.PI) / 180;
         }
 
         const sh = SHADOW[id];
@@ -400,9 +411,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   height: BOTTLE_BOX.h,
                 }}
               >
-                <Center>
-                  <SodaCan flavor="blackCherry" scale={1.7} />
-                </Center>
+                <group ref={groupARef}>
+                  <Center>
+                    <SodaCan flavor="blackCherry" scale={1.15} />
+                  </Center>
+                </group>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
@@ -429,9 +442,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   height: BOTTLE_BOX.h,
                 }}
               >
-                <Center>
-                  <SodaCan flavor="strawberryLemonade" scale={1.7} />
-                </Center>
+                <group ref={groupRRef}>
+                  <Center>
+                    <SodaCan flavor="strawberryLemonade" scale={1.15} />
+                  </Center>
+                </group>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
