@@ -23,10 +23,10 @@ export default function BlogIndexPage() {
           a plain pt-* class on CSS specificity since this Bounded is the
           first child of <main>). */}
       <div className="mx-auto w-full max-w-3xl pt-32 text-center md:pt-40">
-        <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+        <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
           Our Blog
         </p>
-        <h1 className="mt-2 text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
+        <h1 className="mt-2 text-balance text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
           From our <em className="font-normal italic">blog.</em>
         </h1>
         <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
@@ -68,7 +68,7 @@ export default function BlogIndexPage() {
                 >
                   {post.category}
                 </span>
-                <h2 className="text-balance font-serif text-2xl font-bold leading-tight text-[#2B302B] group-hover:text-[#6B8F71]">
+                <h2 className="text-balance text-2xl font-bold leading-tight text-[#2B302B] group-hover:text-[#6B8F71]">
                   {post.title}
                 </h2>
                 <p className="text-base font-normal text-[#2B302B]/80">
@@ -84,7 +84,7 @@ export default function BlogIndexPage() {
         {/* Plain anchor - see BlogTeaser.tsx for why. */}
         <a
           href="/"
-          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
+          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-heading text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
         >
           Back to Home
           <span aria-hidden="true">↗</span>

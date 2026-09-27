@@ -12,7 +12,7 @@ export default function CategoryTicker() {
         {ITEMS.map((label, i) => (
           <span
             key={i}
-            className="flex shrink-0 items-center gap-10 pr-10 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white"
+            className="flex shrink-0 items-center gap-10 pr-10 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white"
           >
             {label}
             <span aria-hidden="true" className="text-lg leading-none text-[#8FAE8F]">
@@ -29,7 +29,7 @@ export default function CategoryTicker() {
         {CATEGORIES.map((label, i) => (
           <span
             key={i}
-            className="flex shrink-0 items-center gap-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white"
+            className="flex shrink-0 items-center gap-3 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white"
           >
             {label}
             {i < CATEGORIES.length - 1 && (

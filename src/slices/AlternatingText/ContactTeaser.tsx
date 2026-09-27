@@ -98,10 +98,10 @@ export function ContactTeaser() {
 
       <div className="relative grid w-full items-center gap-10 lg:grid-cols-[1fr,auto] lg:gap-8">
         <div>
-          <p className="contact-teaser-kicker font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+          <p className="contact-teaser-kicker font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
             Let&apos;s Create Together.
           </p>
-          <h2 className="contact-teaser-heading mt-4 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+          <h2 className="contact-teaser-heading mt-4 text-balance text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
             Bring your vision{" "}
             <em className="block font-normal italic">to life.</em>
           </h2>
@@ -119,7 +119,7 @@ export function ContactTeaser() {
               this page don't survive a client-side unmount cleanly. */}
           <a
             href="/contact"
-            className="contact-teaser-button inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
+            className="contact-teaser-button inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
           >
             Contact Us
             <span
@@ -131,7 +131,7 @@ export function ContactTeaser() {
           </a>
           <a
             href="tel:+393515846229"
-            className="contact-teaser-phone font-serif text-xl italic text-[#2B302B] underline decoration-[#2B302B]/40 underline-offset-4 transition-colors duration-150 hover:text-[#6B8F71]"
+            className="contact-teaser-phone text-xl italic text-[#2B302B] underline decoration-[#2B302B]/40 underline-offset-4 transition-colors duration-150 hover:text-[#6B8F71]"
           >
             +39 351 584 6229
           </a>

@@ -7,3 +7,57 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Site-wide 3-font system. The actual @font-face loading happens once via
+   next/font/google in src/app/layout.tsx (Inter, Manrope, Instrument Serif
+   Italic), which exposes --font-inter / --font-manrope /
+   --font-instrument-serif as CSS variables via a className on <body>. These
+   three variables are the semantic layer every component/class should
+   reference - nothing in the codebase should name a font directly outside
+   this block. Defined here on `body` (not `:root`/html) deliberately:
+   custom properties only inherit downward, and --font-inter etc. only exist
+   starting at <body>, so a `:root` rule referencing them one level up would
+   resolve to nothing. */
+body {
+  --font-heading: var(--font-manrope), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-accent: var(--font-instrument-serif), Georgia, serif;
+
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Italic accent word(s) inside headings - the site's one consistent
+   markup for this is `<em className="font-normal italic">word.</em>`
+   (see Carousel, WhatWeDo, OurProcess, ContactTeaser, BlogTeaser, blog
+   pages), plus WhyChooseUs's own `.wcu-ln.wcu-it` span for the same
+   purpose (handled locally in that component's own CSS instead, since it
+   isn't reachable through a plain tag selector). */
+em,
+i,
+.italic {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}

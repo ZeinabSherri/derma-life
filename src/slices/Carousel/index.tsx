@@ -116,7 +116,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+          <p className="whitespace-nowrap font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
             02 &mdash; Our Products
           </p>
           <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
@@ -124,10 +124,10 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2 lg:items-end lg:gap-12">
           <div>
-            <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Our Products
             </p>
-            <h2 className="mt-2 text-balance font-serif text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-6xl">
+            <h2 className="mt-2 text-balance text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-6xl">
               Premium care, <em className="font-normal italic">engineered.</em>
             </h2>
           </div>
@@ -172,7 +172,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
       </div>
 
       <div className="text-area relative z-10 mx-auto text-center">
-        <div className="text-wrapper font-serif text-3xl font-bold text-[#2B302B]">
+        <div className="text-wrapper font-heading text-3xl font-bold text-[#2B302B]">
           <p>{FLAVORS[currentFlavorIndex].name}</p>
         </div>
         <div className="mt-1 text-lg font-normal text-[#2B302B]/80">

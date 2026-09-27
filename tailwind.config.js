@@ -3,16 +3,13 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
-      // Matches https://dermalife-3d.norma313.chatgpt.site/ exactly: no
-      // custom web font, just the system stacks it uses directly in its
-      // own CSS (`body{font-family:Helvetica Neue,Arial,sans-serif}`,
-      // `em{font-family:Georgia,serif}`).
+      // Site-wide 3-font system (see src/app/app.css for the --font-heading /
+      // --font-body / --font-accent variable definitions, which point at the
+      // next/font-generated variables from src/app/layout.tsx).
       fontFamily: {
-        sans: ['"Helvetica Neue"', "Arial", "sans-serif"],
-        serif: ["Georgia", '"Times New Roman"', "serif"],
-        // Scoped to the Header + Hero restyle only (see layout.tsx) - the
-        // rest of the site keeps the system `sans`/`serif` stacks above.
-        heroSans: ["var(--font-jost)", '"Helvetica Neue"', "Arial", "sans-serif"],
+        heading: ["var(--font-heading)", "system-ui", "sans-serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        accent: ["var(--font-accent)", "Georgia", "serif"],
       },
       keyframes: {
         "slide-left": {

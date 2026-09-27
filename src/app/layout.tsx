@@ -1,4 +1,4 @@
-import { Jost } from "next/font/google";
+import { Inter, Manrope, Instrument_Serif } from "next/font/google";
 import { PrismicPreview } from "@prismicio/next";
 import { repositoryName } from "@/prismicio";
 
@@ -8,16 +8,29 @@ import ViewCanvas from "@/components/ViewCanvas";
 import Footer from "@/components/Footer";
 import CustomCursor from "@/components/CustomCursor";
 
-// The site otherwise uses only system fonts (Helvetica Neue/Arial, Georgia
-// - see tailwind.config.js `fontFamily`). Jost is loaded here as a CSS
-// variable only, scoped via the `font-heroSans` utility to the Header and
-// Hero restyle - registering the variable on <body> doesn't change body's
-// own font-family (that's still the `sans`/`serif` Tailwind classes below),
-// it just makes `var(--font-jost)` available to opt into further down.
-const jost = Jost({
+// The site's whole 3-font system: Manrope for headings/eyebrows/nav/buttons,
+// Inter for body copy/forms, Instrument Serif Italic for the single accent
+// word inside headings (see app.css for how these map to --font-heading /
+// --font-body / --font-accent, and the em{} rule that targets the accent
+// markup). Loaded once, globally, via next/font (not a <link> tag) so
+// there's a single source of truth and no render-blocking request.
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  variable: "--font-jost",
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -28,7 +41,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${jost.variable} overflow-x-hidden bg-white`}>
+      <body
+        className={`${inter.variable} ${manrope.variable} ${instrumentSerif.variable} overflow-x-hidden bg-white font-body`}
+      >
         <CustomCursor />
         <Header />
         <main>

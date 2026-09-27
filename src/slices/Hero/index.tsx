@@ -263,7 +263,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           id="about"
           data-slice-type={slice.slice_type}
           data-slice-variation={slice.variation}
-          className="font-heroSans"
+          className="font-heading"
           style={{
             position: "relative",
             background: "#F3F6F8",
@@ -285,7 +285,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             style={{
               marginTop: 12,
               fontSize: 34,
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 1.08,
               letterSpacing: "-0.01em",
             }}
@@ -297,9 +297,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               marginTop: 16,
               maxWidth: 420,
               fontSize: 16,
-              fontWeight: 300,
+              fontWeight: 400,
               lineHeight: 1.5,
               color: "#3a4247",
+              fontFamily: "var(--font-body)",
               opacity: mobileSection === 2 ? 1 : 0,
               transition: "opacity 0.6s ease",
             }}
@@ -390,7 +391,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         id="about"
         data-slice-type={slice.slice_type}
         data-slice-variation={slice.variation}
-        className="hero font-heroSans"
+        className="hero font-heading"
         style={{
           position: "relative",
           height: `${SCROLL_HEIGHT_VH}vh`,
@@ -446,7 +447,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <div
                 style={{
                   fontSize: 66,
-                  fontWeight: 400,
+                  fontWeight: 500,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
                 }}
@@ -483,7 +484,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <div
                 style={{
                   fontSize: 66,
-                  fontWeight: 400,
+                  fontWeight: 500,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
                 }}
@@ -519,7 +520,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <div
                 style={{
                   fontSize: 66,
-                  fontWeight: 400,
+                  fontWeight: 500,
                   lineHeight: 1.02,
                   letterSpacing: "-0.01em",
                 }}
@@ -535,9 +536,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                   marginTop: 34,
                   maxWidth: 420,
                   fontSize: 22,
-                  fontWeight: 300,
+                  fontWeight: 400,
                   lineHeight: 1.5,
                   color: "#3a4247",
+                  fontFamily: "var(--font-body)",
                 }}
               >
                 Science &middot; Innovation &middot; Skincare
@@ -694,6 +696,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 bottom: 28,
                 transform: "translateX(-50%)",
                 fontSize: 12,
+                fontWeight: 500,
                 letterSpacing: "0.3em",
                 color: "#5a6268",
               }}
