@@ -26,8 +26,12 @@ export default function ViewCanvas({}: Props) {
           zIndex: 30,
         }}
         shadows
-        dpr={[1, 2]}
-        gl={{ antialias: true }}
+        // Capped at 2x before, which left visible softness on the many
+        // phones/displays with a real devicePixelRatio of 2.5-3+ - raised
+        // so every bottle (and its label text) renders at the sharpest
+        // resolution each device can actually show, not an arbitrary cap.
+        dpr={[1, 3]}
+        gl={{ antialias: true, powerPreference: "high-performance" }}
         camera={{
           fov: 30,
         }}
