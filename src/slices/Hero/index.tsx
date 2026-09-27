@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
 import { Center, Environment, Float, View } from "@react-three/drei";
@@ -106,6 +106,15 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   const fillRef = useRef<HTMLDivElement>(null);
   const numRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
+
+  // Mobile: instead of scroll-scrubbing through the 3 keyframes like
+  // desktop, auto-advance through them on a timer, carousel-style - the
+  // bottles keep the same per-section lean (KEYFRAMES[..][section][2]),
+  // just reached by an automatic slide instead of scroll position.
+  const [mobileSection, setMobileSection] = useState(0);
+  const mobileSectionRef = useRef(0);
+  const mobileGroupARef = useRef<Group>(null);
+  const mobileGroupRRef = useRef<Group>(null);
 
   useEffect(() => {
     isReady();
