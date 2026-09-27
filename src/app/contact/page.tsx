@@ -105,7 +105,7 @@ export default function ContactPage() {
           Contact Us
         </p>
         <h1 className="mt-2 text-balance text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
-          Get in <em className="font-normal italic">touch.</em>
+          Get in <em className="font-medium">touch.</em>
         </h1>
         <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
           Ready to bring your brand to life? Let&apos;s talk about your product,

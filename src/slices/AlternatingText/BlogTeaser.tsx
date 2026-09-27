@@ -93,7 +93,7 @@ export function BlogTeaser() {
               Our Blog
             </p>
             <h2 className="blog-teaser-heading mt-2 text-balance text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
-              From our <em className="font-normal italic">blog.</em>
+              From our <em className="font-medium">blog.</em>
             </h2>
           </div>
           <p className="blog-teaser-body text-lg font-normal text-[#2B302B]/80 lg:text-xl">

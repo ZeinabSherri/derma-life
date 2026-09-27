@@ -136,7 +136,7 @@ export default function OurProcess() {
             Here&apos;s How To Get Started.
           </p>
           <h2 className="mt-1 text-balance text-[clamp(1.75rem,3.6vw,3.5rem)] font-bold leading-[1.05] text-[#17231D] lg:mt-2">
-            Your vision, <em className="font-normal italic">made real.</em>
+            Your vision, <em className="font-medium">made real.</em>
           </h2>
         </div>
         <p className="mt-2 max-w-[34rem] text-[0.98rem] font-normal leading-[1.5] text-[#637067] lg:mt-3 lg:text-[1.06rem] lg:leading-[1.6]">
@@ -152,7 +152,7 @@ export default function OurProcess() {
             data-parallax={step.parallax}
             className="our-process-row relative grid grid-cols-[12%,1fr] items-start gap-8 border-t border-[#17231D]/[0.16] bg-[linear-gradient(90deg,#dceadd00,#dceadd3d,#dceadd00)] bg-[length:200%_100%] bg-[position:0%_0] py-[1.1rem] transition-[padding,background-position,box-shadow] duration-500 hover:bg-[position:100%_0] hover:pl-6 hover:shadow-[0_24px_70px_#173f3112] lg:py-[1.5rem]"
           >
-            <span className="text-[1.3rem] italic text-[#6B8F71]">
+            <span className="font-heading text-[1.3rem] font-bold text-[#6B8F71]">
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-16">

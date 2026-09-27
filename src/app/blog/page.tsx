@@ -27,7 +27,7 @@ export default function BlogIndexPage() {
           Our Blog
         </p>
         <h1 className="mt-2 text-balance text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
-          From our <em className="font-normal italic">blog.</em>
+          From our <em className="font-medium">blog.</em>
         </h1>
         <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
           Insights on skincare science, formulation trends, and industry

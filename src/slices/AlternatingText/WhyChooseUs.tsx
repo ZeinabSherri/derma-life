@@ -1210,7 +1210,7 @@ const WCU_CSS = `
 .wcu-ln .wcu-ch{display:inline-block;opacity:0;will-change:transform}
 .wcu-ln.wcu-mask > span{display:inline-block;clip-path:inset(0 100% 0 0)}
 .wcu-bar{position:absolute;left:0;top:6%;height:88%;width:0;background:linear-gradient(90deg,rgba(185,128,58,.15),rgba(185,128,58,.55));opacity:0}
-.wcu-ln.wcu-it{font-family:var(--font-accent);font-style:italic;font-weight:400;letter-spacing:0}
+.wcu-ln.wcu-it{font-style:normal}
 .wcu-ln.wcu-it > span{display:inline-block;transform:translateY(110%);opacity:0}
 .wcu-ul{position:absolute;left:2px;bottom:6px;height:2px;width:0;background:linear-gradient(90deg,var(--accent),var(--spark));opacity:0}
 .wcu-shimmer{background-image:linear-gradient(100deg,var(--ink) 38%,#C79A55 50%,var(--ink) 62%);background-size:320% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:wcu-sheenTxt 9s ease-in-out 1s infinite}

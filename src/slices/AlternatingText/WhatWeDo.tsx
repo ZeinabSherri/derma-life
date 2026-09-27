@@ -172,7 +172,7 @@ export default function WhatWeDo() {
             Services
           </p>
           <h2 className="mt-1 text-balance text-2xl font-bold leading-[1.05] text-[#2B302B] lg:mt-2 lg:text-6xl">
-            From concept to <em className="font-normal italic">consumer.</em>
+            From concept to <em className="font-medium">consumer.</em>
           </h2>
         </div>
         <p className="hidden text-base font-normal text-[#2B302B]/80 sm:block lg:text-lg">

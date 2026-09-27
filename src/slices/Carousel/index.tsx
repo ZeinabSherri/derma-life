@@ -128,7 +128,7 @@ const Carousel = ({ slice }: CarouselProps): JSX.Element => {
               Our Products
             </p>
             <h2 className="mt-2 text-balance text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-6xl">
-              Premium care, <em className="font-normal italic">engineered.</em>
+              Premium care, <em className="font-medium">engineered.</em>
             </h2>
           </div>
           <p className="text-base font-normal text-[#2B302B]/80 lg:text-lg">

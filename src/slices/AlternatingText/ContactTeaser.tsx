@@ -103,7 +103,7 @@ export function ContactTeaser() {
           </p>
           <h2 className="contact-teaser-heading mt-4 text-balance text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
             Bring your vision{" "}
-            <em className="block font-normal italic">to life.</em>
+            <em className="block font-medium">to life.</em>
           </h2>
           <p className="contact-teaser-body mt-6 max-w-lg text-lg font-normal text-[#2B302B]/80 lg:text-xl">
             DermaLife delivers everything you need to conquer the world,
@@ -131,7 +131,7 @@ export function ContactTeaser() {
           </a>
           <a
             href="tel:+393515846229"
-            className="contact-teaser-phone text-xl italic text-[#2B302B] underline decoration-[#2B302B]/40 underline-offset-4 transition-colors duration-150 hover:text-[#6B8F71]"
+            className="contact-teaser-phone font-heading text-xl font-bold text-[#2B302B] underline decoration-[#2B302B]/40 underline-offset-4 transition-colors duration-150 hover:text-[#6B8F71]"
           >
             +39 351 584 6229
           </a>

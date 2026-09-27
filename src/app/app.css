@@ -8,11 +8,10 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Site-wide 3-font system. The actual @font-face loading happens once via
-   next/font/google in src/app/layout.tsx (Inter, Manrope, Instrument Serif
-   Italic), which exposes --font-inter / --font-manrope /
-   --font-instrument-serif as CSS variables via a className on <body>. These
-   three variables are the semantic layer every component/class should
+/* Site-wide 2-font system. The actual @font-face loading happens once via
+   next/font/google in src/app/layout.tsx (Inter, Manrope), which exposes
+   --font-inter / --font-manrope as CSS variables via a className on <body>.
+   These two variables are the semantic layer every component/class should
    reference - nothing in the codebase should name a font directly outside
    this block. Defined here on `body` (not `:root`/html) deliberately:
    custom properties only inherit downward, and --font-inter etc. only exist
@@ -21,7 +20,6 @@ html {
 body {
   --font-heading: var(--font-manrope), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
-  --font-accent: var(--font-instrument-serif), Georgia, serif;
 
   font-family: var(--font-body);
   font-size: 17px;
@@ -40,19 +38,17 @@ h6 {
   line-height: 1.1;
 }
 
-/* Italic accent word(s) inside headings - the site's one consistent
-   markup for this is `<em className="font-normal italic">word.</em>`
-   (see Carousel, WhatWeDo, OurProcess, ContactTeaser, BlogTeaser, blog
-   pages), plus WhyChooseUs's own `.wcu-ln.wcu-it` span for the same
-   purpose (handled locally in that component's own CSS instead, since it
-   isn't reachable through a plain tag selector). */
+/* No italic accent font - the words that used to be set in an italic accent
+   face (marked up as `<em className="font-normal ...">word.</em>` - see
+   Carousel, WhatWeDo, OurProcess, ContactTeaser, BlogTeaser, blog pages -
+   plus WhyChooseUs's own `.wcu-ln.wcu-it` span) now render as plain text in
+   whatever font their context already provides (heading font inside a
+   heading, body font elsewhere). This only cancels the browser's own
+   default italic styling for <em>/<i> tags, which would otherwise still
+   apply regardless of font-family. */
 em,
-i,
-.italic {
-  font-family: var(--font-accent);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0;
+i {
+  font-style: normal;
 }
 
 input,
