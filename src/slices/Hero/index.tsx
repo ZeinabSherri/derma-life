@@ -1,455 +1,712 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { Center, Environment, View } from "@react-three/drei";
+import { Center, Environment, Float, View } from "@react-three/drei";
+import { Group } from "three";
 
-import { Bounded } from "@/components/Bounded";
-import { TextSplitter } from "@/components/TextSplitter";
-import FloatingCan from "@/components/FloatingCan";
-import { SodaCanProps } from "@/components/SodaCan";
 import CategoryTicker from "@/components/CategoryTicker";
-import Scene from "./Scene";
-import { useStore } from "@/hooks/useStore";
+import { SodaCan } from "@/components/SodaCan";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { HERO_TL } from "./heroScrollTimeline";
-
-gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-// Mobile/tablet-only: the desktop hero-scene below is a sticky full-bleed
-// canvas whose 9 bottles are driven entirely by a scroll-scrubbed GSAP
-// timeline tuned for wide screens - the positions crowd/overlap on narrower
-// canvases (less horizontal 3D world-space for the same vertical FOV) below
-// ~1024px, so this is a small, self-contained, non-scroll-tied pair instead
-// (same pattern as Carousel/ContactTeaser) that just floats in place.
-const MOBILE_FIRST_SECTION_BOTTLES: {
-  flavor: SodaCanProps["flavor"];
-  position: [number, number, number];
-  floatSpeed: number;
-}[] = [
-  { flavor: "blackCherry", position: [0.35, 0, 0], floatSpeed: 1.4 },
-  { flavor: "strawberryLemonade", position: [0.85, 0, 0], floatSpeed: 1.7 },
-];
-
-// Screen-space (vh/vw) waypoints for the sparkle trail, roughly tracing
-// the surviving bottle's downward-and-right path from center screen
-// toward the "Who We Are" column as it descends.
-const SPARK_POSITIONS: { top: string; left: string }[] = [
-  { top: "42vh", left: "54vw" },
-  { top: "52vh", left: "60vw" },
-  { top: "62vh", left: "66vw" },
-  { top: "70vh", left: "70vw" },
-];
+import { useStore } from "@/hooks/useStore";
 
 /**
  * Props for `Hero`.
  */
 export type HeroProps = SliceComponentProps<Content.HeroSlice>;
 
+// Ported 1:1 from the reference design's own imperative rAF loop (a fixed
+// 1212x678 "stage" scaled to fit the viewport, exactly like the reference)
+// rather than the rest of the site's GSAP ScrollTrigger convention - this
+// section's whole point is to reproduce that file's numbers and timing
+// faithfully, not adapt them. Liquid-surface physics from the source were
+// intentionally dropped per explicit request; only bottle
+// position/rotation/scale and the arc/float beats are ported.
+const STAGE_W = 1212;
+const STAGE_H = 678;
+const SCROLL_HEIGHT_VH = 400; // "Medium" scrollLength preset in the source
+
+// [x, y, tilt(deg), scale] per keyframe, in stage-local px - identical to
+// the source's K.A / K.R.
+const KEYFRAMES = {
+  A: [
+    [818, 376, -30.5, 0.84],
+    [206, 372, -30.5, 0.84],
+    [1057, 463, -18.6, 0.66],
+  ],
+  R: [
+    [370, 478, 48.6, 0.7],
+    // Was [370, 466, ...], nearly touching bottle A's own mid-scroll
+    // waypoint [206, 372, ...] once both bottles' tilt/size are accounted
+    // for - moved further right/down so the two don't visually cross.
+    [470, 560, 48.6, 0.7],
+    [844, 550, 18, 0.62],
+  ],
+} as const;
+
+// [offsetX, offsetY, boxW, boxH]. The source's own offsetY (564/652) was
+// meant relative to each bottle's *landed* keyframe position, not its live
+// animated one - adding it to the live y here (needed so the shadow tracks
+// the bottle while it's still floating, not just once landed) pushed the
+// shadow hundreds of px below the stage. Replaced with a small grounding
+// offset so it sits directly under the bottle at any point in the scroll.
+const SHADOW = {
+  A: [-7, 90, 520, 250],
+  R: [-12, 100, 560, 270],
+} as const;
+
+const FLOAT_AMT = 1; // source's default `float` prop
+const BOTTLE_BOX = { w: 560, h: 760 };
+
+function clamp(v: number, a = 0, b = 1) {
+  return Math.min(b, Math.max(a, v));
+}
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+function ease(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
 /**
  * Component for "Hero" Slices.
+ *
+ * A literal port of an external reference design: a fixed 1212x678 design
+ * canvas, scaled to fit the viewport, scrubbed by a single scroll-driven
+ * progress value `p` (0-2) computed every frame from this section's own
+ * bounding rect - not Prismic content, not GSAP. See KEYFRAMES/SHADOW
+ * above for the exact source numbers.
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
-  const ready = useStore((state) => state.ready);
+  const isReady = useStore((state) => state.isReady);
+  // The fixed 1212x678 stage is scaled to fit by width, so on a narrow/tall
+  // phone viewport it shrinks to a tiny letterboxed strip with huge blank
+  // space above/below it. Below the same 1024px breakpoint the rest of the
+  // site treats as "desktop", this renders a normal-flow, non-scroll-scrubbed
+  // layout instead of trying to force the scaled canvas to fit.
   const isDesktop = useMediaQuery("(min-width: 1024px)", true);
 
-  useGSAP(
-    () => {
-      if (!ready && isDesktop) return;
+  const rootRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const t0Ref = useRef<HTMLDivElement>(null);
+  const t1Ref = useRef<HTMLDivElement>(null);
+  const t2Ref = useRef<HTMLDivElement>(null);
+  const bARef = useRef<HTMLDivElement>(null);
+  const bRRef = useRef<HTMLDivElement>(null);
+  // The tilt has to be applied to the 3D content itself, not the tracked
+  // DOM wrapper below - <View> sizes/positions the render viewport off
+  // that wrapper's axis-aligned getBoundingClientRect(), which a CSS
+  // rotate() on the wrapper doesn't change, so a DOM-level rotation was
+  // silently ignored and the bottle always rendered upright.
+  const groupARef = useRef<Group>(null);
+  const groupRRef = useRef<Group>(null);
+  const sARef = useRef<HTMLDivElement>(null);
+  const sRRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
+  const numRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLDivElement>(null);
 
-      // The section-visibility flip (opacity-0 -> 1) is not itself an
-      // animation to remove - it's what makes the section visible at all
-      // - so it always runs. Only the fade/scale/stagger entrance below it
-      // is desktop-only; mobile gets everything visible immediately.
-      gsap.set(".hero", { opacity: 1 });
+  // Mobile: instead of scroll-scrubbing through the 3 keyframes like
+  // desktop, auto-advance through them on a timer, carousel-style - the
+  // bottles keep the same per-section lean (KEYFRAMES[..][section][2]),
+  // just reached by an automatic slide instead of scroll position.
+  const [mobileSection, setMobileSection] = useState(0);
+  const mobileSectionRef = useRef(0);
+  const mobileGroupARef = useRef<Group>(null);
+  const mobileGroupRRef = useRef<Group>(null);
 
-      if (isDesktop) {
-        gsap
-          .timeline()
-          .from(".hero-eyebrow", {
-            opacity: 0,
-            y: 10,
-          })
-          .from(".hero-header-word", {
-            scale: 3,
-            opacity: 0,
-            ease: "power4.in",
-            delay: 0.3,
-            stagger: 1,
-          })
-          .from(
-            ".hero-subheading",
-            {
-              opacity: 0,
-              y: 30,
-            },
-            "+=.8",
-          )
-          .from(".hero-body", {
-            opacity: 0,
-            y: 10,
-          });
+  useEffect(() => {
+    isReady();
+    if (!isDesktop) return;
+
+    let raf = 0;
+    let p = 0;
+    let last = performance.now();
+    let time = 0;
+    const ph = { A: 0, R: 1.7 };
+
+    function frame() {
+      const root = rootRef.current;
+      const stage = stageRef.current;
+      if (!root || !stage) {
+        raf = requestAnimationFrame(frame);
+        return;
       }
 
-      // Scroll-scrubbed choreography (body color, text reveal, blur,
-      // sparkle, ripple) is desktop-only, synced to Scene.tsx's bottle
-      // sequence which also only mounts on desktop - mobile has no such
-      // sequence to sync with (its bottles are a separate, non-scroll-tied
-      // pair) and gets all of this content simply visible, no scrub.
-      if (isDesktop) {
-        const scrollTl = gsap.timeline({
-          scrollTrigger: {
-            trigger: ".hero",
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
-          },
-        });
+      const now = performance.now();
+      const dt = clamp((now - last) / 1000, 0.001, 0.05);
+      last = now;
+      time += dt;
 
-        scrollTl.fromTo(
-          ".hero-header",
-          { filter: "blur(0px)" },
-          {
-            filter: "blur(14px)",
-            overwrite: "auto",
-            duration: HERO_TL.blurDone - HERO_TL.blurStart,
-          },
-          HERO_TL.blurStart,
-        );
+      const rect = root.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = stage.parentElement?.clientWidth ?? window.innerWidth;
+      const target = clamp(-rect.top / Math.max(1, rect.height - vh)) * 2;
+      p += (target - p) * (1 - Math.exp(-dt * 5));
 
-        scrollTl
-          .fromTo(
-            "body",
-            { backgroundColor: "#FFFFFF" },
-            {
-              backgroundColor: "#F7F8F5",
-              overwrite: "auto",
-              duration: 0.3,
-            },
-            HERO_TL.descendDone,
-          )
-          .from(
-            ".text-side-heading .split-char",
-            {
-              scale: 1.3,
-              y: 40,
-              rotate: -25,
-              opacity: 0,
-              stagger: 0.03,
-              ease: "back.out(3)",
-              duration: 0.3,
-            },
-            HERO_TL.descendDone,
-          )
-          .from(
-            ".text-side-body",
-            { y: 20, opacity: 0, duration: 0.3 },
-            HERO_TL.descendDone + 0.3,
-          );
+      const s = Math.min(vw / STAGE_W, vh / STAGE_H);
+      stage.style.transform = `translate(-50%,-50%) scale(${s})`;
 
-        // Sparkle trail: a few small gold dots (same warm-gold spark used
-        // in Why Choose Us) fade in/out with a slight downward drift,
-        // staggered across the bottle's descent so they read as
-        // intermittent trailing dust rather than one blob.
-        [".hero-spark-1", ".hero-spark-2", ".hero-spark-3", ".hero-spark-4"].forEach(
-          (sel, i) => {
-            const t = HERO_TL.sparkleStart + i * 0.25;
-            // immediateRender:false - these tweens sit well past position 0
-            // in an already-scrubbing timeline; without this, GSAP renders
-            // their target state as soon as they're added instead of
-            // waiting for the scrubbed playhead to actually reach them.
-            scrollTl.fromTo(
-              sel,
-              { opacity: 0, y: 0 },
-              {
-                opacity: 1,
-                y: 40,
-                duration: 0.4,
-                ease: "power1.out",
-                immediateRender: false,
-              },
-              t,
-            );
-            scrollTl.to(
-              sel,
-              {
-                opacity: 0,
-                duration: 0.3,
-                ease: "power1.in",
-                immediateRender: false,
-              },
-              t + 0.4,
-            );
-          },
-        );
+      const seg = Math.min(1, Math.floor(p));
+      const e = ease(clamp((p - seg - 0.1) / 0.8));
+      const land = clamp((p - 1.55) / 0.45);
+      const arcK = Math.sin(Math.PI * e);
 
-        // Ripple/puddle cue: two expanding rings fire once the bottle
-        // nears its final resting spot, echoing Why Choose Us's
-        // impact-ring visual but driven by scroll position so it
-        // scrubs/reverses cleanly. Timed to land fully within HERO_TL.end
-        // so the trailing anchor tween below is the timeline's true
-        // latest end time.
-        [".hero-ripple-1", ".hero-ripple-2"].forEach((sel, i) => {
-          const t = HERO_TL.rippleFire + i * 0.1;
-          scrollTl.fromTo(
-            sel,
-            { scale: 0.3, opacity: 0.7 },
-            {
-              scale: 4,
-              opacity: 0,
-              duration: 0.45,
-              ease: "power1.out",
-              immediateRender: false,
-            },
-            t,
-          );
-        });
+      (
+        [
+          ["A", bARef, sARef, groupARef],
+          ["R", bRRef, sRRef, groupRRef],
+        ] as const
+      ).forEach(([id, bottleRef, shadowRef, groupRef]) => {
+        const a = KEYFRAMES[id][seg];
+        const b = KEYFRAMES[id][seg + 1];
+        let x = lerp(a[0], b[0], e);
+        let y = lerp(a[1], b[1], e);
+        let tilt = lerp(a[2], b[2], e);
+        let sc = lerp(a[3], b[3], e);
 
-        // Anchor this timeline's total duration to HERO_TL.end so it
-        // stays proportionally in sync with Scene.tsx's separate scrollTl.
-        scrollTl.to({}, { duration: 0 }, HERO_TL.end);
+        if (id === "A") {
+          y -= arcK * 80;
+          tilt -= arcK * 22;
+          sc *= 1 - arcK * 0.12;
+        } else {
+          // Pushed opposite A's arc (down instead of up) so the two
+          // bottles clear each other vertically while their paths cross
+          // horizontally mid-scroll, instead of visually overlapping.
+          y += arcK * 70;
+          tilt += arcK * 10;
+        }
 
-        // Kicker line draws in from the left - same treatment as every
-        // other "0X - Label" kicker across the site (What We Do, The
-        // Process). Desktop-only along with the rest of this scroll
-        // choreography; mobile shows it static/fully drawn (see the
-        // .hero-kicker-line CSS default, not animated from scaleX(0)).
-        gsap.from(".hero-kicker-line", {
-          scaleX: 0,
-          transformOrigin: "left center",
-          duration: 0.9,
-          ease: "power3.out",
-          scrollTrigger: { trigger: "#about", start: "top 85%" },
-        });
+        const fl = (1 - land) * FLOAT_AMT;
+        y += Math.sin(time * 1.1 + ph[id]) * 10 * fl;
+        tilt += Math.sin(time * 0.75 + ph[id]) * 2.2 * fl;
+
+        const bottleEl = bottleRef.current;
+        if (bottleEl) {
+          bottleEl.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+        }
+        if (groupRef.current) {
+          groupRef.current.rotation.z = (-tilt * Math.PI) / 180;
+        }
+
+        const sh = SHADOW[id];
+        const shadowEl = shadowRef.current;
+        if (shadowEl) {
+          // A baseline shadow is always visible under the bottle (not just
+          // once it "lands" near the end of the scroll like the source),
+          // so it reads as grounded throughout, with extra emphasis as it
+          // settles.
+          shadowEl.style.opacity = (0.28 + land * 0.65).toFixed(3);
+          shadowEl.style.transform = `translate(${x + sh[0] - sh[2] / 2}px,${y + sh[1] - sh[3] / 2}px) scale(${0.55 + 0.45 * land})`;
+        }
+      });
+
+      [t0Ref, t1Ref, t2Ref].forEach((ref, i) => {
+        const d = p - i;
+        const el = ref.current;
+        if (!el) return;
+        el.style.opacity = clamp(1 - Math.abs(d) * 2.6).toFixed(3);
+        el.style.transform = `translateY(${(-d * 50).toFixed(1)}px)`;
+      });
+
+      if (fillRef.current) {
+        fillRef.current.style.height = ((p / 2) * 100).toFixed(1) + "%";
       }
-    },
-    { dependencies: [ready, isDesktop] },
-  );
+      const n = "0" + (Math.round(p) + 1);
+      if (numRef.current && numRef.current.textContent !== n) {
+        numRef.current.textContent = n;
+      }
+      if (hintRef.current) {
+        hintRef.current.style.opacity = clamp(1 - p * 4).toFixed(3);
+      }
+
+      raf = requestAnimationFrame(frame);
+    }
+
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (isDesktop) return;
+
+    const advance = setInterval(() => {
+      mobileSectionRef.current = (mobileSectionRef.current + 1) % 3;
+      setMobileSection(mobileSectionRef.current);
+    }, 3000);
+
+    let raf = 0;
+    function frame() {
+      const i = mobileSectionRef.current;
+      const targetA = (-KEYFRAMES.A[i][2] * Math.PI) / 180;
+      const targetR = (-KEYFRAMES.R[i][2] * Math.PI) / 180;
+      const groupA = mobileGroupARef.current;
+      const groupR = mobileGroupRRef.current;
+      if (groupA) groupA.rotation.z += (targetA - groupA.rotation.z) * 0.06;
+      if (groupR) groupR.rotation.z += (targetR - groupR.rotation.z) * 0.06;
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      clearInterval(advance);
+      cancelAnimationFrame(raf);
+    };
+  }, [isDesktop]);
+
+  if (!isDesktop) {
+    return (
+      <>
+        <div
+          id="about"
+          data-slice-type={slice.slice_type}
+          data-slice-variation={slice.variation}
+          className="font-heading"
+          style={{
+            position: "relative",
+            background: "#FFFFFF",
+            color: "#141414",
+            padding: "72px 24px 56px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+            }}
+          >
+            Who We Are
+          </div>
+          <div
+            style={{
+              marginTop: 12,
+              fontSize: 34,
+              fontWeight: 500,
+              lineHeight: 1.08,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Skincare Leaders. Formulating For Success.
+          </div>
+          <div
+            style={{
+              marginTop: 16,
+              maxWidth: 420,
+              fontSize: 16,
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: "#3a4247",
+              fontFamily: "var(--font-body)",
+              opacity: mobileSection === 2 ? 1 : 0,
+              transition: "opacity 0.6s ease",
+            }}
+          >
+            Science &middot; Innovation &middot; Skincare
+          </div>
+          <div
+            style={{
+              position: "relative",
+              marginTop: 4,
+              height: 220,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ position: "relative", width: 150, height: 220 }}>
+              <View style={{ position: "absolute", inset: 0 }}>
+                <group ref={mobileGroupARef}>
+                  <Float speed={1.6} floatIntensity={1.1} rotationIntensity={0.6}>
+                    <Center>
+                      <SodaCan flavor="ageless" scale={1.4} />
+                    </Center>
+                  </Float>
+                </group>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
+              </View>
+            </div>
+            <div
+              style={{
+                position: "relative",
+                width: 150,
+                height: 220,
+                marginLeft: -32,
+              }}
+            >
+              <View style={{ position: "absolute", inset: 0 }}>
+                {/* Slightly different speed/phase than the bottle above so
+                    the two don't bob in lockstep. */}
+                <group ref={mobileGroupRRef}>
+                  <Float speed={1.2} floatIntensity={1.3} rotationIntensity={0.6}>
+                    <Center>
+                      <SodaCan flavor="radiance" scale={1.4} />
+                    </Center>
+                  </Float>
+                </group>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
+              </View>
+            </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 12,
+            }}
+          >
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: i === mobileSection ? "#6B8F71" : "rgba(20,20,20,0.15)",
+                  transition: "background 0.4s ease",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+        <CategoryTicker />
+      </>
+    );
+  }
 
   return (
     <>
-    <Bounded
-      data-slice-type={slice.slice_type}
-      data-slice-variation={slice.variation}
-      className="hero opacity-0"
-    >
-      {isDesktop && (
-        <View className="hero-scene pointer-events-none sticky top-0 z-50 -mt-[100vh] hidden h-screen w-screen lg:block">
-          <Scene />
-        </View>
-      )}
-
-      {isDesktop && (
-        <div className="hero-sparkles pointer-events-none sticky top-0 z-[55] -mt-[100vh] hidden h-screen w-screen lg:block">
-          {SPARK_POSITIONS.map((pos, i) => (
-            <span
-              key={i}
-              className={`hero-spark-${i + 1} absolute size-3 rounded-full opacity-0`}
+      <div
+        ref={rootRef}
+        id="about"
+        data-slice-type={slice.slice_type}
+        data-slice-variation={slice.variation}
+        className="hero font-heading"
+        style={{
+          position: "relative",
+          height: `${SCROLL_HEIGHT_VH}vh`,
+          background: "#FFFFFF",
+          color: "#141414",
+        }}
+      >
+        <div
+          style={{
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            overflow: "hidden",
+            background: "#FFFFFF",
+          }}
+        >
+          <div
+            ref={stageRef}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              width: STAGE_W,
+              height: STAGE_H,
+              transform: "translate(-50%,-50%) scale(0.7)",
+              transformOrigin: "50% 50%",
+              background: "#FFFFFF",
+            }}
+          >
+            {/* Three crossfading text states - same "WHO WE ARE" eyebrow +
+                headline, repositioned each beat; t2 adds the extra subtext
+                line. Identical copy/positions/sizes to the source. */}
+            <div
+              ref={t0Ref}
               style={{
-                top: pos.top,
-                left: pos.left,
+                position: "absolute",
+                left: 60,
+                top: 160,
+                width: 640,
+                willChange: "transform,opacity",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 32,
+                  fontWeight: 500,
+                  letterSpacing: "0.12em",
+                  marginBottom: 26,
+                }}
+              >
+                WHO WE ARE
+              </div>
+              <div
+                style={{
+                  fontSize: 66,
+                  fontWeight: 500,
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Skincare Leaders.
+                <br />
+                Formulating For
+                <br />
+                Success.
+              </div>
+            </div>
+            <div
+              ref={t1Ref}
+              style={{
+                position: "absolute",
+                right: 56,
+                top: 84,
+                width: 640,
+                textAlign: "right",
+                opacity: 0,
+                willChange: "transform,opacity",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 32,
+                  fontWeight: 500,
+                  letterSpacing: "0.12em",
+                  marginBottom: 26,
+                }}
+              >
+                WHO WE ARE
+              </div>
+              <div
+                style={{
+                  fontSize: 66,
+                  fontWeight: 500,
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Skincare Leaders.
+                <br />
+                Formulating For
+                <br />
+                Success.
+              </div>
+            </div>
+            <div
+              ref={t2Ref}
+              style={{
+                position: "absolute",
+                left: 60,
+                top: 120,
+                width: 680,
+                opacity: 0,
+                willChange: "transform,opacity",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 32,
+                  fontWeight: 500,
+                  letterSpacing: "0.12em",
+                  marginBottom: 26,
+                }}
+              >
+                WHO WE ARE
+              </div>
+              <div
+                style={{
+                  fontSize: 66,
+                  fontWeight: 500,
+                  lineHeight: 1.02,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Skincare Leaders.
+                <br />
+                Formulating For
+                <br />
+                Success.
+              </div>
+              <div
+                style={{
+                  marginTop: 34,
+                  maxWidth: 420,
+                  fontSize: 22,
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                  color: "#3a4247",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                Science &middot; Innovation &middot; Skincare
+              </div>
+            </div>
+
+            {/* Bottle A - real 3D product model, positioned/rotated/scaled
+                every frame exactly like the source moved its flat photo. */}
+            <div
+              ref={sARef}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 520,
+                height: 250,
+                opacity: 0,
+                borderRadius: "999px",
                 background:
-                  "radial-gradient(circle at 35% 35%, #E3B575, #B9803A)",
-                boxShadow: "0 0 14px rgba(185,128,58,.75)",
+                  "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(20,20,20,0.4), rgba(20,20,20,0) 70%)",
+                willChange: "transform,opacity",
               }}
             />
-          ))}
-        </div>
-      )}
+            <div
+              ref={sRRef}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 560,
+                height: 270,
+                opacity: 0,
+                borderRadius: "999px",
+                background:
+                  "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(20,20,20,0.4), rgba(20,20,20,0) 70%)",
+                willChange: "transform,opacity",
+              }}
+            />
 
-      <div className="grid">
-        <div className="grid h-screen place-items-center">
-          <div className="grid auto-rows-min place-items-center text-center">
-            {/*
-              Mobile/tablet only: the desktop hero-scene above is a sticky
-              full-bleed canvas whose 9 bottles are driven entirely by a
-              scroll-scrubbed GSAP timeline tuned for wide screens - the
-              positions crowd/overlap on narrower viewports (see the isDesktop
-              comment below) and the scroll-hijack style pin is heavy on
-              touch scrolling anyway. Rather than showing nothing here, this
-              is a small, self-contained, non-scroll-tied pair of bottles
-              (same pattern as Carousel/ContactTeaser) that just floats in
-              place - no position/rotation tween keyed to scroll progress.
-              Desktop is untouched: this block doesn't render there at all.
-            */}
-            {!isDesktop && (
-              <View className="mb-4 aspect-[2/1] h-[26vh] max-h-56 w-full max-w-sm">
-                <Center>
-                  {MOBILE_FIRST_SECTION_BOTTLES.map((bottle, i) => (
-                    <FloatingCan
-                      key={i}
-                      flavor={bottle.flavor}
-                      position={bottle.position}
-                      scale={1.1}
-                      floatIntensity={1.1}
-                      rotationIntensity={0.8}
-                      floatSpeed={bottle.floatSpeed}
-                    />
-                  ))}
-                </Center>
-                <Environment
-                  files="/hdr/lobby.hdr"
-                  environmentIntensity={1.2}
-                />
-                <directionalLight intensity={5} position={[0, 1, 1]} />
+            <div
+              ref={bARef}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 0,
+                height: 0,
+                willChange: "transform",
+              }}
+            >
+              <View
+                style={{
+                  position: "absolute",
+                  left: -BOTTLE_BOX.w / 2,
+                  top: -BOTTLE_BOX.h / 2,
+                  width: BOTTLE_BOX.w,
+                  height: BOTTLE_BOX.h,
+                }}
+              >
+                <group ref={groupARef}>
+                  <Center>
+                    {/* "Ageless Skin" bottle in the reference - near-white glass. */}
+                    <SodaCan flavor="ageless" scale={1.4} />
+                  </Center>
+                </group>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
               </View>
-            )}
-            <p className="hero-eyebrow font-sans text-xs font-medium uppercase tracking-[0.3em] text-[#6B8F71]">
-              Innovation Skin Technology
-            </p>
-            <h1 className="hero-header text-7xl font-black uppercase leading-[.8] text-[#2B302B] md:text-[9rem] lg:text-[13rem]">
-              <TextSplitter
-                text="Beauty"
-                wordDisplayStyle="block"
-                className="hero-header-word"
-              />
-            </h1>
-            <div className="hero-subheading mt-12 font-serif text-5xl text-[#2B302B] lg:text-6xl">
-              <p>
-                <span className="font-bold">Formulating</span>{" "}
-                <span className="italic">for success.</span>
-              </p>
             </div>
-            <div className="hero-body text-2xl font-normal text-[#2B302B]">
-              <p>
-                Skincare. Haircare. Body care. World-class, worldwide.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div
-          id="about"
-          className="text-side relative z-[80] grid h-screen items-center gap-4 overflow-hidden py-6 md:grid-cols-2 md:gap-8 md:py-10"
-        >
-          <div>
-            <div className="flex items-center gap-4">
-              <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
-                01 &mdash; Who We Are
-              </p>
-              <span className="hero-kicker-line h-px w-full bg-[#2B302B]/20" />
-            </div>
-            <p className="mt-4 font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
-              Who We Are.
-            </p>
-            <h2 className="text-side-heading mt-2 text-balance font-serif text-3xl font-bold leading-[1.05] text-[#2B302B] md:text-4xl lg:text-6xl">
-              <TextSplitter text="Where science meets" />{" "}
-              <span className="font-normal italic">
-                <TextSplitter text="beauty." />
-              </span>
-            </h2>
-            <div className="text-side-body mt-3 max-w-xl space-y-2 text-sm font-normal text-[#2B302B] md:text-base lg:text-lg">
-              <p>
-                DermaLife is dedicated to crafting world-class skincare,
-                haircare, and body care products for renowned brands
-                worldwide.
-              </p>
-              <p className="hidden md:block">
-                As experts in contract manufacturing, we specialize in
-                producing cosmetics and cosmeceuticals that not only make a
-                difference but also leave a lasting impression.
-              </p>
-              <p className="hidden lg:block">
-                Our commitment to excellence ensures that every product we
-                create meets the highest standards of quality and efficacy,
-                setting your brand apart in the competitive market.
-              </p>
-            </div>
-            <a
-              href="/#services"
-              className="mt-4 inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71] md:mt-8"
+            <div
+              ref={bRRef}
+              style={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: 0,
+                height: 0,
+                willChange: "transform",
+              }}
             >
-              Read More
-              <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-
-          <div className="relative mx-auto h-[22vh] w-full max-w-md md:h-auto">
-            {/* Empty spacer - just holds the aspect ratio the badge/cards
-                below are positioned against. The sticky hero-scene canvas
-                above already keeps bottles visible through this whole
-                section as the user scrolls, so this column doesn't need
-                its own separate bottle group too. */}
-            <div className="aspect-[4/5] h-full w-full md:h-auto" />
-
-            {/* Rippling puddle cue: fires once the descending bottle in
-                Scene.tsx nears this column, via the shared HERO_TL
-                position map. Desktop-only, same as Scene.tsx's canvas. */}
-            {isDesktop && (
-              <>
-                <span
-                  className="hero-ripple-1 pointer-events-none absolute bottom-6 left-1/2 size-10 -translate-x-1/2 rounded-full opacity-0"
-                  style={{ border: "1.5px solid rgba(47,79,67,.4)" }}
-                />
-                <span
-                  className="hero-ripple-2 pointer-events-none absolute bottom-6 left-1/2 size-10 -translate-x-1/2 rounded-full opacity-0"
-                  style={{ border: "1.5px solid rgba(47,79,67,.4)" }}
-                />
-              </>
-            )}
-
-            <svg
-              viewBox="0 0 200 200"
-              className="absolute left-2 top-2 h-14 w-14 drop-shadow-lg md:h-24 md:w-24 lg:-left-8 lg:-top-8 lg:h-32 lg:w-32"
-            >
-              <circle cx="100" cy="100" r="98" fill="#1F3A2E" />
-              <path
-                id="who-we-are-badge-ring"
-                d="M 100,100 m -74,0 a 74,74 0 1,1 148,0 a 74,74 0 1,1 -148,0"
-                fill="none"
-              />
-              <text
-                fill="white"
-                fontSize="11"
-                fontWeight="700"
-                letterSpacing="2.5"
+              <View
+                style={{
+                  position: "absolute",
+                  left: -BOTTLE_BOX.w / 2,
+                  top: -BOTTLE_BOX.h / 2,
+                  width: BOTTLE_BOX.w,
+                  height: BOTTLE_BOX.h,
+                }}
               >
-                <textPath href="#who-we-are-badge-ring" startOffset="0%">
-                  SCIENCE &bull; INNOVATION &bull; SKINCARE &bull; SCIENCE
-                  &bull; INNOVATION &bull; SKINCARE &bull;
-                </textPath>
-              </text>
-              <text
-                x="100"
-                y="114"
-                textAnchor="middle"
-                fontSize="38"
-                fontFamily="Georgia, serif"
-                fontStyle="italic"
-                fill="white"
-              >
-                DL
-              </text>
-            </svg>
-
-            <div className="absolute right-2 bottom-10 rounded-xl bg-white px-3 py-2 shadow-xl md:right-3 md:bottom-24 md:rounded-2xl md:px-5 md:py-4 lg:-right-8">
-              <p className="font-serif text-base font-bold text-[#2B302B] md:text-2xl">
-                500+
-              </p>
-              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
-                Ingredients
-              </p>
+                <group ref={groupRRef}>
+                  <Center>
+                    {/* "Radiance" bottle in the reference - light peach. */}
+                    <SodaCan flavor="radiance" scale={1.4} />
+                  </Center>
+                </group>
+                <ambientLight intensity={1.4} />
+                <directionalLight intensity={2.5} position={[0, 1, 1]} />
+                <directionalLight intensity={1.2} position={[0, -1, -1]} />
+                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
+              </View>
             </div>
 
-            <div className="absolute left-2 bottom-2 rounded-xl bg-white px-3 py-2 shadow-xl md:left-3 md:bottom-6 md:rounded-2xl md:px-5 md:py-4 lg:-left-8">
-              <p className="font-serif text-sm font-bold text-[#2B302B] md:text-lg">
-                GMP &middot; ISO
-              </p>
-              <p className="font-sans text-[0.55rem] font-bold uppercase tracking-wide text-[#2B302B]/60 md:text-[0.65rem]">
-                Standards
-              </p>
+            {/* Left-edge progress rail. */}
+            <div
+              style={{
+                position: "absolute",
+                left: 24,
+                top: 250,
+                height: 220,
+                width: 30,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  flex: 1,
+                  width: 2,
+                  background: "rgba(20,20,20,0.12)",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  ref={fillRef}
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: 2,
+                    height: "0%",
+                    background: "#6B8F71",
+                  }}
+                />
+              </div>
+              <div
+                ref={numRef}
+                style={{ fontSize: 12, letterSpacing: "0.12em", fontWeight: 500 }}
+              >
+                01
+              </div>
+            </div>
+
+            <div
+              ref={hintRef}
+              style={{
+                position: "absolute",
+                left: "50%",
+                bottom: 28,
+                transform: "translateX(-50%)",
+                fontSize: 12,
+                fontWeight: 500,
+                letterSpacing: "0.3em",
+                color: "#5a6268",
+              }}
+            >
+              SCROLL
             </div>
           </div>
         </div>
       </div>
-    </Bounded>
-    {/* Full-bleed, outside the Bounded's max-w-7xl content column so it
-        truly spans edge to edge - sits between Who We Are and Our
-        Products (Carousel is the next slice after Hero in the page). */}
-    <CategoryTicker />
+      <CategoryTicker />
     </>
   );
 };

@@ -81,7 +81,7 @@ export function BlogTeaser() {
 
       <div ref={sectionRef} className="relative z-10 w-full">
         <div className="flex items-center gap-4">
-          <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+          <p className="whitespace-nowrap font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
             05 &mdash; Our Blog
           </p>
           <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
@@ -89,11 +89,11 @@ export function BlogTeaser() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2 lg:items-end lg:gap-12">
           <div>
-            <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+            <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
               Our Blog
             </p>
-            <h2 className="blog-teaser-heading mt-2 text-balance font-serif text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
-              From our <em className="font-normal italic">blog.</em>
+            <h2 className="blog-teaser-heading mt-2 text-balance text-5xl font-bold leading-[1.05] text-[#2B302B] lg:text-7xl">
+              From our <em className="font-medium">blog.</em>
             </h2>
           </div>
           <p className="blog-teaser-body text-lg font-normal text-[#2B302B]/80 lg:text-xl">
@@ -113,7 +113,7 @@ export function BlogTeaser() {
         */}
         <a
           href="/blog"
-          className="blog-teaser-button mt-10 inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
+          className="blog-teaser-button mt-10 inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
         >
           Visit Our Blog
           <span

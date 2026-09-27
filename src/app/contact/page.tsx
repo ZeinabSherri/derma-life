@@ -101,11 +101,11 @@ export default function ContactPage() {
           which was leaving only 40px of clearance under the absolutely
           positioned header and causing a real overlap on mobile. */}
       <div className="mx-auto w-full max-w-2xl pt-32 text-center md:pt-40">
-        <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+        <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
           Contact Us
         </p>
-        <h1 className="mt-2 text-balance font-serif text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
-          Get in <em className="font-normal italic">touch.</em>
+        <h1 className="mt-2 text-balance text-6xl font-bold leading-[.95] text-[#2B302B] lg:text-7xl">
+          Get in <em className="font-medium">touch.</em>
         </h1>
         <p className="mt-6 text-balance text-lg font-normal text-[#2B302B]/80 lg:text-xl">
           Ready to bring your brand to life? Let&apos;s talk about your product,
@@ -117,10 +117,10 @@ export default function ContactPage() {
         <ContactForm />
 
         <div className="rounded-2xl bg-white p-8 shadow-xl">
-          <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+          <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
             Reach Us
           </p>
-          <h2 className="mt-2 font-serif text-2xl font-bold text-[#2B302B]">
+          <h2 className="mt-2 text-2xl font-bold text-[#2B302B]">
             Keep in touch.
           </h2>
           <ul className="mt-6 flex flex-col gap-5">
@@ -138,12 +138,12 @@ export default function ContactPage() {
                       href={item.href}
                       target={item.external ? "_blank" : undefined}
                       rel={item.external ? "noopener noreferrer" : undefined}
-                      className="font-serif text-lg font-bold text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
+                      className="font-heading text-lg font-bold text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
                     >
                       {item.value}
                     </a>
                   ) : (
-                    <p className="font-serif text-lg font-bold text-[#2B302B]">
+                    <p className="font-heading text-lg font-bold text-[#2B302B]">
                       {item.value}
                     </p>
                   )}
@@ -158,7 +158,7 @@ export default function ContactPage() {
         {/* Plain anchor - see src/slices/AlternatingText/BlogTeaser.tsx for why. */}
         <a
           href="/"
-          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
+          className="inline-flex items-center gap-2 border-b border-[#2B302B] pb-1 font-heading text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:border-[#6B8F71] hover:text-[#6B8F71]"
         >
           Back to Home
           <span aria-hidden="true">↗</span>

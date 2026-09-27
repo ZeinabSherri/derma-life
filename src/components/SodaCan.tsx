@@ -17,6 +17,11 @@ export const flavorColors = {
   blackCherry: "#F5F1E6", // Collagen Boost - the two colors in active use
   strawberryLemonade: "#F5F1E6", // Vitamin C Brighten - site-wide
   watermelon: "#C98F5E", // Hyaluronic Hydrate - warm tan
+  // Hero-only tints (not tied to any Prismic flavor option) - matching the
+  // reference's two named bottles without touching the shared "watermelon"/
+  // "lemonLime" hexes above, which are also used on Carousel/SkyDive.
+  ageless: "#FAFAF8", // near-white, brighter than the first pass
+  radiance: "#FBDAB9", // light peach, softer/lighter than the first pass
 };
 
 // Model has 5 separate parts (label, glass body, inner tube, cap, rubber
@@ -82,6 +87,7 @@ export function SodaCan({
   }, [materials, gl]);
 
   const bottleMaterial = materials.bottle as THREE.MeshStandardMaterial;
+  const labelMaterial = materials["label ageles "] as THREE.MeshStandardMaterial;
 
   // Clone so each flavor gets its own tinted instance instead of mutating
   // the shared cached material.
@@ -91,6 +97,19 @@ export function SodaCan({
     return mat;
   }, [bottleMaterial, flavor]);
 
+  // The printed label wraps almost the entire visible bottle - tinting only
+  // the glass (above) left two different flavors looking nearly identical,
+  // since the label's own material never changed. Its texture map is mostly
+  // white/cream, so multiplying it by the flavor color (standard PBR
+  // base-color * map shading) washes the whole label toward that tint while
+  // the darker printed text stays legible, instead of just tinting a thin
+  // sliver of exposed glass.
+  const tintedLabelMaterial = useMemo(() => {
+    const mat = labelMaterial.clone();
+    mat.color = new THREE.Color(flavorColors[flavor]);
+    return mat;
+  }, [labelMaterial, flavor]);
+
   return (
     <group {...props} dispose={null} scale={scale}>
       <group scale={MODEL_SCALE} position={[0, CENTER_OFFSET_Y, 0]}>
@@ -98,7 +117,7 @@ export function SodaCan({
           castShadow
           receiveShadow
           geometry={(nodes.lable as THREE.Mesh).geometry}
-          material={materials["label ageles "]}
+          material={tintedLabelMaterial}
           rotation={PART_ROTATION}
           scale={PART_SCALE}
         />

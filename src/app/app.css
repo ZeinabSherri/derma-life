@@ -7,3 +7,53 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Site-wide 2-font system. The actual @font-face loading happens once via
+   next/font/google in src/app/layout.tsx (Inter, Manrope), which exposes
+   --font-inter / --font-manrope as CSS variables via a className on <body>.
+   These two variables are the semantic layer every component/class should
+   reference - nothing in the codebase should name a font directly outside
+   this block. Defined here on `body` (not `:root`/html) deliberately:
+   custom properties only inherit downward, and --font-inter etc. only exist
+   starting at <body>, so a `:root` rule referencing them one level up would
+   resolve to nothing. */
+body {
+  --font-heading: var(--font-manrope), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* No italic accent font - the words that used to be set in an italic accent
+   face (marked up as `<em className="font-normal ...">word.</em>` - see
+   Carousel, WhatWeDo, OurProcess, ContactTeaser, BlogTeaser, blog pages -
+   plus WhyChooseUs's own `.wcu-ln.wcu-it` span) now render as plain text in
+   whatever font their context already provides (heading font inside a
+   heading, body font elsewhere). This only cancels the browser's own
+   default italic styling for <em>/<i> tags, which would otherwise still
+   apply regardless of font-family. */
+em,
+i {
+  font-style: normal;
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}

@@ -160,7 +160,7 @@ export default function WhatWeDo() {
       className="what-we-do w-full scroll-mt-24 py-6"
     >
       <div className="flex items-center gap-4">
-        <p className="whitespace-nowrap font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
+        <p className="whitespace-nowrap font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#2B302B]/70">
           03 &mdash; What We Do
         </p>
         <span className="section-kicker-line h-px w-full bg-[#2B302B]/20" />
@@ -168,11 +168,11 @@ export default function WhatWeDo() {
 
       <div className="what-we-do-heading mt-4 grid gap-2 lg:mt-6 lg:grid-cols-2 lg:items-end lg:gap-12">
         <div>
-          <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+          <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
             Services
           </p>
-          <h2 className="mt-1 text-balance font-serif text-2xl font-bold leading-[1.05] text-[#2B302B] lg:mt-2 lg:text-6xl">
-            From concept to <em className="font-normal italic">consumer.</em>
+          <h2 className="mt-1 text-balance text-2xl font-bold leading-[1.05] text-[#2B302B] lg:mt-2 lg:text-6xl">
+            From concept to <em className="font-medium">consumer.</em>
           </h2>
         </div>
         <p className="hidden text-base font-normal text-[#2B302B]/80 sm:block lg:text-lg">

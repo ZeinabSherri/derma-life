@@ -1143,9 +1143,9 @@ const WCU_CSS = `
   --paper:#FBFAF8; --surface:#F2F0EB; --line:#E4E1DA;
   --ink:#1C2621; --ink-2:#5F6762;
   --accent:#2F4F43; --spark:#B9803A;
-  --serif:Georgia,"Times New Roman",serif;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-  --mono:"SFMono-Regular",Menlo,Consolas,monospace;
+  --serif:var(--font-heading);
+  --sans:var(--font-body);
+  --mono:var(--font-heading);
   --e:cubic-bezier(.16,1,.3,1);
   --back:cubic-bezier(.2,1.25,.3,1);
   color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
@@ -1188,7 +1188,7 @@ const WCU_CSS = `
 .wcu-dot{width:7px;height:7px;border-radius:50%;background:var(--spark);animation:wcu-pulse 2.2s ease-in-out infinite}
 @keyframes wcu-pulse{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 .wcu-win{display:block;height:15px;overflow:hidden}
-.wcu-txt{display:block;font:600 12px/15px var(--sans);letter-spacing:.15em;text-transform:uppercase;white-space:nowrap}
+.wcu-txt{display:block;font:600 12px/15px var(--font-heading);letter-spacing:.15em;text-transform:uppercase;white-space:nowrap}
 .wcu-txt.wcu-swap{animation:wcu-swap .5s var(--e)}
 @keyframes wcu-swap{from{transform:translateY(100%);opacity:0}to{transform:none;opacity:1}}
 .wcu-stamp{position:absolute;right:18px;bottom:18px;z-index:8;display:flex;gap:1px;padding:6px 10px;border-radius:5px;background:rgba(251,250,248,.78);
@@ -1204,13 +1204,13 @@ const WCU_CSS = `
 .wcu-orb::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid rgba(255,255,255,.55)}
 
 .wcu-copy{position:relative}
-.wcu-eyebrow{margin:0 0 14px;font:600 12px/1 var(--sans);letter-spacing:.9em;text-transform:uppercase;color:var(--ink-2);opacity:0}
+.wcu-eyebrow{margin:0 0 14px;font:600 12px/1 var(--font-heading);letter-spacing:.9em;text-transform:uppercase;color:var(--ink-2);opacity:0}
 .wcu-display{font-family:var(--serif);font-size:clamp(32px,4vw,54px);line-height:1.05;letter-spacing:-.022em;margin:0 0 22px}
 .wcu-ln{display:block;position:relative;overflow:hidden;padding:2px 0}
 .wcu-ln .wcu-ch{display:inline-block;opacity:0;will-change:transform}
 .wcu-ln.wcu-mask > span{display:inline-block;clip-path:inset(0 100% 0 0)}
 .wcu-bar{position:absolute;left:0;top:6%;height:88%;width:0;background:linear-gradient(90deg,rgba(185,128,58,.15),rgba(185,128,58,.55));opacity:0}
-.wcu-ln.wcu-it{font-style:italic}
+.wcu-ln.wcu-it{font-style:normal}
 .wcu-ln.wcu-it > span{display:inline-block;transform:translateY(110%);opacity:0}
 .wcu-ul{position:absolute;left:2px;bottom:6px;height:2px;width:0;background:linear-gradient(90deg,var(--accent),var(--spark));opacity:0}
 .wcu-shimmer{background-image:linear-gradient(100deg,var(--ink) 38%,#C79A55 50%,var(--ink) 62%);background-size:320% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:wcu-sheenTxt 9s ease-in-out 1s infinite}
@@ -1241,9 +1241,9 @@ const WCU_CSS = `
 .wcu-row.wcu-on .wcu-row-in{opacity:1;transform:none;transition-delay:.12s}
 .wcu-row-in p{margin:0;max-width:40ch;font-size:15px;line-height:1.6;color:var(--ink-2)}
 .wcu-metric{text-align:right;white-space:nowrap}
-.wcu-metric .wcu-num{display:flex;align-items:baseline;justify-content:flex-end;font:400 30px/1 var(--serif);color:var(--ink)}
+.wcu-metric .wcu-num{display:flex;align-items:baseline;justify-content:flex-end;font:600 30px/1 var(--serif);color:var(--ink)}
 .wcu-metric .wcu-suf{color:var(--spark)}
-.wcu-metric span.wcu-cap{display:block;margin-top:8px;font:600 11px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.wcu-metric span.wcu-cap{display:block;margin-top:8px;font:600 11px/1.4 var(--font-heading);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
 .wcu-reel{display:inline-block;height:1em;overflow:hidden;vertical-align:baseline}
 .wcu-reel .wcu-strip{display:block}
 .wcu-reel .wcu-strip b{display:block;height:1em;line-height:1em;font-weight:400}
@@ -1258,7 +1258,7 @@ const WCU_CSS = `
 .wcu-tools{display:flex;align-items:center;gap:16px}
 .wcu-count{display:flex;gap:1px;font:500 12px/1 var(--mono);letter-spacing:.12em;color:var(--ink-2);white-space:nowrap}
 .wcu-replay{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;min-width:44px;padding:0 6px;border:0;background:none;cursor:pointer;
-  font:600 11px/1 var(--sans);letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);transition:color .3s ease}
+  font:600 11px/1 var(--font-heading);letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2);transition:color .3s ease}
 .wcu-replay:hover{color:var(--ink)}
 .wcu-replay svg{transition:transform .6s var(--e)}
 .wcu-replay:hover svg{transform:rotate(-180deg)}

@@ -20,10 +20,10 @@ export function ContactForm() {
   if (status === "submitted") {
     return (
       <div className="rounded-2xl bg-[#F5F3EE] p-8 text-center">
-        <p className="font-sans text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
+        <p className="font-heading text-xs font-bold uppercase tracking-[0.25em] text-[#6B8F71]">
           Message Sent
         </p>
-        <h2 className="mt-2 font-serif text-2xl font-bold text-[#2B302B]">
+        <h2 className="mt-2 text-2xl font-bold text-[#2B302B]">
           Thank you!
         </h2>
         <p className="mt-2 text-lg text-[#2B302B]/80">
@@ -88,7 +88,7 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="mt-2 inline-flex items-center justify-center gap-10 self-start rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
+        className="mt-2 inline-flex items-center justify-center gap-10 self-start rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
       >
         Send Message
         <span

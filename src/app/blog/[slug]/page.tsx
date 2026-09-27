@@ -43,7 +43,7 @@ export default function BlogPostPage({ params }: Props) {
         {/* Plain anchor - see BlogTeaser.tsx for why. */}
         <a
           href="/blog"
-          className="inline-flex items-center gap-2 font-sans text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
+          className="inline-flex items-center gap-2 font-heading text-sm font-bold uppercase tracking-[0.2em] text-[#2B302B] transition-colors duration-150 hover:text-[#6B8F71]"
         >
           <span aria-hidden="true">←</span>
           Back to Blog
@@ -56,7 +56,7 @@ export default function BlogPostPage({ params }: Props) {
           {post.category}
         </span>
 
-        <h1 className="mt-4 text-balance font-serif text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-5xl">
+        <h1 className="mt-4 text-balance text-4xl font-bold leading-[1.05] text-[#2B302B] lg:text-5xl">
           {post.title}
         </h1>
 
@@ -84,7 +84,7 @@ export default function BlogPostPage({ params }: Props) {
               return (
                 <h2
                   key={i}
-                  className="mt-4 font-serif text-2xl font-bold text-[#2B302B]"
+                  className="mt-4 text-2xl font-bold text-[#2B302B]"
                 >
                   {block.text}
                 </h2>
@@ -125,7 +125,7 @@ export default function BlogPostPage({ params }: Props) {
           {/* Plain anchor - see BlogTeaser.tsx for why. */}
           <a
             href="/blog"
-            className="inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-sans text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
+            className="inline-flex items-center gap-10 rounded-full bg-[#1F3A2E] py-3 pl-6 pr-3 font-heading text-sm font-bold uppercase tracking-[0.2em] text-white transition-colors duration-150 hover:bg-[#16291f]"
           >
             Back to Blog
             <span

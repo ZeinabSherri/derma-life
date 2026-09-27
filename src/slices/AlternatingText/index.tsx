@@ -120,7 +120,7 @@ const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
                       "rounded-lg p-4 backdrop-blur-lg max-lg:bg-white/30",
                     )}
                   >
-                    <h2 className="text-balance font-serif text-6xl font-bold">
+                    <h2 className="text-balance text-6xl font-bold">
                       {item.heading}
                     </h2>
                     {item.items ? (
