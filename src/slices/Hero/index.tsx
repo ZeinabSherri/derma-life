@@ -300,6 +300,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               fontWeight: 300,
               lineHeight: 1.5,
               color: "#3a4247",
+              opacity: mobileSection === 2 ? 1 : 0,
+              transition: "opacity 0.6s ease",
             }}
           >
             Science &middot; Innovation &middot; Skincare
@@ -316,11 +318,13 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           >
             <div style={{ position: "relative", width: 150, height: 220 }}>
               <View style={{ position: "absolute", inset: 0 }}>
-                <Float speed={1.6} floatIntensity={1.1} rotationIntensity={0.6}>
-                  <Center>
-                    <SodaCan flavor="ageless" scale={1.4} />
-                  </Center>
-                </Float>
+                <group ref={mobileGroupARef}>
+                  <Float speed={1.6} floatIntensity={1.1} rotationIntensity={0.6}>
+                    <Center>
+                      <SodaCan flavor="ageless" scale={1.4} />
+                    </Center>
+                  </Float>
+                </group>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
@@ -338,17 +342,40 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               <View style={{ position: "absolute", inset: 0 }}>
                 {/* Slightly different speed/phase than the bottle above so
                     the two don't bob in lockstep. */}
-                <Float speed={1.2} floatIntensity={1.3} rotationIntensity={0.6}>
-                  <Center>
-                    <SodaCan flavor="radiance" scale={1.4} />
-                  </Center>
-                </Float>
+                <group ref={mobileGroupRRef}>
+                  <Float speed={1.2} floatIntensity={1.3} rotationIntensity={0.6}>
+                    <Center>
+                      <SodaCan flavor="radiance" scale={1.4} />
+                    </Center>
+                  </Float>
+                </group>
                 <ambientLight intensity={1.4} />
                 <directionalLight intensity={2.5} position={[0, 1, 1]} />
                 <directionalLight intensity={1.2} position={[0, -1, -1]} />
                 <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
               </View>
             </div>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 8,
+              marginTop: 12,
+            }}
+          >
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: i === mobileSection ? "#6B8F71" : "rgba(20,20,20,0.15)",
+                  transition: "background 0.4s ease",
+                }}
+              />
+            ))}
           </div>
         </div>
         <CategoryTicker />
