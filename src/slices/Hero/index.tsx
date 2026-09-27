@@ -229,6 +229,33 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDesktop]);
 
+  useEffect(() => {
+    if (isDesktop) return;
+
+    const advance = setInterval(() => {
+      mobileSectionRef.current = (mobileSectionRef.current + 1) % 3;
+      setMobileSection(mobileSectionRef.current);
+    }, 3000);
+
+    let raf = 0;
+    function frame() {
+      const i = mobileSectionRef.current;
+      const targetA = (-KEYFRAMES.A[i][2] * Math.PI) / 180;
+      const targetR = (-KEYFRAMES.R[i][2] * Math.PI) / 180;
+      const groupA = mobileGroupARef.current;
+      const groupR = mobileGroupRRef.current;
+      if (groupA) groupA.rotation.z += (targetA - groupA.rotation.z) * 0.06;
+      if (groupR) groupR.rotation.z += (targetR - groupR.rotation.z) * 0.06;
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      clearInterval(advance);
+      cancelAnimationFrame(raf);
+    };
+  }, [isDesktop]);
+
   if (!isDesktop) {
     return (
       <>
