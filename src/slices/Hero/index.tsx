@@ -266,7 +266,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           className="font-heading"
           style={{
             position: "relative",
-            background: "#F3F6F8",
+            background: "#FFFFFF",
             color: "#141414",
             padding: "72px 24px 56px",
           }}
@@ -395,7 +395,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         style={{
           position: "relative",
           height: `${SCROLL_HEIGHT_VH}vh`,
-          background: "#F3F6F8",
+          background: "#FFFFFF",
           color: "#141414",
         }}
       >
@@ -405,7 +405,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             top: 0,
             height: "100vh",
             overflow: "hidden",
-            background: "#F3F6F8",
+            background: "#FFFFFF",
           }}
         >
           <div
@@ -418,7 +418,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               height: STAGE_H,
               transform: "translate(-50%,-50%) scale(0.7)",
               transformOrigin: "50% 50%",
-              background: "#F3F6F8",
+              background: "#FFFFFF",
             }}
           >
             {/* Three crossfading text states - same "WHO WE ARE" eyebrow +
