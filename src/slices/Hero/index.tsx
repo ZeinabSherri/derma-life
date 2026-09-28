@@ -33,7 +33,9 @@ const KEYFRAMES = {
   A: [
     [818, 376, -30.5, 0.84],
     [206, 372, -30.5, 0.84],
-    [1057, 463, -18.6, 0.66],
+    // Landed tilt was -18.6 (still leaning) - upright once settled, so not
+    // every state reads as oblique.
+    [1057, 463, 0, 0.66],
   ],
   R: [
     [370, 478, 48.6, 0.7],
@@ -41,19 +43,9 @@ const KEYFRAMES = {
     // waypoint [206, 372, ...] once both bottles' tilt/size are accounted
     // for - moved further right/down so the two don't visually cross.
     [470, 560, 48.6, 0.7],
-    [844, 550, 18, 0.62],
+    // Landed tilt was 18 (still leaning) - upright once settled.
+    [844, 550, 0, 0.62],
   ],
-} as const;
-
-// [offsetX, offsetY, boxW, boxH]. The source's own offsetY (564/652) was
-// meant relative to each bottle's *landed* keyframe position, not its live
-// animated one - adding it to the live y here (needed so the shadow tracks
-// the bottle while it's still floating, not just once landed) pushed the
-// shadow hundreds of px below the stage. Replaced with a small grounding
-// offset so it sits directly under the bottle at any point in the scroll.
-const SHADOW = {
-  A: [-7, 90, 520, 250],
-  R: [-12, 100, 560, 270],
 } as const;
 
 const FLOAT_AMT = 1; // source's default `float` prop
@@ -75,8 +67,8 @@ function ease(t: number) {
  * A literal port of an external reference design: a fixed 1212x678 design
  * canvas, scaled to fit the viewport, scrubbed by a single scroll-driven
  * progress value `p` (0-2) computed every frame from this section's own
- * bounding rect - not Prismic content, not GSAP. See KEYFRAMES/SHADOW
- * above for the exact source numbers.
+ * bounding rect - not Prismic content, not GSAP. See KEYFRAMES above for
+ * the exact source numbers.
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
   const isReady = useStore((state) => state.isReady);
@@ -101,8 +93,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   // silently ignored and the bottle always rendered upright.
   const groupARef = useRef<Group>(null);
   const groupRRef = useRef<Group>(null);
-  const sARef = useRef<HTMLDivElement>(null);
-  const sRRef = useRef<HTMLDivElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
   const numRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
@@ -155,10 +145,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
       (
         [
-          ["A", bARef, sARef, groupARef],
-          ["R", bRRef, sRRef, groupRRef],
+          ["A", bARef, groupARef],
+          ["R", bRRef, groupRRef],
         ] as const
-      ).forEach(([id, bottleRef, shadowRef, groupRef]) => {
+      ).forEach(([id, bottleRef, groupRef]) => {
         const a = KEYFRAMES[id][seg];
         const b = KEYFRAMES[id][seg + 1];
         let x = lerp(a[0], b[0], e);
@@ -188,17 +178,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         }
         if (groupRef.current) {
           groupRef.current.rotation.z = (-tilt * Math.PI) / 180;
-        }
-
-        const sh = SHADOW[id];
-        const shadowEl = shadowRef.current;
-        if (shadowEl) {
-          // A baseline shadow is always visible under the bottle (not just
-          // once it "lands" near the end of the scroll like the source),
-          // so it reads as grounded throughout, with extra emphasis as it
-          // settles.
-          shadowEl.style.opacity = (0.28 + land * 0.65).toFixed(3);
-          shadowEl.style.transform = `translate(${x + sh[0] - sh[2] / 2}px,${y + sh[1] - sh[3] / 2}px) scale(${0.55 + 0.45 * land})`;
         }
       });
 
@@ -548,37 +527,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
             {/* Bottle A - real 3D product model, positioned/rotated/scaled
                 every frame exactly like the source moved its flat photo. */}
-            <div
-              ref={sARef}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: 520,
-                height: 250,
-                opacity: 0,
-                borderRadius: "999px",
-                background:
-                  "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(20,20,20,0.4), rgba(20,20,20,0) 70%)",
-                willChange: "transform,opacity",
-              }}
-            />
-            <div
-              ref={sRRef}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: 560,
-                height: 270,
-                opacity: 0,
-                borderRadius: "999px",
-                background:
-                  "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(20,20,20,0.4), rgba(20,20,20,0) 70%)",
-                willChange: "transform,opacity",
-              }}
-            />
-
             <div
               ref={bARef}
               style={{
