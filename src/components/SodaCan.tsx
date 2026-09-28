@@ -5,6 +5,8 @@ import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+import { LiquidSurface, LiquidState } from "@/components/LiquidSurface";
+
 useGLTF.preload("/Bottle-baked.glb");
 
 // Serum "flavor" tints - each key stays wired to the Prismic `flavor` Select
@@ -22,6 +24,16 @@ export const flavorColors = {
   // "lemonLime" hexes above, which are also used on Carousel/SkyDive.
   ageless: "#FAFAF8", // near-white, brighter than the first pass
   radiance: "#FBDAB9", // light peach, softer/lighter than the first pass
+};
+
+// The liquid itself is a distinct, more saturated color from the bottle's
+// own pale exterior tint above (oklch(0.80 0.09 225) light blue / oklch
+// (0.80 0.10 65) warm amber, per spec) - reusing the same pale flavor hex
+// for both would leave it blending invisibly into the label/glass it sits
+// behind.
+export const liquidColors: Partial<Record<keyof typeof flavorColors, string>> = {
+  ageless: "#AECBDA",
+  radiance: "#D9B67E",
 };
 
 // Model has 5 separate parts (label, glass body, inner tube, cap, rubber
@@ -44,11 +56,21 @@ const CENTER_OFFSET_Y = -0.19459;
 export type SodaCanProps = {
   flavor?: keyof typeof flavorColors;
   scale?: number;
+  // Opt-in per instance - most SodaCan usages (Carousel, FloatingCan,
+  // SkyDive) keep the bottle fully opaque and don't pay for the extra
+  // per-frame mesh work. `stateRef` is written every frame by the caller's
+  // own animation loop (Hero) with the bottle's live x/tilt; see
+  // LiquidSurface for why that's a ref and not a prop.
+  liquid?: {
+    stateRef: React.MutableRefObject<LiquidState>;
+    reducedMotion?: boolean;
+  };
 };
 
 export function SodaCan({
   flavor = "blackCherry",
   scale = 2.3,
+  liquid,
   ...props
 }: SodaCanProps) {
   const { nodes, materials } = useGLTF("/Bottle-baked.glb");
@@ -90,12 +112,21 @@ export function SodaCan({
   const labelMaterial = materials["label ageles "] as THREE.MeshStandardMaterial;
 
   // Clone so each flavor gets its own tinted instance instead of mutating
-  // the shared cached material.
+  // the shared cached material. When a liquid surface is present, the
+  // glass also needs to be translucent - otherwise the liquid mesh sits
+  // fully hidden behind an opaque wall - but only for that instance, so
+  // every other SodaCan usage (Carousel, FloatingCan, SkyDive) keeps its
+  // current solid/opaque look.
   const tintedBottleMaterial = useMemo(() => {
     const mat = bottleMaterial.clone();
     mat.color = new THREE.Color(flavorColors[flavor]);
+    if (liquid) {
+      mat.transparent = true;
+      mat.opacity = 0.4;
+      mat.depthWrite = false;
+    }
     return mat;
-  }, [bottleMaterial, flavor]);
+  }, [bottleMaterial, flavor, liquid]);
 
   // The printed label wraps almost the entire visible bottle - tinting only
   // the glass (above) left two different flavors looking nearly identical,
@@ -107,8 +138,18 @@ export function SodaCan({
   const tintedLabelMaterial = useMemo(() => {
     const mat = labelMaterial.clone();
     mat.color = new THREE.Color(flavorColors[flavor]);
+    if (liquid) {
+      // The label wraps essentially the entire glass circumference, so
+      // making only the glass translucent (above) left the liquid mesh
+      // fully hidden behind this opaque layer regardless of camera angle.
+      // A light translucency here keeps the printed text readable while
+      // letting the liquid's color/motion show through.
+      mat.transparent = true;
+      mat.opacity = 0.35;
+      mat.depthWrite = false;
+    }
     return mat;
-  }, [labelMaterial, flavor]);
+  }, [labelMaterial, flavor, liquid]);
 
   return (
     <group {...props} dispose={null} scale={scale}>
@@ -120,6 +161,7 @@ export function SodaCan({
           material={tintedLabelMaterial}
           rotation={PART_ROTATION}
           scale={PART_SCALE}
+          renderOrder={liquid ? 3 : undefined}
         />
         <mesh
           castShadow
@@ -136,7 +178,21 @@ export function SodaCan({
           material={tintedBottleMaterial}
           rotation={PART_ROTATION}
           scale={PART_SCALE}
+          renderOrder={liquid ? 2 : undefined}
         />
+        {liquid && (
+          // Sibling of "bootle" at this same group level, in the same
+          // post-rotation/scale coordinate space (see the bounding-box
+          // numbers this was measured against) - radius/centerY are tuned
+          // to the glass interior, not derived from a formula.
+          <LiquidSurface
+            color={liquidColors[flavor] ?? flavorColors[flavor]}
+            stateRef={liquid.stateRef}
+            reducedMotion={liquid.reducedMotion}
+            radius={1}
+            centerY={0}
+          />
+        )}
         <mesh
           castShadow
           receiveShadow

@@ -7,6 +7,7 @@ import { Center, Environment, Float, View } from "@react-three/drei";
 import { Group } from "three";
 
 import CategoryTicker from "@/components/CategoryTicker";
+import { LiquidState } from "@/components/LiquidSurface";
 import { SodaCan } from "@/components/SodaCan";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useStore } from "@/hooks/useStore";
@@ -20,9 +21,10 @@ export type HeroProps = SliceComponentProps<Content.HeroSlice>;
 // 1212x678 "stage" scaled to fit the viewport, exactly like the reference)
 // rather than the rest of the site's GSAP ScrollTrigger convention - this
 // section's whole point is to reproduce that file's numbers and timing
-// faithfully, not adapt them. Liquid-surface physics from the source were
-// intentionally dropped per explicit request; only bottle
-// position/rotation/scale and the arc/float beats are ported.
+// faithfully, not adapt them. The reference's liquid-surface physics are
+// ported too (see LiquidSurface.tsx), just re-targeted at a 3D mesh instead
+// of an SVG path, since these bottles are a real 3D model, not the
+// reference's flat photos.
 const STAGE_W = 1212;
 const STAGE_H = 678;
 const SCROLL_HEIGHT_VH = 400; // "Medium" scrollLength preset in the source
@@ -78,6 +80,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   // site treats as "desktop", this renders a normal-flow, non-scroll-scrubbed
   // layout instead of trying to force the scaled canvas to fit.
   const isDesktop = useMediaQuery("(min-width: 1024px)", true);
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", false);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -93,6 +96,12 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   // silently ignored and the bottle always rendered upright.
   const groupARef = useRef<Group>(null);
   const groupRRef = useRef<Group>(null);
+  // Live x/tilt each bottle's own liquid mesh reads every frame to run its
+  // spring/wave sim - written in the same frame() loop that already
+  // computes these values for the bottle's own transform, just also
+  // stashed here instead of thrown away.
+  const liquidARef = useRef<LiquidState>({ x: 0, tilt: 0 });
+  const liquidRRef = useRef<LiquidState>({ x: 0, tilt: 0 });
   const fillRef = useRef<HTMLDivElement>(null);
   const numRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
@@ -105,6 +114,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   const mobileSectionRef = useRef(0);
   const mobileGroupARef = useRef<Group>(null);
   const mobileGroupRRef = useRef<Group>(null);
+  const mobileLiquidARef = useRef<LiquidState>({ x: 0, tilt: 0 });
+  const mobileLiquidRRef = useRef<LiquidState>({ x: 0, tilt: 0 });
 
   useEffect(() => {
     isReady();
@@ -145,10 +156,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
       (
         [
-          ["A", bARef, groupARef],
-          ["R", bRRef, groupRRef],
+          ["A", bARef, groupARef, liquidARef],
+          ["R", bRRef, groupRRef, liquidRRef],
         ] as const
-      ).forEach(([id, bottleRef, groupRef]) => {
+      ).forEach(([id, bottleRef, groupRef, liquidRef]) => {
         const a = KEYFRAMES[id][seg];
         const b = KEYFRAMES[id][seg + 1];
         let x = lerp(a[0], b[0], e);
@@ -168,7 +179,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           tilt += arcK * 10;
         }
 
-        const fl = (1 - land) * FLOAT_AMT;
+        const fl = (1 - land) * (reducedMotion ? 0 : FLOAT_AMT);
         y += Math.sin(time * 1.1 + ph[id]) * 10 * fl;
         tilt += Math.sin(time * 0.75 + ph[id]) * 2.2 * fl;
 
@@ -179,6 +190,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         if (groupRef.current) {
           groupRef.current.rotation.z = (-tilt * Math.PI) / 180;
         }
+        liquidRef.current.x = x;
+        liquidRef.current.tilt = tilt;
       });
 
       [t0Ref, t1Ref, t2Ref].forEach((ref, i) => {
@@ -206,7 +219,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDesktop]);
+  }, [isDesktop, reducedMotion]);
 
   useEffect(() => {
     if (isDesktop) return;
@@ -219,12 +232,19 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     let raf = 0;
     function frame() {
       const i = mobileSectionRef.current;
-      const targetA = (-KEYFRAMES.A[i][2] * Math.PI) / 180;
-      const targetR = (-KEYFRAMES.R[i][2] * Math.PI) / 180;
+      const tiltA = KEYFRAMES.A[i][2];
+      const tiltR = KEYFRAMES.R[i][2];
+      const targetA = (-tiltA * Math.PI) / 180;
+      const targetR = (-tiltR * Math.PI) / 180;
       const groupA = mobileGroupARef.current;
       const groupR = mobileGroupRRef.current;
       if (groupA) groupA.rotation.z += (targetA - groupA.rotation.z) * 0.06;
       if (groupR) groupR.rotation.z += (targetR - groupR.rotation.z) * 0.06;
+      // No horizontal motion on mobile (bottles don't translate, only
+      // lean), so only the tilt-velocity term of the liquid sim ever
+      // engages here - still enough to react to each section change.
+      mobileLiquidARef.current.tilt = groupA ? (-groupA.rotation.z * 180) / Math.PI : tiltA;
+      mobileLiquidRRef.current.tilt = groupR ? (-groupR.rotation.z * 180) / Math.PI : tiltR;
       raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
@@ -299,9 +319,17 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             <div style={{ position: "relative", width: 150, height: 220 }}>
               <View style={{ position: "absolute", inset: 0 }}>
                 <group ref={mobileGroupARef}>
-                  <Float speed={1.6} floatIntensity={1.1} rotationIntensity={0.6}>
+                  <Float
+                    speed={reducedMotion ? 0 : 1.6}
+                    floatIntensity={reducedMotion ? 0 : 1.1}
+                    rotationIntensity={reducedMotion ? 0 : 0.6}
+                  >
                     <Center>
-                      <SodaCan flavor="ageless" scale={1.4} />
+                      <SodaCan
+                        flavor="ageless"
+                        scale={1.4}
+                        liquid={{ stateRef: mobileLiquidARef, reducedMotion }}
+                      />
                     </Center>
                   </Float>
                 </group>
@@ -323,9 +351,17 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 {/* Slightly different speed/phase than the bottle above so
                     the two don't bob in lockstep. */}
                 <group ref={mobileGroupRRef}>
-                  <Float speed={1.2} floatIntensity={1.3} rotationIntensity={0.6}>
+                  <Float
+                    speed={reducedMotion ? 0 : 1.2}
+                    floatIntensity={reducedMotion ? 0 : 1.3}
+                    rotationIntensity={reducedMotion ? 0 : 0.6}
+                  >
                     <Center>
-                      <SodaCan flavor="radiance" scale={1.4} />
+                      <SodaCan
+                        flavor="radiance"
+                        scale={1.4}
+                        liquid={{ stateRef: mobileLiquidRRef, reducedMotion }}
+                      />
                     </Center>
                   </Float>
                 </group>
@@ -550,7 +586,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 <group ref={groupARef}>
                   <Center>
                     {/* "Ageless Skin" bottle in the reference - near-white glass. */}
-                    <SodaCan flavor="ageless" scale={1.4} />
+                    <SodaCan
+                      flavor="ageless"
+                      scale={1.4}
+                      liquid={{ stateRef: liquidARef, reducedMotion }}
+                    />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />
@@ -582,7 +622,11 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 <group ref={groupRRef}>
                   <Center>
                     {/* "Radiance" bottle in the reference - light peach. */}
-                    <SodaCan flavor="radiance" scale={1.4} />
+                    <SodaCan
+                      flavor="radiance"
+                      scale={1.4}
+                      liquid={{ stateRef: liquidRRef, reducedMotion }}
+                    />
                   </Center>
                 </group>
                 <ambientLight intensity={1.4} />
