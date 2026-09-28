@@ -306,7 +306,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     // just the two bottles leaning to the current auto-slide section). The
     // two centers need real separation - too close and the second bottle
     // (drawn on top in DOM order) mostly covers the first.
-    const pos = { A: { x: 95, y: 120, scale: 0.3 }, R: { x: 230, y: 120, scale: 0.27 } };
+    const pos = { A: { x: 112, y: 135, scale: 0.39 }, R: { x: 288, y: 135, scale: 0.35 } };
 
     function frame() {
       const now = performance.now();
@@ -405,7 +405,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             style={{
               position: "relative",
               marginTop: 4,
-              height: 220,
+              height: 270,
               overflow: "hidden",
             }}
           >

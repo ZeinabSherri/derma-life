@@ -161,7 +161,12 @@ const AlternatingText = ({ slice }: AlternatingTextProps): JSX.Element => {
       <Bounded
         data-slice-type={slice.slice_type}
         data-slice-variation={slice.variation}
-        className="flex h-screen items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F5F3EE_16%,#F5F3EE_84%,#ffffff_100%)] text-[#2B302B]"
+        // h-screen force-centered WhatWeDo's actual (much shorter) content
+        // inside a full viewport height, which reads fine on desktop but
+        // left huge blank margins above/below it on a tall phone - only
+        // forced full-height from lg up, where the content is closer to
+        // filling the screen anyway.
+        className="flex items-center overflow-hidden bg-[linear-gradient(to_bottom,#ffffff_0%,#F5F3EE_16%,#F5F3EE_84%,#ffffff_100%)] py-16 text-[#2B302B] lg:h-screen lg:py-0"
       >
         <WhatWeDo />
       </Bounded>
