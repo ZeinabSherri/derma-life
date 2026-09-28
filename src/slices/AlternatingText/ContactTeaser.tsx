@@ -130,10 +130,10 @@ export function ContactTeaser() {
             </span>
           </a>
           <a
-            href="tel:+393515846229"
+            href="tel:+96171503354"
             className="contact-teaser-phone font-heading text-xl font-bold text-[#2B302B] underline decoration-[#2B302B]/40 underline-offset-4 transition-colors duration-150 hover:text-[#6B8F71]"
           >
-            +39 351 584 6229
+            +961 71 503 354
           </a>
         </div>
       </div>

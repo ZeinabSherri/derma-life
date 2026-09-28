@@ -36,8 +36,8 @@ const CONTACT_DETAILS: {
   },
   {
     label: "Phone",
-    value: "+39 351 584 6229",
-    href: "tel:+393515846229",
+    value: "+961 71 503 354",
+    href: "tel:+96171503354",
     icon: (
       <svg
         viewBox="0 0 24 24"
