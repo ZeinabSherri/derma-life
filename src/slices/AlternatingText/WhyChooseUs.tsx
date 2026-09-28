@@ -1267,8 +1267,15 @@ const WCU_CSS = `
   background:radial-gradient(circle at 35% 35%,#E3B575,var(--spark));box-shadow:0 0 14px rgba(185,128,58,.75);opacity:0;pointer-events:none}
 
 @media (max-width:900px){
-  .wcu-section{height:100vh;padding:10px 14px;overflow:hidden}
-  .wcu-wrap{grid-template-columns:1fr;gap:4px}
+  /* Was height:100vh + overflow:hidden - forcing the image + heading +
+     all 5 rows into exactly one screen left every row squeezed down to
+     a 28px sliver with 4px of padding, reading as one stacked block
+     instead of a list. min-height lets the section grow to whatever
+     the content actually needs; mobile already settles everything
+     instantly (see the animation-duration override below), so there's
+     no scroll-pin timing depending on an exact 100vh height. */
+  .wcu-section{min-height:100vh;height:auto;padding:32px 14px;overflow:visible}
+  .wcu-wrap{grid-template-columns:1fr;gap:16px}
   /* No height cap here - the base rule's max-width:min(500px,58vh)
      still applies and, combined with aspect-ratio:1/1, was previously
      losing to this 14vh height cap and shrinking the image down to a
@@ -1278,10 +1285,10 @@ const WCU_CSS = `
   .wcu-ring{width:190px;height:190px;right:-60px;top:-60px}
   .wcu-display{font-size:clamp(19px,6vw,28px);margin-bottom:4px}
   .wcu-eyebrow{margin-bottom:4px;letter-spacing:.5em}
-  .wcu-row-btn{min-height:28px;padding:4px 2px}
-  .wcu-row-title{font-size:13px;line-height:1.25}
-  .wcu-row-in{flex-direction:column;align-items:flex-start;gap:4px;padding:0 2px 4px 0}
-  .wcu-row-in p{font-size:10.5px;line-height:1.3}
+  .wcu-row-btn{min-height:44px;padding:10px 2px}
+  .wcu-row-title{font-size:14px;line-height:1.3}
+  .wcu-row-in{flex-direction:column;align-items:flex-start;gap:6px;padding:0 2px 14px 0}
+  .wcu-row-in p{font-size:12px;line-height:1.5}
   .wcu-metric{text-align:left}
   .wcu-metric .wcu-num{justify-content:flex-start;font-size:18px}
   .wcu-only-d{display:none}

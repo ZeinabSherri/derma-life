@@ -359,7 +359,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             position: "relative",
             background: "#FFFFFF",
             color: "#141414",
-            padding: "72px 24px 56px",
+            padding: "112px 24px 56px",
+            textAlign: "center",
           }}
         >
           <div
@@ -387,6 +388,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             style={{
               marginTop: 16,
               maxWidth: 420,
+              marginLeft: "auto",
+              marginRight: "auto",
               fontSize: 16,
               fontWeight: 400,
               lineHeight: 1.5,
