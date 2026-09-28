@@ -14,7 +14,11 @@ import * as THREE from "three";
 // the surface" rather than a literal disc (a flat disc lying horizontally
 // is nearly edge-on to a camera looking at the bottle from the side, and
 // is effectively invisible - a front-facing fill shape is what the
-// reference actually draws). The bottle (in Hero/index.tsx) writes its own
+// reference actually draws). Per-vertex alpha fades the left/right/bottom
+// edges to nothing - a flat, uniform-opacity quad read as a hard sticker-
+// like diamond sitting on top of the label rather than liquid, since
+// there's no glass-shaped mask to clip it the way the reference's
+// overflow:hidden div does. The bottle (in Hero/index.tsx) writes its own
 // live x/tilt into `stateRef` every frame; this component reads that ref
 // inside its own useFrame rather than taking x/tilt as React props, so
 // 60fps updates never trigger a re-render.
@@ -31,6 +35,7 @@ type LiquidSurfaceProps = {
 
 const SEGMENTS_X = 32;
 const FILL_DEPTH = 1.5; // how far below the wave line the fill extends, in radius-relative units
+const BASE_ALPHA = 0.85;
 
 function clamp(v: number, a: number, b: number) {
   return Math.min(b, Math.max(a, v));
@@ -51,35 +56,61 @@ export function LiquidSurface({
   const vertexCount = (SEGMENTS_X + 1) * 2;
 
   // Two rows of vertices (top = wave line, bottom = far below it) - built
-  // once as a triangle strip; only positions are mutated per frame.
+  // once as a triangle strip; only positions are mutated per frame. Alpha
+  // (per-vertex, via the color attribute's 4th component) is set once too:
+  // it fades toward 0 at the left/right columns and is lower on the
+  // bottom row than the top, so the shape reads as a soft pool instead of
+  // a flat-alpha polygon with a hard silhouette.
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     const positions = new Float32Array(vertexCount * 3);
+    const colors = new Float32Array(vertexCount * 4);
     const indices: number[] = [];
-    for (let i = 0; i < SEGMENTS_X; i++) {
-      const a = i * 2; // top[i]
-      const b = i * 2 + 1; // bottom[i]
-      const c = (i + 1) * 2; // top[i+1]
-      const d = (i + 1) * 2 + 1; // bottom[i+1]
-      indices.push(a, b, c, b, d, c);
+    const base = new THREE.Color(color);
+    for (let i = 0; i <= SEGMENTS_X; i++) {
+      const u = i / SEGMENTS_X; // 0..1 across the width
+      // Floor of 0.45 (not 0) at the edges - fully fading to 0 read as
+      // "barely visible," a floor keeps it readable while still softening
+      // the silhouette relative to a flat, uniform alpha.
+      const edgeFade = 0.45 + 0.55 * Math.sin(u * Math.PI);
+      const topAlpha = BASE_ALPHA * edgeFade;
+      const bottomAlpha = BASE_ALPHA * 0.55 * edgeFade;
+      const top = i * 2;
+      const bottom = i * 2 + 1;
+      colors[top * 4] = base.r;
+      colors[top * 4 + 1] = base.g;
+      colors[top * 4 + 2] = base.b;
+      colors[top * 4 + 3] = topAlpha;
+      colors[bottom * 4] = base.r;
+      colors[bottom * 4 + 1] = base.g;
+      colors[bottom * 4 + 2] = base.b;
+      colors[bottom * 4 + 3] = bottomAlpha;
+      if (i < SEGMENTS_X) {
+        const a = top;
+        const b = bottom;
+        const c = (i + 1) * 2;
+        const d = (i + 1) * 2 + 1;
+        indices.push(a, b, c, b, d, c);
+      }
     }
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 4));
     geo.setIndex(indices);
     return geo;
-  }, [vertexCount]);
+  }, [vertexCount, color]);
 
   // Unlit deliberately - MeshPhysicalMaterial/MeshStandardMaterial (lit,
   // PBR) rendered this mesh completely invisible here regardless of
   // opacity/color, seemingly a normals/lighting interaction specific to
   // this flat, live-mutated geometry sitting this close to other
   // transparent surfaces. Unlit avoids that dependency entirely and still
-  // reads fine as a tinted liquid fill.
+  // reads fine as a tinted liquid fill. vertexColors picks up the
+  // per-vertex RGBA set above for the edge/bottom fade.
   const material = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color,
+        vertexColors: true,
         transparent: true,
-        opacity: 0.88,
         side: THREE.DoubleSide,
         depthWrite: false,
         // The bottle's inner tube/straw ("bootle_1") runs right through
@@ -89,7 +120,8 @@ export function LiquidSurface({
         // inaccuracy that reads far better than being invisible.
         depthTest: false,
       }),
-    [color],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
   useFrame((_, rawDelta) => {
