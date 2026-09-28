@@ -182,7 +182,7 @@ export default function WhatWeDo() {
         </p>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-[#2B302B]/10 lg:mt-6 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-2xl bg-[#2B302B]/10 sm:grid-cols-2 lg:mt-6 lg:grid-cols-4">
         {SERVICES.map((service) => (
           <div
             key={service.number}
