@@ -3,12 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
-import { Center, Environment, Float, View } from "@react-three/drei";
-import { Group } from "three";
 
 import CategoryTicker from "@/components/CategoryTicker";
-import { LiquidState } from "@/components/LiquidSurface";
-import { SodaCan } from "@/components/SodaCan";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useStore } from "@/hooks/useStore";
 
@@ -17,14 +13,13 @@ import { useStore } from "@/hooks/useStore";
  */
 export type HeroProps = SliceComponentProps<Content.HeroSlice>;
 
-// Ported 1:1 from the reference design's own imperative rAF loop (a fixed
-// 1212x678 "stage" scaled to fit the viewport, exactly like the reference)
-// rather than the rest of the site's GSAP ScrollTrigger convention - this
-// section's whole point is to reproduce that file's numbers and timing
-// faithfully, not adapt them. The reference's liquid-surface physics are
-// ported too (see LiquidSurface.tsx), just re-targeted at a 3D mesh instead
-// of an SVG path, since these bottles are a real 3D model, not the
-// reference's flat photos.
+// Literal port of the reference design (DermaLife Hero.dc.html) - a fixed
+// 1212x678 "stage" scaled to fit the viewport, scrubbed by a single
+// scroll-driven progress value `p` (0-2), with the two bottles as flat
+// photos (not a 3D model - an earlier pass tried adapting this onto the
+// site's 3D bottle and it never read as convincing liquid, so this now
+// matches the reference exactly: real bottle images + an SVG wave/fill
+// path for the liquid, driven by the same spring-wobble physics).
 const STAGE_W = 1212;
 const STAGE_H = 678;
 const SCROLL_HEIGHT_VH = 400; // "Medium" scrollLength preset in the source
@@ -50,8 +45,25 @@ const KEYFRAMES = {
   ],
 } as const;
 
+// Bottle photo box + liquid mask geometry - identical to the source's BODY
+// (used for the liquid math below) and the img/mask left/top/width/height
+// in its markup.
+const PHOTO_BOX = { w: 420, h: 620 };
+const BODY = {
+  A: { w: 142, h: 224 },
+  R: { w: 172, h: 246 },
+} as const;
+const MASK = {
+  A: { left: 145, top: 268, width: 142, height: 224, radius: "18px 18px 12px 12px" },
+  R: { left: 126, top: 262, width: 172, height: 246, radius: "20px 20px 14px 14px" },
+} as const;
+const LIQUID_COLOR = {
+  A: { fill: "oklch(0.80 0.09 225)", stroke: "oklch(0.6 0.11 225)" },
+  R: { fill: "oklch(0.80 0.1 65)", stroke: "oklch(0.6 0.12 60)" },
+} as const;
+
+const FILL_LEVEL = 0.7; // source's default `fillLevel` prop
 const FLOAT_AMT = 1; // source's default `float` prop
-const BOTTLE_BOX = { w: 560, h: 760 };
 
 function clamp(v: number, a = 0, b = 1) {
   return Math.min(b, Math.max(a, v));
@@ -61,6 +73,68 @@ function lerp(a: number, b: number, t: number) {
 }
 function ease(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+type LiquidSim = { w: number; v: number; wp: number; px: number | null; pt: number | null };
+function makeSim(): LiquidSim {
+  return { w: 0, v: 0, wp: 0, px: null, pt: null };
+}
+
+// Liquid surface: a wavy top line across the bottle's width, rotated to the
+// current wobble angle and extended far past it in the same direction, so
+// it reads as "everything below the surface is filled" once clipped by the
+// mask div - identical math to the source's own per-frame path builder.
+function updateLiquid(
+  sim: LiquidSim,
+  x: number,
+  tilt: number,
+  dt: number,
+  body: { w: number; h: number },
+  slosh: number,
+  lEl: SVGPathElement | null,
+  mEl: SVGPathElement | null,
+) {
+  const xv = sim.px == null ? 0 : (x - sim.px) / dt;
+  const tv = sim.pt == null ? 0 : (tilt - sim.pt) / dt;
+  sim.px = x;
+  sim.pt = tilt;
+
+  const wT = clamp((-xv * 0.035 + tv * 0.35) * slosh, -30, 30);
+  const acc = (wT - sim.w) * 110 - sim.v * 6;
+  sim.v += acc * dt;
+  sim.w += sim.v * dt;
+  const amp =
+    (1.5 + Math.min(9, Math.abs(sim.v) * 0.06 + Math.abs(wT - sim.w) * 0.25)) *
+    Math.min(1.5, 0.4 + slosh);
+  sim.wp += dt * (2.2 + Math.min(6, Math.abs(sim.v) * 0.04));
+
+  const th = ((sim.w - tilt) * Math.PI) / 180;
+  const cx = body.w / 2;
+  const cy = body.h * (1 - FILL_LEVEL);
+  const ux = Math.cos(th);
+  const uy = Math.sin(th);
+  const nx = Math.sin(th);
+  const ny = -Math.cos(th);
+  const L = 260;
+  const N = 36;
+  let top = "";
+  let first: [number, number] = [0, 0];
+  let lastPt: [number, number] = [0, 0];
+  for (let i = 0; i <= N; i++) {
+    const t = -L + (2 * L * i) / N;
+    const w = amp * Math.sin(t * 0.045 + sim.wp) + amp * 0.4 * Math.sin(t * 0.11 - sim.wp * 1.6);
+    const px = cx + t * ux + w * nx;
+    const py = cy + t * uy + w * ny;
+    top += (i ? " L" : "M") + px.toFixed(1) + " " + py.toFixed(1);
+    if (i === 0) first = [px, py];
+    lastPt = [px, py];
+  }
+  const D = 2 * L;
+  const fillD =
+    top +
+    ` L${(lastPt[0] - nx * D).toFixed(1)} ${(lastPt[1] - ny * D).toFixed(1)} L${(first[0] - nx * D).toFixed(1)} ${(first[1] - ny * D).toFixed(1)} Z`;
+  lEl?.setAttribute("d", fillD);
+  mEl?.setAttribute("d", top);
 }
 
 /**
@@ -89,19 +163,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   const t2Ref = useRef<HTMLDivElement>(null);
   const bARef = useRef<HTMLDivElement>(null);
   const bRRef = useRef<HTMLDivElement>(null);
-  // The tilt has to be applied to the 3D content itself, not the tracked
-  // DOM wrapper below - <View> sizes/positions the render viewport off
-  // that wrapper's axis-aligned getBoundingClientRect(), which a CSS
-  // rotate() on the wrapper doesn't change, so a DOM-level rotation was
-  // silently ignored and the bottle always rendered upright.
-  const groupARef = useRef<Group>(null);
-  const groupRRef = useRef<Group>(null);
-  // Live x/tilt each bottle's own liquid mesh reads every frame to run its
-  // spring/wave sim - written in the same frame() loop that already
-  // computes these values for the bottle's own transform, just also
-  // stashed here instead of thrown away.
-  const liquidARef = useRef<LiquidState>({ x: 0, tilt: 0 });
-  const liquidRRef = useRef<LiquidState>({ x: 0, tilt: 0 });
+  const lARef = useRef<SVGPathElement>(null);
+  const mARef = useRef<SVGPathElement>(null);
+  const lRRef = useRef<SVGPathElement>(null);
+  const mRRef = useRef<SVGPathElement>(null);
   const fillRef = useRef<HTMLDivElement>(null);
   const numRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
@@ -112,10 +177,13 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   // just reached by an automatic slide instead of scroll position.
   const [mobileSection, setMobileSection] = useState(0);
   const mobileSectionRef = useRef(0);
-  const mobileGroupARef = useRef<Group>(null);
-  const mobileGroupRRef = useRef<Group>(null);
-  const mobileLiquidARef = useRef<LiquidState>({ x: 0, tilt: 0 });
-  const mobileLiquidRRef = useRef<LiquidState>({ x: 0, tilt: 0 });
+  const mobileBARef = useRef<HTMLDivElement>(null);
+  const mobileBRRef = useRef<HTMLDivElement>(null);
+  const mobileLARef = useRef<SVGPathElement>(null);
+  const mobileMARef = useRef<SVGPathElement>(null);
+  const mobileLRRef = useRef<SVGPathElement>(null);
+  const mobileMRRef = useRef<SVGPathElement>(null);
+  const mobileTiltRef = useRef({ A: 0, R: 0 });
 
   useEffect(() => {
     isReady();
@@ -126,6 +194,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     let last = performance.now();
     let time = 0;
     const ph = { A: 0, R: 1.7 };
+    const sim = { A: makeSim(), R: makeSim() };
 
     function frame() {
       const root = rootRef.current;
@@ -153,13 +222,14 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       const e = ease(clamp((p - seg - 0.1) / 0.8));
       const land = clamp((p - 1.55) / 0.45);
       const arcK = Math.sin(Math.PI * e);
+      const slosh = reducedMotion ? 0.3 : 1;
 
       (
         [
-          ["A", bARef, groupARef, liquidARef],
-          ["R", bRRef, groupRRef, liquidRRef],
+          ["A", bARef, lARef, mARef],
+          ["R", bRRef, lRRef, mRRef],
         ] as const
-      ).forEach(([id, bottleRef, groupRef, liquidRef]) => {
+      ).forEach(([id, bottleRef, lRef, mRef]) => {
         const a = KEYFRAMES[id][seg];
         const b = KEYFRAMES[id][seg + 1];
         let x = lerp(a[0], b[0], e);
@@ -185,13 +255,9 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
         const bottleEl = bottleRef.current;
         if (bottleEl) {
-          bottleEl.style.transform = `translate(${x}px,${y}px) scale(${sc})`;
+          bottleEl.style.transform = `translate(${x}px,${y}px) rotate(${tilt}deg) scale(${sc})`;
         }
-        if (groupRef.current) {
-          groupRef.current.rotation.z = (-tilt * Math.PI) / 180;
-        }
-        liquidRef.current.x = x;
-        liquidRef.current.tilt = tilt;
+        updateLiquid(sim[id], x, tilt, dt, BODY[id], slosh, lRef.current, mRef.current);
       });
 
       [t0Ref, t1Ref, t2Ref].forEach((ref, i) => {
@@ -230,21 +296,45 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
     }, 3000);
 
     let raf = 0;
+    let last = performance.now();
+    let time = 0;
+    const ph = { A: 0, R: 1.7 };
+    const sim = { A: makeSim(), R: makeSim() };
+    // Small fixed side-by-side layout (no scroll-driven x/y like desktop -
+    // just the two bottles leaning to the current auto-slide section). The
+    // two centers need real separation - too close and the second bottle
+    // (drawn on top in DOM order) mostly covers the first.
+    const pos = { A: { x: 95, y: 120, scale: 0.3 }, R: { x: 230, y: 120, scale: 0.27 } };
+
     function frame() {
-      const i = mobileSectionRef.current;
-      const tiltA = KEYFRAMES.A[i][2];
-      const tiltR = KEYFRAMES.R[i][2];
-      const targetA = (-tiltA * Math.PI) / 180;
-      const targetR = (-tiltR * Math.PI) / 180;
-      const groupA = mobileGroupARef.current;
-      const groupR = mobileGroupRRef.current;
-      if (groupA) groupA.rotation.z += (targetA - groupA.rotation.z) * 0.06;
-      if (groupR) groupR.rotation.z += (targetR - groupR.rotation.z) * 0.06;
-      // No horizontal motion on mobile (bottles don't translate, only
-      // lean), so only the tilt-velocity term of the liquid sim ever
-      // engages here - still enough to react to each section change.
-      mobileLiquidARef.current.tilt = groupA ? (-groupA.rotation.z * 180) / Math.PI : tiltA;
-      mobileLiquidRRef.current.tilt = groupR ? (-groupR.rotation.z * 180) / Math.PI : tiltR;
+      const now = performance.now();
+      const dt = clamp((now - last) / 1000, 0.001, 0.05);
+      last = now;
+      time += dt;
+      const slosh = reducedMotion ? 0.3 : 1;
+
+      (
+        [
+          ["A", mobileBARef, mobileLARef, mobileMARef],
+          ["R", mobileBRRef, mobileLRRef, mobileMRRef],
+        ] as const
+      ).forEach(([id, bottleRef, lRef, mRef]) => {
+        const i = mobileSectionRef.current;
+        const targetTilt = KEYFRAMES[id][i][2];
+        mobileTiltRef.current[id] += (targetTilt - mobileTiltRef.current[id]) * 0.06;
+        let tilt = mobileTiltRef.current[id];
+
+        const fl = reducedMotion ? 0 : FLOAT_AMT;
+        const y = pos[id].y + Math.sin(time * 1.1 + ph[id]) * 4 * fl;
+        tilt += Math.sin(time * 0.75 + ph[id]) * 2 * fl;
+
+        const bottleEl = bottleRef.current;
+        if (bottleEl) {
+          bottleEl.style.transform = `translate(${pos[id].x}px,${y}px) rotate(${tilt}deg) scale(${pos[id].scale})`;
+        }
+        updateLiquid(sim[id], 0, tilt, dt, BODY[id], slosh, lRef.current, mRef.current);
+      });
+
       raf = requestAnimationFrame(frame);
     }
     raf = requestAnimationFrame(frame);
@@ -253,7 +343,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       clearInterval(advance);
       cancelAnimationFrame(raf);
     };
-  }, [isDesktop]);
+  }, [isDesktop, reducedMotion]);
 
   if (!isDesktop) {
     return (
@@ -311,65 +401,84 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               position: "relative",
               marginTop: 4,
               height: 220,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              overflow: "hidden",
             }}
           >
-            <div style={{ position: "relative", width: 150, height: 220 }}>
-              <View style={{ position: "absolute", inset: 0 }}>
-                <group ref={mobileGroupARef}>
-                  <Float
-                    speed={reducedMotion ? 0 : 1.6}
-                    floatIntensity={reducedMotion ? 0 : 1.1}
-                    rotationIntensity={reducedMotion ? 0 : 0.6}
-                  >
-                    <Center>
-                      <SodaCan
-                        flavor="ageless"
-                        scale={1.4}
-                        liquid={{ stateRef: mobileLiquidARef, reducedMotion }}
-                      />
-                    </Center>
-                  </Float>
-                </group>
-                <ambientLight intensity={1.4} />
-                <directionalLight intensity={2.5} position={[0, 1, 1]} />
-                <directionalLight intensity={1.2} position={[0, -1, -1]} />
-                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
-              </View>
+            <div
+              ref={mobileBARef}
+              style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0, willChange: "transform" }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  left: -PHOTO_BOX.w / 2,
+                  top: -PHOTO_BOX.h / 2,
+                  width: PHOTO_BOX.w,
+                  height: PHOTO_BOX.h,
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero/ageless.webp"
+                  alt="Ageless Skin serum"
+                  style={{ position: "absolute", left: 0, top: 0, width: PHOTO_BOX.w, height: PHOTO_BOX.h, display: "block" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: MASK.A.left,
+                    top: MASK.A.top,
+                    width: MASK.A.width,
+                    height: MASK.A.height,
+                    borderRadius: MASK.A.radius,
+                    overflow: "hidden",
+                    mixBlendMode: "multiply",
+                  }}
+                >
+                  <svg width={MASK.A.width} height={MASK.A.height} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+                    <path ref={mobileLARef} fill={LIQUID_COLOR.A.fill} fillOpacity={0.6} />
+                    <path ref={mobileMARef} fill="none" stroke={LIQUID_COLOR.A.stroke} strokeWidth={2.5} strokeOpacity={0.55} />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div
-              style={{
-                position: "relative",
-                width: 150,
-                height: 220,
-                marginLeft: -32,
-              }}
+              ref={mobileBRRef}
+              style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0, willChange: "transform" }}
             >
-              <View style={{ position: "absolute", inset: 0 }}>
-                {/* Slightly different speed/phase than the bottle above so
-                    the two don't bob in lockstep. */}
-                <group ref={mobileGroupRRef}>
-                  <Float
-                    speed={reducedMotion ? 0 : 1.2}
-                    floatIntensity={reducedMotion ? 0 : 1.3}
-                    rotationIntensity={reducedMotion ? 0 : 0.6}
-                  >
-                    <Center>
-                      <SodaCan
-                        flavor="radiance"
-                        scale={1.4}
-                        liquid={{ stateRef: mobileLiquidRRef, reducedMotion }}
-                      />
-                    </Center>
-                  </Float>
-                </group>
-                <ambientLight intensity={1.4} />
-                <directionalLight intensity={2.5} position={[0, 1, 1]} />
-                <directionalLight intensity={1.2} position={[0, -1, -1]} />
-                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
-              </View>
+              <div
+                style={{
+                  position: "absolute",
+                  left: -PHOTO_BOX.w / 2,
+                  top: -PHOTO_BOX.h / 2,
+                  width: PHOTO_BOX.w,
+                  height: PHOTO_BOX.h,
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero/radiance.webp"
+                  alt="Radiance Vitamin C serum"
+                  style={{ position: "absolute", left: 0, top: 0, width: PHOTO_BOX.w, height: PHOTO_BOX.h, display: "block" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: MASK.R.left,
+                    top: MASK.R.top,
+                    width: MASK.R.width,
+                    height: MASK.R.height,
+                    borderRadius: MASK.R.radius,
+                    overflow: "hidden",
+                    mixBlendMode: "multiply",
+                  }}
+                >
+                  <svg width={MASK.R.width} height={MASK.R.height} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+                    <path ref={mobileLRRef} fill={LIQUID_COLOR.R.fill} fillOpacity={0.55} />
+                    <path ref={mobileMRRef} fill="none" stroke={LIQUID_COLOR.R.stroke} strokeWidth={2.5} strokeOpacity={0.55} />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -561,8 +670,9 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               </div>
             </div>
 
-            {/* Bottle A - real 3D product model, positioned/rotated/scaled
-                every frame exactly like the source moved its flat photo. */}
+            {/* Bottle A - a flat photo positioned/rotated/scaled every
+                frame exactly like the source, with an SVG liquid surface
+                clipped into a mask window over the glass. */}
             <div
               ref={bARef}
               style={{
@@ -571,33 +681,43 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 top: 0,
                 width: 0,
                 height: 0,
+                mixBlendMode: "multiply",
                 willChange: "transform",
               }}
             >
-              <View
+              <div
                 style={{
                   position: "absolute",
-                  left: -BOTTLE_BOX.w / 2,
-                  top: -BOTTLE_BOX.h / 2,
-                  width: BOTTLE_BOX.w,
-                  height: BOTTLE_BOX.h,
+                  left: -PHOTO_BOX.w / 2,
+                  top: -PHOTO_BOX.h / 2,
+                  width: PHOTO_BOX.w,
+                  height: PHOTO_BOX.h,
                 }}
               >
-                <group ref={groupARef}>
-                  <Center>
-                    {/* "Ageless Skin" bottle in the reference - near-white glass. */}
-                    <SodaCan
-                      flavor="ageless"
-                      scale={1.4}
-                      liquid={{ stateRef: liquidARef, reducedMotion }}
-                    />
-                  </Center>
-                </group>
-                <ambientLight intensity={1.4} />
-                <directionalLight intensity={2.5} position={[0, 1, 1]} />
-                <directionalLight intensity={1.2} position={[0, -1, -1]} />
-                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
-              </View>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero/ageless.webp"
+                  alt="Ageless Skin serum"
+                  style={{ position: "absolute", left: 0, top: 0, width: PHOTO_BOX.w, height: PHOTO_BOX.h, display: "block" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: MASK.A.left,
+                    top: MASK.A.top,
+                    width: MASK.A.width,
+                    height: MASK.A.height,
+                    borderRadius: MASK.A.radius,
+                    overflow: "hidden",
+                    mixBlendMode: "multiply",
+                  }}
+                >
+                  <svg width={MASK.A.width} height={MASK.A.height} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+                    <path ref={lARef} fill={LIQUID_COLOR.A.fill} fillOpacity={0.6} />
+                    <path ref={mARef} fill="none" stroke={LIQUID_COLOR.A.stroke} strokeWidth={2.5} strokeOpacity={0.55} />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div
               ref={bRRef}
@@ -607,33 +727,43 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
                 top: 0,
                 width: 0,
                 height: 0,
+                mixBlendMode: "multiply",
                 willChange: "transform",
               }}
             >
-              <View
+              <div
                 style={{
                   position: "absolute",
-                  left: -BOTTLE_BOX.w / 2,
-                  top: -BOTTLE_BOX.h / 2,
-                  width: BOTTLE_BOX.w,
-                  height: BOTTLE_BOX.h,
+                  left: -PHOTO_BOX.w / 2,
+                  top: -PHOTO_BOX.h / 2,
+                  width: PHOTO_BOX.w,
+                  height: PHOTO_BOX.h,
                 }}
               >
-                <group ref={groupRRef}>
-                  <Center>
-                    {/* "Radiance" bottle in the reference - light peach. */}
-                    <SodaCan
-                      flavor="radiance"
-                      scale={1.4}
-                      liquid={{ stateRef: liquidRRef, reducedMotion }}
-                    />
-                  </Center>
-                </group>
-                <ambientLight intensity={1.4} />
-                <directionalLight intensity={2.5} position={[0, 1, 1]} />
-                <directionalLight intensity={1.2} position={[0, -1, -1]} />
-                <Environment files="/hdr/lobby.hdr" environmentIntensity={1.5} />
-              </View>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/hero/radiance.webp"
+                  alt="Radiance Vitamin C serum"
+                  style={{ position: "absolute", left: 0, top: 0, width: PHOTO_BOX.w, height: PHOTO_BOX.h, display: "block" }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    left: MASK.R.left,
+                    top: MASK.R.top,
+                    width: MASK.R.width,
+                    height: MASK.R.height,
+                    borderRadius: MASK.R.radius,
+                    overflow: "hidden",
+                    mixBlendMode: "multiply",
+                  }}
+                >
+                  <svg width={MASK.R.width} height={MASK.R.height} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+                    <path ref={lRRef} fill={LIQUID_COLOR.R.fill} fillOpacity={0.55} />
+                    <path ref={mRRef} fill="none" stroke={LIQUID_COLOR.R.stroke} strokeWidth={2.5} strokeOpacity={0.55} />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Left-edge progress rail. */}
