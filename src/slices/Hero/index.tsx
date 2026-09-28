@@ -220,7 +220,6 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
 
       const seg = Math.min(1, Math.floor(p));
       const e = ease(clamp((p - seg - 0.1) / 0.8));
-      const land = clamp((p - 1.55) / 0.45);
       const arcK = Math.sin(Math.PI * e);
       const slosh = reducedMotion ? 0.3 : 1;
 
@@ -249,7 +248,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           tilt += arcK * 10;
         }
 
-        const fl = (1 - land) * (reducedMotion ? 0 : FLOAT_AMT);
+        // Was (1 - land) * FLOAT_AMT, which faded the float out to nothing
+        // right as the bottle finished landing - the opposite of wanting
+        // it to keep gently floating once scrolling stops.
+        const fl = reducedMotion ? 0 : FLOAT_AMT;
         y += Math.sin(time * 1.1 + ph[id]) * 10 * fl;
         tilt += Math.sin(time * 0.75 + ph[id]) * 2.2 * fl;
 
