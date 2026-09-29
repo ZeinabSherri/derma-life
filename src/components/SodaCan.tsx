@@ -19,10 +19,7 @@ export const flavorColors = {
   watermelon: "#C98F5E", // Hyaluronic Hydrate - warm tan
   // Hero-only tints (not tied to any Prismic flavor option) - matching the
   // reference's two named bottles without touching the shared "watermelon"/
-  // "lemonLime" hexes above, which are also used on Carousel/SkyDive. Hero
-  // itself now renders its two bottles as flat photos (see src/slices/Hero)
-  // rather than this 3D model, but these stay in case that model is ever
-  // used for them again.
+  // "lemonLime" hexes above, which are also used on Carousel/SkyDive.
   ageless: "#FAFAF8", // near-white, brighter than the first pass
   radiance: "#FBDAB9", // light peach, softer/lighter than the first pass
 };
