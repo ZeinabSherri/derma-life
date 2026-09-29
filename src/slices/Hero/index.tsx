@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Content } from "@prismicio/client";
 import { SliceComponentProps } from "@prismicio/react";
 import { Center, Environment, View } from "@react-three/drei";
@@ -16,40 +16,65 @@ import { useStore } from "@/hooks/useStore";
  */
 export type HeroProps = SliceComponentProps<Content.HeroSlice>;
 
-// Ported 1:1 from the reference design's own imperative rAF loop (a fixed
-// 1212x678 "stage" scaled to fit the viewport, exactly like the reference)
-// rather than the rest of the site's GSAP ScrollTrigger convention - this
-// section's whole point is to reproduce that file's numbers and timing
-// faithfully, not adapt them. Liquid-surface physics from the source were
-// intentionally dropped per explicit request; only bottle
-// position/rotation/scale and the arc/float beats are ported.
-const STAGE_W = 1212;
-const STAGE_H = 678;
+// Ported 1:1 from the reference design's own imperative rAF loop rather than
+// the rest of the site's GSAP ScrollTrigger convention - this section's
+// whole point is to reproduce that file's numbers and timing faithfully,
+// not adapt them. Liquid-surface physics from the source were intentionally
+// dropped per explicit request; only bottle position/rotation/scale and the
+// arc/float beats are ported.
+//
+// Two independently-tuned "stages" - matching DermaLife Hero Responsive.dc.html's
+// own LAYOUTS.desktop/mobile - picked at runtime by viewport size/aspect
+// ratio via pickMobile() below, not one canvas just scaled down. Mobile gets
+// its own composition (bigger bottles relative to the text, rail moved to
+// the right) rather than a shrunk, letterboxed desktop layout.
 const SCROLL_HEIGHT_VH = 400; // "Medium" scrollLength preset in the source
 
-// [x, y, tilt(deg), scale] per keyframe, in stage-local px - identical to
-// the source's K.A / K.R.
-const KEYFRAMES = {
+// [x, y, tilt(deg), scale] per keyframe, in stage-local px.
+const DESKTOP_LAYOUT = {
+  W: 1212,
+  H: 678,
+  arc: { A: 80, R: 70 },
   A: [
     [818, 376, -30.5, 0.84],
     [206, 372, -30.5, 0.84],
-    // Landed tilt was -18.6 (still leaning) - upright once settled, so not
-    // every state reads as oblique.
+    // Landed tilt was -18.6 (still leaning) in the source - upright once
+    // settled, so not every state reads as oblique.
     [1057, 463, 0, 0.66],
   ],
   R: [
     [370, 478, 48.6, 0.7],
-    // Was [370, 466, ...], nearly touching bottle A's own mid-scroll
-    // waypoint [206, 372, ...] once both bottles' tilt/size are accounted
-    // for - moved further right/down so the two don't visually cross.
+    // Was [370, 466, ...] in the source, nearly touching bottle A's own
+    // mid-scroll waypoint [206, 372, ...] once both bottles' tilt/size are
+    // accounted for - moved further right/down so the two don't visually
+    // cross.
     [470, 560, 48.6, 0.7],
-    // Landed tilt was 18 (still leaning) - upright once settled.
+    // Landed tilt was 18 (still leaning) in the source - upright once settled.
     [844, 550, 0, 0.62],
   ],
 } as const;
 
-const FLOAT_AMT = 1; // source's default `float` prop
+const MOBILE_LAYOUT = {
+  W: 390,
+  H: 844,
+  arc: { A: 50, R: 44 },
+  A: [
+    [262, 480, -24, 0.6],
+    [128, 492, -24, 0.6],
+    // Upright once landed, matching the desktop convention above (source
+    // had -10 here).
+    [128, 536, 0, 0.5],
+  ],
+  R: [
+    [118, 588, 40, 0.5],
+    [270, 596, 40, 0.5],
+    // Upright once landed (source had 10 here).
+    [272, 560, 0, 0.48],
+  ],
+} as const;
+
 const BOTTLE_BOX = { w: 560, h: 760 };
+const FLOAT_AMT = 1; // source's default `float` prop
 
 function clamp(v: number, a = 0, b = 1) {
   return Math.min(b, Math.max(a, v));
@@ -60,22 +85,31 @@ function lerp(a: number, b: number, t: number) {
 function ease(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
+// Identical to the source's Component#pickMobile (Auto mode): a narrow OR
+// a tall/narrow-aspect viewport gets the mobile composition.
+function pickMobile(vw: number, vh: number) {
+  return vw < 760 || vw / vh < 0.85;
+}
 
 /**
  * Component for "Hero" Slices.
  *
- * A literal port of an external reference design: a fixed 1212x678 design
- * canvas, scaled to fit the viewport, scrubbed by a single scroll-driven
- * progress value `p` (0-2) computed every frame from this section's own
- * bounding rect - not Prismic content, not GSAP. See KEYFRAMES above for
- * the exact source numbers.
+ * A literal port of an external reference design: a fixed design canvas
+ * (1212x678 desktop, 390x844 mobile), scaled to fit the viewport, scrubbed
+ * by a single scroll-driven progress value `p` (0-2) computed every frame
+ * from this section's own bounding rect - not Prismic content, not GSAP.
+ * See DESKTOP_LAYOUT/MOBILE_LAYOUT above for the exact source numbers.
  */
 const Hero = ({ slice }: HeroProps): JSX.Element => {
   const isReady = useStore((state) => state.isReady);
-  // The fixed 1212x678 stage scales to fit by min(vw/STAGE_W, vh/STAGE_H),
-  // so this same scroll-scrubbed layout works at any viewport size down to
-  // phones - no separate mobile layout needed.
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)", false);
+  // Initial guess only, to avoid an SSR/first-paint flash - frame() below
+  // recomputes this every frame from the real viewport via pickMobile(),
+  // exactly like the source's own componentDidUpdate-driven state.mobile,
+  // and is the source of truth once mounted.
+  const isMobileGuess = useMediaQuery("(max-width: 759px), (max-aspect-ratio: 17/20)", false);
+  const [isMobileLayout, setIsMobileLayout] = useState(isMobileGuess);
+  const isMobileRef = useRef(isMobileGuess);
 
   const rootRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -117,13 +151,22 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
       last = now;
       time += dt;
 
-      const rect = root.getBoundingClientRect();
       const vh = window.innerHeight;
       const vw = stage.parentElement?.clientWidth ?? window.innerWidth;
+      const mobile = pickMobile(vw, vh);
+      if (mobile !== isMobileRef.current) {
+        isMobileRef.current = mobile;
+        setIsMobileLayout(mobile);
+      }
+      const Lay = mobile ? MOBILE_LAYOUT : DESKTOP_LAYOUT;
+
+      const rect = root.getBoundingClientRect();
       const target = clamp(-rect.top / Math.max(1, rect.height - vh)) * 2;
       p += (target - p) * (1 - Math.exp(-dt * 5));
 
-      const s = Math.min(vw / STAGE_W, vh / STAGE_H);
+      const s = Math.min(vw / Lay.W, vh / Lay.H);
+      stage.style.width = `${Lay.W}px`;
+      stage.style.height = `${Lay.H}px`;
       stage.style.transform = `translate(-50%,-50%) scale(${s})`;
 
       const seg = Math.min(1, Math.floor(p));
@@ -136,22 +179,22 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           ["R", bRRef, groupRRef],
         ] as const
       ).forEach(([id, bottleRef, groupRef]) => {
-        const a = KEYFRAMES[id][seg];
-        const b = KEYFRAMES[id][seg + 1];
+        const a = Lay[id][seg];
+        const b = Lay[id][seg + 1];
         let x = lerp(a[0], b[0], e);
         let y = lerp(a[1], b[1], e);
         let tilt = lerp(a[2], b[2], e);
         let sc = lerp(a[3], b[3], e);
 
         if (id === "A") {
-          y -= arcK * 80;
+          y -= arcK * Lay.arc.A;
           tilt -= arcK * 22;
           sc *= 1 - arcK * 0.12;
         } else {
           // Pushed opposite A's arc (down instead of up) so the two
           // bottles clear each other vertically while their paths cross
           // horizontally mid-scroll, instead of visually overlapping.
-          y += arcK * 70;
+          y += arcK * Lay.arc.R;
           tilt += arcK * 10;
         }
 
@@ -159,7 +202,8 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         // right as the bottle finished landing - the opposite of wanting
         // it to keep gently floating once scrolling stops.
         const fl = reducedMotion ? 0 : FLOAT_AMT;
-        y += Math.sin(time * 1.1 + ph[id]) * 10 * fl;
+        const bob = mobile ? 6 : 10;
+        y += Math.sin(time * 1.1 + ph[id]) * bob * fl;
         tilt += Math.sin(time * 0.75 + ph[id]) * 2.2 * fl;
 
         const bottleEl = bottleRef.current;
@@ -176,7 +220,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         const el = ref.current;
         if (!el) return;
         el.style.opacity = clamp(1 - Math.abs(d) * 2.6).toFixed(3);
-        el.style.transform = `translateY(${(-d * 50).toFixed(1)}px)`;
+        el.style.transform = `translateY(${(-d * (mobile ? 30 : 50)).toFixed(1)}px)`;
       });
 
       if (fillRef.current) {
@@ -228,133 +272,141 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               position: "absolute",
               left: "50%",
               top: "50%",
-              width: STAGE_W,
-              height: STAGE_H,
+              width: isMobileLayout ? MOBILE_LAYOUT.W : DESKTOP_LAYOUT.W,
+              height: isMobileLayout ? MOBILE_LAYOUT.H : DESKTOP_LAYOUT.H,
               transform: "translate(-50%,-50%) scale(0.7)",
               transformOrigin: "50% 50%",
               background: "#FFFFFF",
             }}
           >
             {/* Three crossfading text states - same "WHO WE ARE" eyebrow +
-                headline, repositioned each beat; t2 adds the extra subtext
-                line. Identical copy/positions/sizes to the source. */}
+                headline, repositioned each beat on desktop; t2 adds the
+                extra subtext line. Mobile keeps all three states in the
+                same box (per the source's mobile layout) and crossfades in
+                place instead of moving between corners. Identical copy to
+                the source either way. */}
             <div
               ref={t0Ref}
-              style={{
-                position: "absolute",
-                left: 60,
-                top: 160,
-                width: 640,
-                willChange: "transform,opacity",
-              }}
+              style={
+                isMobileLayout
+                  ? { position: "absolute", left: 24, top: 140, width: 342, willChange: "transform,opacity" }
+                  : { position: "absolute", left: 60, top: 160, width: 640, willChange: "transform,opacity" }
+              }
             >
               <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 500,
-                  letterSpacing: "0.12em",
-                  marginBottom: 26,
-                }}
+                style={
+                  isMobileLayout
+                    ? { fontSize: 14, fontWeight: 500, letterSpacing: "0.14em", marginBottom: 12 }
+                    : { fontSize: 32, fontWeight: 500, letterSpacing: "0.12em", marginBottom: 26 }
+                }
               >
                 WHO WE ARE
               </div>
-              <div
-                style={{
-                  fontSize: 66,
-                  fontWeight: 500,
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Skincare Leaders.
-                <br />
-                Formulating For
-                <br />
-                Success.
-              </div>
+              {isMobileLayout ? (
+                <div style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.05, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders. Formulating For Success.
+                </div>
+              ) : (
+                <div style={{ fontSize: 66, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders.
+                  <br />
+                  Formulating For
+                  <br />
+                  Success.
+                </div>
+              )}
             </div>
             <div
               ref={t1Ref}
-              style={{
-                position: "absolute",
-                right: 56,
-                top: 84,
-                width: 640,
-                textAlign: "right",
-                opacity: 0,
-                willChange: "transform,opacity",
-              }}
+              style={
+                isMobileLayout
+                  ? {
+                      position: "absolute",
+                      left: 24,
+                      top: 140,
+                      width: 342,
+                      textAlign: "right",
+                      opacity: 0,
+                      willChange: "transform,opacity",
+                    }
+                  : {
+                      position: "absolute",
+                      right: 56,
+                      top: 84,
+                      width: 640,
+                      textAlign: "right",
+                      opacity: 0,
+                      willChange: "transform,opacity",
+                    }
+              }
             >
               <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 500,
-                  letterSpacing: "0.12em",
-                  marginBottom: 26,
-                }}
+                style={
+                  isMobileLayout
+                    ? { fontSize: 14, fontWeight: 500, letterSpacing: "0.14em", marginBottom: 12 }
+                    : { fontSize: 32, fontWeight: 500, letterSpacing: "0.12em", marginBottom: 26 }
+                }
               >
                 WHO WE ARE
               </div>
-              <div
-                style={{
-                  fontSize: 66,
-                  fontWeight: 500,
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Skincare Leaders.
-                <br />
-                Formulating For
-                <br />
-                Success.
-              </div>
+              {isMobileLayout ? (
+                <div style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.05, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders. Formulating For Success.
+                </div>
+              ) : (
+                <div style={{ fontSize: 66, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders.
+                  <br />
+                  Formulating For
+                  <br />
+                  Success.
+                </div>
+              )}
             </div>
             <div
               ref={t2Ref}
-              style={{
-                position: "absolute",
-                left: 60,
-                top: 120,
-                width: 680,
-                opacity: 0,
-                willChange: "transform,opacity",
-              }}
+              style={
+                isMobileLayout
+                  ? { position: "absolute", left: 24, top: 140, width: 342, opacity: 0, willChange: "transform,opacity" }
+                  : { position: "absolute", left: 60, top: 120, width: 680, opacity: 0, willChange: "transform,opacity" }
+              }
             >
               <div
-                style={{
-                  fontSize: 32,
-                  fontWeight: 500,
-                  letterSpacing: "0.12em",
-                  marginBottom: 26,
-                }}
+                style={
+                  isMobileLayout
+                    ? { fontSize: 14, fontWeight: 500, letterSpacing: "0.14em", marginBottom: 12 }
+                    : { fontSize: 32, fontWeight: 500, letterSpacing: "0.12em", marginBottom: 26 }
+                }
               >
                 WHO WE ARE
               </div>
+              {isMobileLayout ? (
+                <div style={{ fontSize: 34, fontWeight: 400, lineHeight: 1.05, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders. Formulating For Success.
+                </div>
+              ) : (
+                <div style={{ fontSize: 66, fontWeight: 500, lineHeight: 1.02, letterSpacing: "-0.01em" }}>
+                  Skincare Leaders.
+                  <br />
+                  Formulating For
+                  <br />
+                  Success.
+                </div>
+              )}
               <div
-                style={{
-                  fontSize: 66,
-                  fontWeight: 500,
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.01em",
-                }}
-              >
-                Skincare Leaders.
-                <br />
-                Formulating For
-                <br />
-                Success.
-              </div>
-              <div
-                style={{
-                  marginTop: 34,
-                  maxWidth: 420,
-                  fontSize: 22,
-                  fontWeight: 400,
-                  lineHeight: 1.5,
-                  color: "#3a4247",
-                  fontFamily: "var(--font-body)",
-                }}
+                style={
+                  isMobileLayout
+                    ? { marginTop: 14, fontSize: 15, fontWeight: 300, lineHeight: 1.5, color: "#3a4247", fontFamily: "var(--font-body)" }
+                    : {
+                        marginTop: 34,
+                        maxWidth: 420,
+                        fontSize: 22,
+                        fontWeight: 400,
+                        lineHeight: 1.5,
+                        color: "#3a4247",
+                        fontFamily: "var(--font-body)",
+                      }
+                }
               >
                 Science &middot; Innovation &middot; Skincare
               </div>
@@ -428,18 +480,34 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
             </div>
 
             {/* Left-edge progress rail. */}
+            {/* Progress rail - left edge on desktop, right edge on mobile,
+                per the source's two layouts. */}
             <div
-              style={{
-                position: "absolute",
-                left: 24,
-                top: 250,
-                height: 220,
-                width: 30,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 10,
-              }}
+              style={
+                isMobileLayout
+                  ? {
+                      position: "absolute",
+                      right: 20,
+                      top: 292,
+                      height: 110,
+                      width: 24,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 8,
+                    }
+                  : {
+                      position: "absolute",
+                      left: 24,
+                      top: 250,
+                      height: 220,
+                      width: 30,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 10,
+                    }
+              }
             >
               <div
                 style={{
@@ -465,7 +533,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               </div>
               <div
                 ref={numRef}
-                style={{ fontSize: 12, letterSpacing: "0.12em", fontWeight: 500 }}
+                style={{ fontSize: isMobileLayout ? 11 : 12, letterSpacing: "0.12em", fontWeight: 500 }}
               >
                 01
               </div>
